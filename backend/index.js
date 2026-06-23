@@ -43,6 +43,14 @@ app.post('/api/contact', async (req, res) => {
     return res.status(400).json({ ok:false, message:'Tous les champs sont requis.' })
   }
 
+  // Intercepte les tentatives d'accès direct par le navigateur
+app.get('/api/contact', (req, res) => {
+  res.status(405).json({ 
+    ok: false, 
+    message: "Méthode non autorisée. Cette route n'accepte que les requêtes POST via le formulaire de contact." 
+  })
+})
+
   const contactMessage = {
     name: name.trim(),
     email: email.trim(),

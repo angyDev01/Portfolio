@@ -111,6 +111,7 @@ export default function App(){
       message: form.get('message')
     }
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+    console.log("URL de l'API appelée :", apiUrl); // <--- Ajoute ça ici
     try{
       const res = await fetch(`${apiUrl}/api/contact`, {
         method: 'POST',
