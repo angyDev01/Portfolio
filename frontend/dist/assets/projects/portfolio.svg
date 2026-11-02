@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="100%" height="100%" fill="#f6fbff"/>
+  <g fill="#0b61b3" font-family="Inter, Arial, sans-serif">
+    <rect x="40" y="40" width="720" height="220" rx="12" fill="#ffffff" stroke="#e6f6ff"/>
+    <text x="60" y="120" font-size="38" font-weight="700">Portfolio React</text>
+    <text x="60" y="160" font-size="18" fill="#5b6b80">Vite • React • Responsive</text>
+  </g>
+</svg>

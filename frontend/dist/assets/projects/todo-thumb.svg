@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="220" viewBox="0 0 400 220">
+  <rect width="100%" height="100%" rx="12" fill="#fefeff"/>
+  <g fill="#0b61b3" font-family="Inter, Arial, sans-serif">
+    <rect x="16" y="16" width="368" height="100" rx="8" fill="#f6fbff" stroke="#e6f6ff"/>
+    <text x="28" y="64" font-size="20" font-weight="700">Todo App</text>
+    <text x="28" y="88" font-size="12" fill="#5b6b80">Gestion locale • UI simple</text>
+    <circle cx="320" cy="140" r="38" fill="#2EA0FF" opacity="0.12"/>
+  </g>
+</svg>

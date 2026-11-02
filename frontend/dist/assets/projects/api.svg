@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <g fill="#0b61b3" font-family="Inter, Arial, sans-serif">
+    <rect x="28" y="28" width="584" height="140" rx="10" fill="#f6fbff" stroke="#e6f6ff"/>
+    <text x="48" y="96" font-size="28" font-weight="700">API Django</text>
+    <text x="48" y="128" font-size="14" fill="#5b6b80">Django REST • Endpoints</text>
+  </g>
+</svg>
