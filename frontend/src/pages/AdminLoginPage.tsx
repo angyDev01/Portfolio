@@ -118,7 +118,7 @@ export default function AdminLoginPage(): ReactElement {
               <Icon name="alert" className="size-4 shrink-0 mt-0.5" />
               <span>
                 Configuration Supabase manquante : renseignez <code>VITE_SUPABASE_URL</code> et{' '}
-                <code>VITE_SUPABASE_ANON_KEY</code> dans <code>frontend/.env</code>.
+                <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> dans <code>frontend/.env</code>.
               </span>
             </div>
           )}

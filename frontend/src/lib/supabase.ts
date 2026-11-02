@@ -1,12 +1,13 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+export const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY
 
 // Vérification de sécurité au démarrage du client Supabase
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error(
-    'Supabase: VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY est introuvable dans le fichier .env'
+    'Supabase: VITE_SUPABASE_URL ou VITE_SUPABASE_PUBLISHABLE_KEY / VITE_SUPABASE_ANON_KEY est introuvable dans le fichier .env'
   )
 }
 
