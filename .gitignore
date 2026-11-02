@@ -60,7 +60,11 @@ report.*.json
 **/*.md
 !README.md
 
-# 6. Fichiers système et explorateurs d'OS
+# 6. Agents & Skills CLI
+.agents/
+skills-lock.json
+
+# 7. Fichiers système et explorateurs d'OS
 .DS_Store
 .DS_Store?
 ._*
