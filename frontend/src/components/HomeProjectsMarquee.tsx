@@ -27,18 +27,18 @@ export default function HomeProjectsMarquee(): ReactElement {
   const displayItems = featured.length > 0 ? featured : projects.slice(0, 5)
 
   return (
-    <section id="projets-phares" aria-labelledby="marquee-projects-title" className="py-20 border-t border-zinc-900 overflow-hidden">
+    <section id="projets-phares" aria-labelledby="marquee-projects-title" className="py-20 border-t border-zinc-200 dark:border-zinc-900 overflow-hidden">
       <div className="container-custom mb-10 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-mono font-medium text-indigo-400 uppercase tracking-widest mb-2">
+          <p className="text-xs font-mono font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">
             Vitrine
           </p>
-          <h2 id="marquee-projects-title" className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+          <h2 id="marquee-projects-title" className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
             Projets Phares
           </h2>
         </div>
         {displayItems.length > 0 && (
-          <p className="text-xs font-mono text-zinc-400">
+          <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
             * Survolez pour figer le défilement
           </p>
         )}
@@ -59,8 +59,8 @@ export default function HomeProjectsMarquee(): ReactElement {
         </div>
       ) : (
         <div className="marquee-container relative w-full overflow-hidden py-4">
-          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 sm:w-28 bg-gradient-to-r from-zinc-950 to-transparent z-10" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 sm:w-28 bg-gradient-to-l from-zinc-950 to-transparent z-10" />
+          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 sm:w-28 bg-gradient-to-r from-zinc-50 dark:from-zinc-950 to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 sm:w-28 bg-gradient-to-l from-zinc-50 dark:from-zinc-950 to-transparent z-10" />
 
           {/* Défilement infini */}
           <div className="marquee-track flex gap-6 w-max animate-[marquee_28s_linear_infinite] will-change-transform">
@@ -77,10 +77,10 @@ export default function HomeProjectsMarquee(): ReactElement {
         <Link
           to="/projets"
           onMouseEnter={() => portfolioService.prefetch('projects')}
-          className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-zinc-800 bg-zinc-900/60 text-zinc-200 text-sm font-semibold hover:border-indigo-500/40 hover:bg-zinc-800/80 hover:text-white transition-all shadow-sm"
+          className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-800 dark:text-zinc-200 text-sm font-semibold hover:border-indigo-500/40 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 hover:text-zinc-950 dark:hover:text-white transition-all shadow-xs"
         >
           <span>Explorer tous les projets</span>
-          <Icon name="arrowRight" className="size-4 text-indigo-400 group-hover:translate-x-1 transition-transform" />
+          <Icon name="arrowRight" className="size-4 text-indigo-500 dark:text-indigo-400 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
     </section>

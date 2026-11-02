@@ -35,19 +35,19 @@ export default function ProjectsPage(): ReactElement {
       <div className="container-custom">
         {/* Header de la page */}
         <div className="max-w-2xl mb-10">
-          <p className="text-xs font-mono font-medium text-indigo-400 uppercase tracking-widest mb-2">
+          <p className="text-xs font-mono font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">
             Travaux & Réalisations
           </p>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-100 mb-4">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 mb-4">
             Catalogue des Projets
           </h1>
-          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
             Une sélection de projets complets alimentés par Supabase, des interfaces dynamiques aux architectures d’APIs modulaires.
           </p>
         </div>
 
         {/* Système de filtres par tags */}
-        <div className="flex flex-wrap items-center gap-2 mb-10 border-b border-zinc-900 pb-5">
+        <div className="flex flex-wrap items-center gap-2 mb-10 border-b border-zinc-200 dark:border-zinc-900 pb-5">
           {CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat
             const count = cat === 'Tous' ? projects.length : projects.filter((p) => p.category === cat).length
@@ -58,8 +58,8 @@ export default function ProjectsPage(): ReactElement {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-4 py-2 rounded-lg text-xs font-mono transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'bg-zinc-100 text-zinc-950 font-bold shadow-md shadow-zinc-100/10'
-                    : 'bg-zinc-900/60 text-zinc-400 border border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/60'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-bold shadow-md'
+                    : 'bg-white dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/60'
                 }`}
               >
                 {cat}

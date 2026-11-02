@@ -27,16 +27,16 @@ export default function HomeSkillsPreview(): ReactElement {
   const displaySkills = featured.length > 0 ? featured : skills.slice(0, 6)
 
   return (
-    <section id="stack-preview" aria-labelledby="skills-preview-title" className="py-20 border-t border-zinc-900 bg-zinc-950/40">
+    <section id="stack-preview" aria-labelledby="skills-preview-title" className="py-20 border-t border-zinc-200 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/40">
       <div className="container-custom">
         <div className="max-w-2xl mb-10">
-          <p className="text-xs font-mono font-medium text-indigo-400 uppercase tracking-widest mb-2">
+          <p className="text-xs font-mono font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">
             Technologies Maîtrisées
           </p>
-          <h2 id="skills-preview-title" className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 mb-3">
+          <h2 id="skills-preview-title" className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 mb-3">
             Le Coeur de ma Stack
           </h2>
-          <p className="text-sm text-zinc-400 leading-relaxed">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
             Les outils et technologies prioritaires au centre de mes projets web quotidiens.
           </p>
         </div>
@@ -59,15 +59,15 @@ export default function HomeSkillsPreview(): ReactElement {
             {displaySkills.map((skill) => (
               <div
                 key={skill.id}
-                className="glass-card p-4 flex flex-col items-center text-center group hover:border-indigo-400/50 hover:bg-zinc-900/90 transition-all"
+                className="glass-card p-4 flex flex-col items-center text-center group hover:border-indigo-400/50 hover:bg-zinc-100 dark:hover:bg-zinc-900/90 transition-all"
               >
-                <div className="size-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center font-mono font-bold text-sm mb-3 group-hover:scale-105 group-hover:bg-indigo-500/20 transition-all">
+                <div className="size-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-mono font-bold text-sm mb-3 group-hover:scale-105 group-hover:bg-indigo-500/20 transition-all">
                   {skill.name.slice(0, 2).toUpperCase()}
                 </div>
-                <span className="font-semibold text-zinc-100 text-sm tracking-tight mb-1 truncate max-w-full">
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm tracking-tight mb-1 truncate max-w-full">
                   {skill.name}
                 </span>
-                <span className="text-[11px] font-mono text-zinc-400 leading-tight capitalize">
+                <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 leading-tight capitalize">
                   {skill.category}
                 </span>
               </div>
@@ -79,7 +79,7 @@ export default function HomeSkillsPreview(): ReactElement {
           <Link
             to="/competences"
             onMouseEnter={() => portfolioService.prefetch('skills')}
-            className="group inline-flex items-center gap-2 text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="group inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
           >
             <span>Voir toutes mes compétences</span>
             <Icon name="arrowRight" className="size-4 group-hover:translate-x-1 transition-transform" />

@@ -59,7 +59,7 @@ export default function Hero(): ReactElement {
             }
             // Par défaut : 'available'
             return (
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 text-xs font-mono text-zinc-300 shadow-sm mb-6 backdrop-blur-md hover:border-zinc-700 transition-colors">
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 shadow-sm mb-6 backdrop-blur-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
                 <span className="relative flex size-2" aria-hidden="true">
                   <span className="absolute inline-flex size-full motion-safe:animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
@@ -70,15 +70,15 @@ export default function Hero(): ReactElement {
           })()}
 
           {/* Salutation & Titre percutant */}
-          <p className="text-sm font-mono text-indigo-400 font-medium mb-3 tracking-wide uppercase">
+          <p className="text-sm font-mono text-indigo-600 dark:text-indigo-400 font-medium mb-3 tracking-wide uppercase">
             Bonjour, je suis{' '}
-            <span className="text-zinc-200">{profile?.name || 'Yao Jean Angoa'}</span>
+            <span className="text-zinc-900 dark:text-zinc-200">{profile?.name || 'Yao Jean Angoa'}</span>
             {profile?.alias ? ` (${profile.alias})` : ' (Angy)'}
           </p>
 
-          <h1 id="hero-title" className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-zinc-100 leading-[1.12] mb-6">
+          <h1 id="hero-title" className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 leading-[1.12] mb-6">
             Concevoir des architectures web{' '}
-            <span className="bg-linear-to-r from-indigo-400 via-indigo-300 to-violet-400 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-indigo-500 via-indigo-400 to-violet-500 dark:from-indigo-400 dark:via-indigo-300 dark:to-violet-400 bg-clip-text text-transparent">
               performantes & fluides.
             </span>
           </h1>
@@ -86,11 +86,11 @@ export default function Hero(): ReactElement {
           {/* Bio dynamique */}
           {loading ? (
             <div className="w-full max-w-xl mx-auto space-y-2 mb-9 animate-pulse">
-              <div className="h-4 bg-zinc-800/80 rounded w-full" />
-              <div className="h-4 bg-zinc-800/50 rounded w-4/5 mx-auto" />
+              <div className="h-4 bg-zinc-200 dark:bg-zinc-800/80 rounded w-full" />
+              <div className="h-4 bg-zinc-200 dark:bg-zinc-800/50 rounded w-4/5 mx-auto" />
             </div>
           ) : (
-            <p className="text-base sm:text-lg text-zinc-400 max-w-2xl leading-relaxed mb-9">
+            <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed mb-9">
               {profile?.short_bio ||
                 'Développeur Full-Stack autodidacte orienté React, Vite, TypeScript et Node.js. Je transforme des idées complexes en expériences numériques claires et percutantes.'}
             </p>
@@ -101,7 +101,7 @@ export default function Hero(): ReactElement {
             <Link
               to="/projets"
               onMouseEnter={() => portfolioService.prefetch('projects')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-100 text-zinc-950 font-semibold text-sm hover:bg-white hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-200 group"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-950 font-semibold text-sm dark:hover:bg-white hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-200 group cursor-pointer"
             >
               <span>Voir mes projets</span>
               <Icon
@@ -111,25 +111,25 @@ export default function Hero(): ReactElement {
             </Link>
             <Link
               to="/contact"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-300 font-medium text-sm hover:text-white hover:border-zinc-700 hover:bg-zinc-800/60 transition-all duration-200"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 font-medium text-sm hover:text-zinc-900 dark:hover:text-white hover:border-zinc-400 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-all duration-200 cursor-pointer"
             >
               <span>Me contacter</span>
             </Link>
           </div>
 
           {/* Métriques / Badges en monospace */}
-          <div className="mt-14 pt-8 border-t border-zinc-900/80 grid grid-cols-3 gap-6 sm:gap-12 w-full max-w-lg">
+          <div className="mt-14 pt-8 border-t border-zinc-200 dark:border-zinc-900/80 grid grid-cols-3 gap-6 sm:gap-12 w-full max-w-lg">
             <div className="flex flex-col items-center">
-              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-100 tracking-tight">Supabase</span>
-              <span className="text-[11px] sm:text-xs font-mono text-zinc-400 uppercase tracking-wider mt-0.5">Database</span>
+              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 tracking-tight">Supabase</span>
+              <span className="text-[11px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-0.5">Database</span>
             </div>
             <div className="flex flex-col items-center">
-              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-100 tracking-tight">100%</span>
-              <span className="text-[11px] sm:text-xs font-mono text-zinc-400 uppercase tracking-wider mt-0.5">TypeScript</span>
+              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 tracking-tight">100%</span>
+              <span className="text-[11px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-0.5">TypeScript</span>
             </div>
             <div className="flex flex-col items-center">
-              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-100 tracking-tight">Fast</span>
-              <span className="text-[11px] sm:text-xs font-mono text-zinc-400 uppercase tracking-wider mt-0.5">Vite & Tailwind</span>
+              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 tracking-tight">Fast</span>
+              <span className="text-[11px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-0.5">Vite & Tailwind</span>
             </div>
           </div>
         </div>

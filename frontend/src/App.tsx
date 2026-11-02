@@ -9,6 +9,7 @@ import ContactPage from './pages/ContactPage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import DashboardPage from './pages/DashboardPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import { ThemeProvider } from './context/ThemeContext'
 import { portfolioService } from './services/portfolioService'
 
 // Défilement automatique en haut & enregistrement automatique page_views (Analytics)
@@ -51,11 +52,11 @@ function MainLayout(): ReactElement {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col selection:bg-indigo-500/30 selection:text-white">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col selection:bg-indigo-500/30 selection:text-white transition-colors duration-200">
       <a
         href="#main"
         onClick={skipToMain}
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-60 focus:rounded-lg focus:bg-zinc-100 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-zinc-950"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-60 focus:rounded-lg focus:bg-zinc-900 focus:text-white dark:focus:bg-zinc-100 dark:focus:text-zinc-950 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold"
       >
         Aller au contenu principal
       </a>
@@ -109,9 +110,11 @@ function MainLayout(): ReactElement {
 
 export default function App(): ReactElement {
   return (
-    <BrowserRouter>
-      <PageWatcher />
-      <MainLayout />
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <PageWatcher />
+        <MainLayout />
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }

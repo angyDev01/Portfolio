@@ -56,7 +56,7 @@ export default function Footer(): ReactElement {
   }
 
   return (
-    <footer className="border-t border-zinc-900 py-10 bg-zinc-950">
+    <footer className="border-t border-zinc-200 dark:border-zinc-900 py-10 bg-zinc-50 dark:bg-zinc-950 transition-colors duration-200">
       <div className="container-custom flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
         {/* Bloc Copyright avec déclencheur tactile secret (triple-clic ou appui de 2s) sans changer le curseur */}
         <div
@@ -70,7 +70,7 @@ export default function Footer(): ReactElement {
           className="p-2 cursor-default select-none rounded-lg flex flex-col gap-1 transition-colors"
           title=""
         >
-          <p className="text-xs font-mono text-zinc-400">
+          <p className="text-xs font-mono text-zinc-600 dark:text-zinc-400">
             © {new Date().getFullYear()} {name} ({alias}). Tous droits réservés.
           </p>
           <p className="text-[11px] text-zinc-500 font-mono">
@@ -86,7 +86,7 @@ export default function Footer(): ReactElement {
                 href={github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-100 hover:border-zinc-700 hover:bg-zinc-800/60 motion-safe:hover:-translate-y-0.5 transition-all duration-200"
+                className="flex size-10 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200 shadow-xs"
                 aria-label="GitHub (nouvel onglet)"
               >
                 <Icon name="github" className="size-4" />
@@ -97,7 +97,7 @@ export default function Footer(): ReactElement {
                 href={linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-100 hover:border-zinc-700 hover:bg-zinc-800/60 motion-safe:hover:-translate-y-0.5 transition-all duration-200"
+                className="flex size-10 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200 shadow-xs"
                 aria-label="LinkedIn (nouvel onglet)"
               >
                 <Icon name="linkedin" className="size-4" />
@@ -108,7 +108,7 @@ export default function Footer(): ReactElement {
                 href={twitter}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-100 hover:border-zinc-700 hover:bg-zinc-800/60 motion-safe:hover:-translate-y-0.5 transition-all duration-200"
+                className="flex size-10 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200 shadow-xs"
                 aria-label="X (Twitter) (nouvel onglet)"
               >
                 <Icon name="x" className="size-4" />
@@ -119,7 +119,7 @@ export default function Footer(): ReactElement {
                 href={facebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-100 hover:border-zinc-700 hover:bg-zinc-800/60 motion-safe:hover:-translate-y-0.5 transition-all duration-200"
+                className="flex size-10 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200 shadow-xs"
                 aria-label="Facebook (nouvel onglet)"
               >
                 <Icon name="facebook" className="size-4" />

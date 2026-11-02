@@ -34,6 +34,9 @@ import {
   ShieldCheck,
   AlertCircle,
   Database,
+  Sun,
+  Moon,
+  Bell,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -76,6 +79,9 @@ export type IconName =
   | 'settings'
   | 'shield'
   | 'alert'
+  | 'sun'
+  | 'moon'
+  | 'bell'
 
 type CustomIcon = (props: SVGProps<SVGSVGElement>) => ReactElement
 
@@ -178,6 +184,9 @@ const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   settings: Settings,
   shield: ShieldCheck,
   alert: AlertCircle,
+  sun: Sun,
+  moon: Moon,
+  bell: Bell,
 }
 
 interface IconProps {
