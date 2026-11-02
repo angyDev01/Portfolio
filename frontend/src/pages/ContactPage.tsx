@@ -8,7 +8,7 @@ export default function ContactPage(): ReactElement {
   const [copied, setCopied] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
 
   useEffect(() => {
     let mounted = true
@@ -49,7 +49,7 @@ export default function ContactPage(): ReactElement {
 
     if (result.ok) {
       setFeedback({ type: 'success', text: result.message })
-      setFormData({ name: '', email: '', message: '' })
+      setFormData({ name: '', email: '', phone: '', message: '' })
       setTimeout(() => setFeedback(null), 6000)
     } else {
       setFeedback({ type: 'error', text: result.message })
@@ -130,7 +130,7 @@ export default function ContactPage(): ReactElement {
 
             <div>
               <label htmlFor="contact-email" className="block text-xs font-mono text-zinc-400 mb-1.5">
-                Adresse email
+                Adresse email *
               </label>
               <input
                 id="contact-email"
@@ -139,6 +139,20 @@ export default function ContactPage(): ReactElement {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="vous@exemple.com"
+                className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="contact-phone" className="block text-xs font-mono text-zinc-400 mb-1.5">
+                Téléphone <span className="text-zinc-500 font-sans">(optionnel)</span>
+              </label>
+              <input
+                id="contact-phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="+33 6 12 34 56 78"
                 className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
               />
             </div>

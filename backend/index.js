@@ -78,10 +78,10 @@ app.get('/api/skills', async (req, res) => {
 // POST /api/contact : Enregistrer un message
 app.post('/api/contact', async (req, res) => {
   if (!pool) return res.status(500).json({ ok: false, message: 'Database not initialized' })
-  const { name, email, message } = req.body
+  const { name, email, phone, message } = req.body
 
   if (!name || !email || !message) {
-    return res.status(400).json({ ok: false, message: 'Tous les champs sont requis.' })
+    return res.status(400).json({ ok: false, message: 'Tous les champs obligatoires doivent être renseignés.' })
   }
 
   try {
@@ -89,8 +89,8 @@ app.post('/api/contact', async (req, res) => {
     const userAgent = req.headers['user-agent']
 
     await pool.query(
-      'INSERT INTO contact_messages (name, email, message, ip_address, user_agent) VALUES ($1, $2, $3, $4, $5)',
-      [name.trim(), email.trim(), message.trim(), String(ip || ''), String(userAgent || '')]
+      'INSERT INTO contact_messages (name, email, phone, message, ip_address, user_agent) VALUES ($1, $2, $3, $4, $5, $6)',
+      [name.trim(), email.trim(), phone ? phone.trim() : null, message.trim(), String(ip || ''), String(userAgent || '')]
     )
 
     res.json({ ok: true, message: 'Merci pour votre message ! Je vous répondrai dans les plus brefs délais.' })

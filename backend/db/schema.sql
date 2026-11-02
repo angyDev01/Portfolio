@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(120) NOT NULL,
   email VARCHAR(150) NOT NULL,
+  phone VARCHAR(30),
   message TEXT NOT NULL,
   is_read BOOLEAN NOT NULL DEFAULT FALSE,
   ip_address VARCHAR(45),
