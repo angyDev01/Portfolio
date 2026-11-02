@@ -5,7 +5,7 @@ import Icon from '../components/Icon'
 
 export default function AdminLoginPage(): ReactElement {
   const navigate = useNavigate()
-  const [email, setEmail] = useState<string>('')
+  const [email, setEmail] = useState<string>('yaojeanangoa@gmail.com')
   const [password, setPassword] = useState<string>('')
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
@@ -29,11 +29,10 @@ export default function AdminLoginPage(): ReactElement {
     setLoading(true)
     setErrorMsg('')
 
-    // Vérification de sécurité préalable
     if (!isSupabaseConfigured) {
       setLoading(false)
       setErrorMsg(
-        'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
+        'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
       )
       return
     }
@@ -44,11 +43,17 @@ export default function AdminLoginPage(): ReactElement {
       return
     }
 
+    // Normalisation si faute de frappe (@mail.com au lieu de @gmail.com)
+    let loginEmail = email.trim()
+    if (loginEmail.toLowerCase() === 'yaojeanangoa@mail.com') {
+      loginEmail = 'yaojeanangoa@gmail.com'
+    }
+
     try {
       // Appel standard Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
+        email: loginEmail,
+        password: password.trim(),
       })
 
       if (error) {
@@ -57,10 +62,10 @@ export default function AdminLoginPage(): ReactElement {
           lowerMsg.includes('invalid api key') ||
           lowerMsg.includes('api key') ||
           lowerMsg.includes('apikey') ||
-          error.status === 401 && lowerMsg.includes('jwt')
+          (error.status === 401 && lowerMsg.includes('jwt'))
         ) {
           setErrorMsg(
-            'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
+            'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
           )
         } else if (lowerMsg.includes('invalid login credentials')) {
           setErrorMsg(
@@ -79,7 +84,7 @@ export default function AdminLoginPage(): ReactElement {
       const message = err instanceof Error ? err.message : 'Erreur inattendue de connexion'
       if (message.toLowerCase().includes('api key')) {
         setErrorMsg(
-          'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
+          'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
         )
       } else {
         setErrorMsg(message)
@@ -113,16 +118,6 @@ export default function AdminLoginPage(): ReactElement {
             Authentification Supabase requise pour accéder au tableau de bord de gestion.
           </p>
 
-          {!isSupabaseConfigured && (
-            <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono text-left flex items-start gap-2">
-              <Icon name="alert" className="size-4 shrink-0 mt-0.5" />
-              <span>
-                Configuration Supabase manquante : renseignez <code>VITE_SUPABASE_URL</code> et{' '}
-                <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> dans <code>frontend/.env</code>.
-              </span>
-            </div>
-          )}
-
           <form onSubmit={handleLogin} className="flex flex-col gap-4 text-left">
             <div>
               <label htmlFor="admin-email" className="block text-xs font-mono text-zinc-300 mb-1.5">
@@ -134,7 +129,7 @@ export default function AdminLoginPage(): ReactElement {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@angy.dev"
+                placeholder="yaojeanangoa@gmail.com"
                 autoComplete="email"
                 className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
               />

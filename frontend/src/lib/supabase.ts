@@ -1,8 +1,12 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+export const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL || 'https://bemwrrgnquvnuuxjghhm.supabase.co'
+
 export const supabaseAnonKey =
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  'sb_publishable_SpSllH6khfzhvjIceQPOZA_WPlckQAV'
 
 // Vérification de sécurité au démarrage du client Supabase
 if (!supabaseUrl || !supabaseAnonKey) {
@@ -13,7 +17,4 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
 
-export const supabase: SupabaseClient = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-anon-key'
-)
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
