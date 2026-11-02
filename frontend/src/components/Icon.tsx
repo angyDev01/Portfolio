@@ -13,6 +13,16 @@ import {
   Wrench,
   X,
   Send,
+  Phone,
+  MessageSquare,
+  Trash2,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  Lock,
+  RotateCw,
+  Inbox,
+  User,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -32,6 +42,16 @@ export type IconName =
   | 'backend'
   | 'tools'
   | 'send'
+  | 'phone'
+  | 'messageSquare'
+  | 'trash'
+  | 'eye'
+  | 'eyeOff'
+  | 'checkCircle'
+  | 'lock'
+  | 'refresh'
+  | 'inbox'
+  | 'user'
 
 type CustomIcon = (props: SVGProps<SVGSVGElement>) => ReactElement
 
@@ -82,6 +102,16 @@ const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   backend: Server,
   tools: Wrench,
   send: Send,
+  phone: Phone,
+  messageSquare: MessageSquare,
+  trash: Trash2,
+  eye: Eye,
+  eyeOff: EyeOff,
+  checkCircle: CheckCircle2,
+  lock: Lock,
+  refresh: RotateCw,
+  inbox: Inbox,
+  user: User,
 }
 
 interface IconProps {

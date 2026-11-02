@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactElement } from 'react'
+import { useEffect, type MouseEvent, type ReactElement } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage'
 import ProjectsPage from './pages/ProjectsPage'
 import SkillsPage from './pages/SkillsPage'
 import ContactPage from './pages/ContactPage'
+import DashboardPage from './pages/DashboardPage'
 
 // Défilement automatique en haut à chaque changement de page
 function ScrollToTop(): null {
@@ -17,8 +18,6 @@ function ScrollToTop(): null {
 
   return null
 }
-
-import { useEffect } from 'react'
 
 export default function App(): ReactElement {
   const skipToMain = (e: MouseEvent<HTMLAnchorElement>): void => {
@@ -48,6 +47,8 @@ export default function App(): ReactElement {
             <Route path="/projets" element={<ProjectsPage />} />
             <Route path="/competences" element={<SkillsPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/admin" element={<DashboardPage />} />
             <Route path="*" element={<HomePage />} />
           </Routes>
         </main>

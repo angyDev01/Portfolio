@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactElement } from 'react'
+import { Link } from 'react-router-dom'
 import { portfolioService } from '../services/portfolioService'
 import type { DbProfile } from '../types/database'
 import Icon from './Icon'
@@ -66,6 +67,16 @@ export default function Footer(): ReactElement {
               >
                 <Icon name="mail" className="size-4" />
               </a>
+            </li>
+            <li>
+              <Link
+                to="/dashboard"
+                className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-indigo-300 hover:border-zinc-700 hover:bg-zinc-800/60 motion-safe:hover:-translate-y-0.5 transition-all duration-200"
+                aria-label="Tableau de bord administration"
+                title="Espace administration"
+              >
+                <Icon name="lock" className="size-4" />
+              </Link>
             </li>
           </ul>
         </nav>

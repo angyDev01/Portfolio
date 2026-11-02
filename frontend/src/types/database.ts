@@ -57,3 +57,29 @@ export interface ContactMessagePayload {
   phone?: string
   message: string
 }
+
+export interface DirectMessagePayload {
+  name: string
+  email: string
+  phone: string
+  message: string
+}
+
+export interface EmailContactPayload {
+  name: string
+  email: string
+  subject: string
+  message: string
+}
+
+export interface ContactMessage {
+  id: string
+  name: string
+  email: string
+  phone: string | null
+  message: string
+  is_read: boolean
+  created_at: string
+  ip_address?: string | null
+  user_agent?: string | null
+}

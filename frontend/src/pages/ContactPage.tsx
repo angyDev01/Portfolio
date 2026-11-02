@@ -1,14 +1,34 @@
 import { useEffect, useState, type FormEvent, type ReactElement } from 'react'
 import { portfolioService } from '../services/portfolioService'
-import type { DbProfile } from '../types/database'
+import type { DbProfile, DirectMessagePayload, EmailContactPayload } from '../types/database'
 import Icon from '../components/Icon'
+
+type ContactChannel = 'direct' | 'email'
 
 export default function ContactPage(): ReactElement {
   const [profile, setProfile] = useState<DbProfile | null>(null)
+  const [activeChannel, setActiveChannel] = useState<ContactChannel>('direct')
   const [copied, setCopied] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
+
+  // État formulaire Canal 1 : Email
+  const [emailForm, setEmailForm] = useState<EmailContactPayload>({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+  })
+  const [submittingEmail, setSubmittingEmail] = useState(false)
+  const [emailFeedback, setEmailFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  // État formulaire Canal 2 : Message direct (4 champs obligatoires)
+  const [directForm, setDirectForm] = useState<DirectMessagePayload>({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+  })
+  const [submittingDirect, setSubmittingDirect] = useState(false)
+  const [directFeedback, setDirectFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -26,65 +46,126 @@ export default function ContactPage(): ReactElement {
     return () => window.clearTimeout(timer)
   }, [copied])
 
-  const email = profile?.email || 'contact@angy.dev'
+  const recipientEmail = profile?.email || 'contact@angy.dev'
   const github = profile?.github_url || 'https://github.com/angyDev01'
   const linkedin = profile?.linkedin_url || 'https://linkedin.com/in/angydev'
 
   const handleCopyEmail = async (): Promise<void> => {
     try {
-      await navigator.clipboard.writeText(email)
+      await navigator.clipboard.writeText(recipientEmail)
       setCopied(true)
     } catch {
-      // Fallback
+      // Fallback si clipboard API non autorisée
     }
   }
 
-  const handleSubmit = async (e: FormEvent): Promise<void> => {
+  // Soumission Canal 1 — Envoi d'un email
+  const handleEmailSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault()
-    setSubmitting(true)
-    setFeedback(null)
+    setSubmittingEmail(true)
+    setEmailFeedback(null)
 
-    const result = await portfolioService.submitContact(formData)
-    setSubmitting(false)
+    if (!emailForm.name.trim() || !emailForm.email.trim() || !emailForm.subject.trim() || !emailForm.message.trim()) {
+      setSubmittingEmail(false)
+      setEmailFeedback({
+        type: 'error',
+        text: 'Veuillez renseigner tous les champs (Nom, Email, Objet, Message).',
+      })
+      return
+    }
+
+    try {
+      await portfolioService.submitEmailMessage(emailForm)
+
+      // Ouverture du client mailto pour assurer l'envoi direct vers la boîte
+      const mailtoUrl = `mailto:${recipientEmail}?subject=${encodeURIComponent(
+        emailForm.subject
+      )}&body=${encodeURIComponent(
+        `Bonjour Angy,\n\n${emailForm.message}\n\n---\nDe: ${emailForm.name}\nEmail: ${emailForm.email}`
+      )}`
+      window.location.href = mailtoUrl
+
+      setEmailFeedback({
+        type: 'success',
+        text: `Votre client de messagerie s'est ouvert pour envoyer l'email à ${recipientEmail}. Si ce n'est pas le cas, vous pouvez lui écrire directement.`,
+      })
+      setEmailForm({ name: '', email: '', subject: '', message: '' })
+    } catch {
+      setEmailFeedback({
+        type: 'error',
+        text: 'Une erreur est survenue lors de la préparation de l’email.',
+      })
+    } finally {
+      setSubmittingEmail(false)
+    }
+  }
+
+  // Soumission Canal 2 — Laisser un message direct sur le site (4 champs obligatoires)
+  const handleDirectSubmit = async (e: FormEvent): Promise<void> => {
+    e.preventDefault()
+    setSubmittingDirect(true)
+    setDirectFeedback(null)
+
+    if (
+      !directForm.name.trim() ||
+      !directForm.email.trim() ||
+      !directForm.phone.trim() ||
+      !directForm.message.trim()
+    ) {
+      setSubmittingDirect(false)
+      setDirectFeedback({
+        type: 'error',
+        text: 'Les 4 champs (Nom complet, Email, Téléphone, Message) sont obligatoires pour un message direct.',
+      })
+      return
+    }
+
+    const result = await portfolioService.submitDirectMessage(directForm)
+    setSubmittingDirect(false)
 
     if (result.ok) {
-      setFeedback({ type: 'success', text: result.message })
-      setFormData({ name: '', email: '', phone: '', message: '' })
-      setTimeout(() => setFeedback(null), 6000)
+      setDirectFeedback({
+        type: 'success',
+        text: 'Votre message a été transmis directement sur le site. Je pourrai vous recontacter par email ou téléphone/WhatsApp.',
+      })
+      setDirectForm({ name: '', email: '', phone: '', message: '' })
     } else {
-      setFeedback({ type: 'error', text: result.message })
+      setDirectFeedback({
+        type: 'error',
+        text: result.message,
+      })
     }
   }
 
   return (
     <div className="pt-28 pb-24 md:pt-36">
       <div className="container-custom">
-        {/* Header de la page */}
-        <div className="max-w-2xl mx-auto text-center mb-12">
+        {/* Header */}
+        <div className="max-w-2xl mx-auto text-center mb-10">
           <p className="text-xs font-mono font-medium text-indigo-400 uppercase tracking-widest mb-2">
-            Contact Direct
+            Contact & Messagerie
           </p>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-100 mb-4">
             Démarrons un projet ensemble
           </h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
-            Que ce soit pour une opportunité d’embauche, un projet freelance ou une collaboration technique, n’hésitez pas à me joindre.
+            Pour une opportunité professionnelle, un contrat freelance ou un échange technique, choisissez votre canal de contact privilégié ci-dessous.
           </p>
         </div>
 
-        <div className="max-w-xl mx-auto space-y-8">
-          {/* Bloc de contact direct avec bouton Copie */}
-          <div className="glass-card p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-xl mx-auto space-y-6">
+          {/* Bloc d'adresse email avec bouton Copie */}
+          <div className="glass-card p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <span className="flex size-10 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shrink-0">
                 <Icon name="mail" className="size-5" />
               </span>
               <div className="flex flex-col text-left truncate">
                 <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
-                  Adresse email
+                  Boîte de réception
                 </span>
                 <span className="font-mono text-sm text-zinc-100 font-medium select-all truncate">
-                  {email}
+                  {recipientEmail}
                 </span>
               </div>
             </div>
@@ -97,110 +178,286 @@ export default function ContactPage(): ReactElement {
                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                   : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
               }`}
-              aria-label={`Copier l'email ${email}`}
+              aria-label={`Copier l'email ${recipientEmail}`}
             >
               <Icon name={copied ? 'check' : 'copy'} className="size-3.5" />
-              <span>{copied ? 'Copié !' : 'Copier'}</span>
+              <span>{copied ? 'Copié !' : 'Copier l’adresse'}</span>
             </button>
           </div>
 
-          {/* Formulaire de contact centré connecté à contact_messages */}
-          <form
-            onSubmit={handleSubmit}
-            className="glass-card p-6 sm:p-8 flex flex-col gap-4 text-left"
-          >
-            <h2 className="text-lg font-bold text-zinc-100 mb-1">
-              Envoyer un message direct
-            </h2>
-
-            <div>
-              <label htmlFor="contact-name" className="block text-xs font-mono text-zinc-400 mb-1.5">
-                Nom complet
-              </label>
-              <input
-                id="contact-name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Votre nom"
-                className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="contact-email" className="block text-xs font-mono text-zinc-400 mb-1.5">
-                Adresse email *
-              </label>
-              <input
-                id="contact-email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="vous@exemple.com"
-                className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="contact-phone" className="block text-xs font-mono text-zinc-400 mb-1.5">
-                Téléphone <span className="text-zinc-500 font-sans">(optionnel)</span>
-              </label>
-              <input
-                id="contact-phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+33 6 12 34 56 78"
-                className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="contact-msg" className="block text-xs font-mono text-zinc-400 mb-1.5">
-                Votre message
-              </label>
-              <textarea
-                id="contact-msg"
-                rows={4}
-                required
-                value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                placeholder="Votre message..."
-                className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans resize-y"
-              />
-            </div>
-
+          {/* SÉLECTEUR D'ONGLET DES DEUX CANAUX */}
+          <div className="p-1 rounded-xl bg-zinc-900/90 border border-zinc-800/80 grid grid-cols-2 gap-1 text-sm font-medium">
             <button
-              type="submit"
-              disabled={submitting}
-              className="mt-2 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-100 text-zinc-950 font-semibold text-sm hover:bg-white hover:shadow-lg hover:shadow-zinc-100/10 transition-all cursor-pointer disabled:opacity-50"
+              type="button"
+              onClick={() => setActiveChannel('direct')}
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer text-xs sm:text-sm ${
+                activeChannel === 'direct'
+                  ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700/80 font-semibold'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
+              }`}
+              aria-selected={activeChannel === 'direct'}
             >
-              <span>{submitting ? 'Envoi en cours...' : 'Envoyer le message'}</span>
-              <Icon name="send" className="size-3.5" />
+              <Icon name="messageSquare" className="size-4 text-indigo-400" />
+              <span>Laisser un message direct</span>
             </button>
 
-            {feedback && (
-              <p
-                role="status"
-                className={`text-xs font-mono text-center mt-2 py-2 rounded-lg border ${
-                  feedback.type === 'success'
-                    ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-                    : 'text-rose-400 bg-rose-500/10 border-rose-500/20'
-                }`}
-              >
-                {feedback.text}
-              </p>
-            )}
-          </form>
+            <button
+              type="button"
+              onClick={() => setActiveChannel('email')}
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer text-xs sm:text-sm ${
+                activeChannel === 'email'
+                  ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700/80 font-semibold'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
+              }`}
+              aria-selected={activeChannel === 'email'}
+            >
+              <Icon name="mail" className="size-4 text-indigo-400" />
+              <span>M’envoyer un email</span>
+            </button>
+          </div>
 
-          {/* Réseaux sociaux */}
+          {/* ============================================================== */}
+          {/* CANAL 2 : LAISSER UN MESSAGE DIRECT SUR LE SITE               */}
+          {/* ============================================================== */}
+          {activeChannel === 'direct' && (
+            <div className="glass-card p-6 sm:p-8 flex flex-col gap-5 text-left border-indigo-500/20">
+              <div>
+                <div className="flex items-center gap-2 text-indigo-400 text-xs font-mono uppercase tracking-wider mb-1">
+                  <Icon name="messageSquare" className="size-3.5" />
+                  <span>Canal 2 — Notification Directe</span>
+                </div>
+                <h2 className="text-xl font-bold text-zinc-100">
+                  Laisser un message direct sur le site
+                </h2>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Ce message est enregistré directement dans la base du portfolio et s'affichera immédiatement dans mon Dashboard d'administration.
+                </p>
+              </div>
+
+              <form onSubmit={handleDirectSubmit} className="flex flex-col gap-4">
+                {/* 1. Nom complet */}
+                <div>
+                  <label htmlFor="direct-name" className="block text-xs font-mono text-zinc-300 mb-1.5">
+                    Nom complet <span className="text-indigo-400">*</span>
+                  </label>
+                  <input
+                    id="direct-name"
+                    type="text"
+                    required
+                    value={directForm.name}
+                    onChange={(e) => setDirectForm({ ...directForm, name: e.target.value })}
+                    placeholder="Ex: Jean Dupont"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
+                  />
+                </div>
+
+                {/* 2. Adresse email */}
+                <div>
+                  <label htmlFor="direct-email" className="block text-xs font-mono text-zinc-300 mb-1.5">
+                    Adresse email <span className="text-indigo-400">*</span>
+                  </label>
+                  <input
+                    id="direct-email"
+                    type="email"
+                    required
+                    value={directForm.email}
+                    onChange={(e) => setDirectForm({ ...directForm, email: e.target.value })}
+                    placeholder="jean.dupont@entreprise.com"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
+                  />
+                </div>
+
+                {/* 3. Numéro de téléphone */}
+                <div>
+                  <label htmlFor="direct-phone" className="block text-xs font-mono text-zinc-300 mb-1.5">
+                    Numéro de téléphone <span className="text-indigo-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="direct-phone"
+                      type="tel"
+                      required
+                      value={directForm.phone}
+                      onChange={(e) => setDirectForm({ ...directForm, phone: e.target.value })}
+                      placeholder="+33 6 12 34 56 78 (ou WhatsApp)"
+                      className="w-full pl-9 pr-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
+                    />
+                    <span className="absolute left-3 top-3 text-zinc-500 pointer-events-none">
+                      <Icon name="phone" className="size-4" />
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 mt-1">
+                    Pour pouvoir vous recontacter directement ou via WhatsApp.
+                  </p>
+                </div>
+
+                {/* 4. Le message */}
+                <div>
+                  <label htmlFor="direct-message" className="block text-xs font-mono text-zinc-300 mb-1.5">
+                    Votre message <span className="text-indigo-400">*</span>
+                  </label>
+                  <textarea
+                    id="direct-message"
+                    rows={4}
+                    required
+                    value={directForm.message}
+                    onChange={(e) => setDirectForm({ ...directForm, message: e.target.value })}
+                    placeholder="Décrivez votre besoin, projet ou proposition..."
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans resize-y"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submittingDirect}
+                  className="mt-1 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white font-semibold text-sm transition-all cursor-pointer disabled:opacity-50 shadow-lg shadow-indigo-500/20"
+                >
+                  <span>{submittingDirect ? 'Transmission en cours...' : 'Transmettre le message direct'}</span>
+                  <Icon name="send" className="size-4" />
+                </button>
+
+                {directFeedback && (
+                  <div
+                    role="status"
+                    className={`text-xs p-3.5 rounded-lg border leading-relaxed flex items-start gap-2.5 ${
+                      directFeedback.type === 'success'
+                        ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                        : 'text-rose-300 bg-rose-500/10 border-rose-500/30'
+                    }`}
+                  >
+                    <span className="shrink-0 mt-0.5">
+                      <Icon
+                        name={directFeedback.type === 'success' ? 'checkCircle' : 'close'}
+                        className="size-4"
+                      />
+                    </span>
+                    <span>{directFeedback.text}</span>
+                  </div>
+                )}
+              </form>
+            </div>
+          )}
+
+          {/* ============================================================== */}
+          {/* CANAL 1 : M'ENVOYER UN EMAIL (Nom, Email, Objet, Message)      */}
+          {/* ============================================================== */}
+          {activeChannel === 'email' && (
+            <div className="glass-card p-6 sm:p-8 flex flex-col gap-5 text-left">
+              <div>
+                <div className="flex items-center gap-2 text-indigo-400 text-xs font-mono uppercase tracking-wider mb-1">
+                  <Icon name="mail" className="size-3.5" />
+                  <span>Canal 1 — Messagerie Électronique</span>
+                </div>
+                <h2 className="text-xl font-bold text-zinc-100">
+                  M'envoyer un email direct
+                </h2>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Ce formulaire transmet votre demande directement à ma boîte de réception ({recipientEmail}).
+                </p>
+              </div>
+
+              <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
+                {/* 1. Nom */}
+                <div>
+                  <label htmlFor="email-name" className="block text-xs font-mono text-zinc-300 mb-1.5">
+                    Nom complet <span className="text-indigo-400">*</span>
+                  </label>
+                  <input
+                    id="email-name"
+                    type="text"
+                    required
+                    value={emailForm.name}
+                    onChange={(e) => setEmailForm({ ...emailForm, name: e.target.value })}
+                    placeholder="Votre nom"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
+                  />
+                </div>
+
+                {/* 2. Email */}
+                <div>
+                  <label htmlFor="email-address" className="block text-xs font-mono text-zinc-300 mb-1.5">
+                    Adresse email <span className="text-indigo-400">*</span>
+                  </label>
+                  <input
+                    id="email-address"
+                    type="email"
+                    required
+                    value={emailForm.email}
+                    onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
+                    placeholder="votre.email@exemple.com"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
+                  />
+                </div>
+
+                {/* 3. Objet */}
+                <div>
+                  <label htmlFor="email-subject" className="block text-xs font-mono text-zinc-300 mb-1.5">
+                    Objet <span className="text-indigo-400">*</span>
+                  </label>
+                  <input
+                    id="email-subject"
+                    type="text"
+                    required
+                    value={emailForm.subject}
+                    onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                    placeholder="Ex: Proposition de mission / Recrutement"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
+                  />
+                </div>
+
+                {/* 4. Message */}
+                <div>
+                  <label htmlFor="email-body" className="block text-xs font-mono text-zinc-300 mb-1.5">
+                    Message <span className="text-indigo-400">*</span>
+                  </label>
+                  <textarea
+                    id="email-body"
+                    rows={4}
+                    required
+                    value={emailForm.message}
+                    onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
+                    placeholder="Votre message complet..."
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans resize-y"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submittingEmail}
+                  className="mt-1 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-sm transition-all cursor-pointer disabled:opacity-50 shadow-lg shadow-white/5"
+                >
+                  <span>{submittingEmail ? 'Préparation de l’envoi...' : 'Envoyer l’email'}</span>
+                  <Icon name="mail" className="size-4" />
+                </button>
+
+                {emailFeedback && (
+                  <div
+                    role="status"
+                    className={`text-xs p-3.5 rounded-lg border leading-relaxed flex items-start gap-2.5 ${
+                      emailFeedback.type === 'success'
+                        ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                        : 'text-rose-300 bg-rose-500/10 border-rose-500/30'
+                    }`}
+                  >
+                    <span className="shrink-0 mt-0.5">
+                      <Icon
+                        name={emailFeedback.type === 'success' ? 'checkCircle' : 'close'}
+                        className="size-4"
+                      />
+                    </span>
+                    <span>{emailFeedback.text}</span>
+                  </div>
+                )}
+              </form>
+            </div>
+          )}
+
+          {/* Liens réseaux & professionnels */}
           <div className="glass-card p-6 flex flex-col items-center gap-4 text-center">
             <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider">
-              Retrouvez-moi également sur le web
+              Réseaux professionnels & Profils
             </span>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-3">
               <a
                 href={github}
                 target="_blank"
@@ -222,9 +479,9 @@ export default function ContactPage(): ReactElement {
                 <span>LinkedIn</span>
               </a>
               <a
-                href={`mailto:${email}`}
+                href={`mailto:${recipientEmail}`}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80 transition-all text-xs font-mono"
-                aria-label="Email"
+                aria-label="Email direct"
               >
                 <Icon name="mail" className="size-4 text-indigo-400" />
                 <span>Email</span>
