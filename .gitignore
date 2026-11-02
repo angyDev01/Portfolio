@@ -52,9 +52,15 @@ lerna-debug.log*
 debug.log
 error.log
 report.*.json
-RAPPORT_*.md
 
-# 5. Fichiers système et explorateurs d'OS
+# 5. Documentations internes & notes de conception (privées)
+# Bloque tous les fichiers Markdown sauf le README principal du projet
+*.md
+*/*.md
+**/*.md
+!README.md
+
+# 6. Fichiers système et explorateurs d'OS
 .DS_Store
 .DS_Store?
 ._*
@@ -64,7 +70,7 @@ ehthumbs.db
 Thumbs.db
 [Dd]esktop.ini
 
-# 6. IDEs et éditeurs de texte
+# 7. IDEs et éditeurs de texte
 .idea/
 *.sublime-workspace
 *.sublime-project
