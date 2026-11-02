@@ -1,10 +1,30 @@
-import type { ReactElement } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
 import { Link } from 'react-router-dom'
-import { portfolioData } from '../data/portfolioData'
+import { portfolioService } from '../services/portfolioService'
+import type { DbSkill } from '../types/database'
+import EmptyState from './EmptyState'
 import Icon from './Icon'
 
 export default function HomeSkillsPreview(): ReactElement {
-  const { featuredTechs } = portfolioData
+  const [skills, setSkills] = useState<DbSkill[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let mounted = true
+    portfolioService.getSkills().then((data) => {
+      if (mounted) {
+        setSkills(data)
+        setLoading(false)
+      }
+    })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  // 6 compétences mises en avant (is_featured ou premières)
+  const featured = skills.filter((s) => s.is_featured).slice(0, 6)
+  const displaySkills = featured.length > 0 ? featured : skills.slice(0, 6)
 
   return (
     <section id="stack-preview" aria-labelledby="skills-preview-title" className="py-20 border-t border-zinc-900 bg-zinc-950/40">
@@ -21,30 +41,44 @@ export default function HomeSkillsPreview(): ReactElement {
           </p>
         </div>
 
-        {/* Grille des 6 technologies principales sous forme de badges élégants */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-10">
-          {featuredTechs.map((tech) => (
-            <div
-              key={tech.name}
-              className="glass-card p-4 flex flex-col items-center text-center group hover:border-indigo-400/50 hover:bg-zinc-900/90 transition-all"
-            >
-              <div className="size-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center font-mono font-bold text-sm mb-3 group-hover:scale-105 group-hover:bg-indigo-500/20 transition-all">
-                {tech.name.slice(0, 2)}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-10">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-28 glass-card animate-pulse" />
+            ))}
+          </div>
+        ) : displaySkills.length === 0 ? (
+          <div className="mb-10">
+            <EmptyState
+              title="Aucune compétence pour le moment"
+              description="Les technologies et compétences seront chargées depuis Supabase très prochainement."
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-10">
+            {displaySkills.map((skill) => (
+              <div
+                key={skill.id}
+                className="glass-card p-4 flex flex-col items-center text-center group hover:border-indigo-400/50 hover:bg-zinc-900/90 transition-all"
+              >
+                <div className="size-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center font-mono font-bold text-sm mb-3 group-hover:scale-105 group-hover:bg-indigo-500/20 transition-all">
+                  {skill.name.slice(0, 2).toUpperCase()}
+                </div>
+                <span className="font-semibold text-zinc-100 text-sm tracking-tight mb-1 truncate max-w-full">
+                  {skill.name}
+                </span>
+                <span className="text-[11px] font-mono text-zinc-400 leading-tight capitalize">
+                  {skill.category}
+                </span>
               </div>
-              <span className="font-semibold text-zinc-100 text-sm tracking-tight mb-1">
-                {tech.name}
-              </span>
-              <span className="text-[11px] font-mono text-zinc-400 leading-tight">
-                {tech.role}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
-        {/* CTA vers /competences */}
         <div className="text-center">
           <Link
             to="/competences"
+            onMouseEnter={() => portfolioService.prefetch('skills')}
             className="group inline-flex items-center gap-2 text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
           >
             <span>Voir toutes mes compétences</span>
@@ -55,4 +89,3 @@ export default function HomeSkillsPreview(): ReactElement {
     </section>
   )
 }
-

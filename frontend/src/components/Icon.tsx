@@ -11,11 +11,27 @@ import {
   Server,
   Sparkles,
   Wrench,
-  Send,
   X,
+  Send,
   type LucideIcon,
 } from 'lucide-react'
-import type { IconName } from '../types/portfolio'
+
+export type IconName =
+  | 'github'
+  | 'linkedin'
+  | 'mail'
+  | 'external'
+  | 'code'
+  | 'arrowRight'
+  | 'copy'
+  | 'check'
+  | 'menu'
+  | 'close'
+  | 'sparkles'
+  | 'frontend'
+  | 'backend'
+  | 'tools'
+  | 'send'
 
 type CustomIcon = (props: SVGProps<SVGSVGElement>) => ReactElement
 

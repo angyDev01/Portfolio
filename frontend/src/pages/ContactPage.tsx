@@ -1,13 +1,24 @@
 import { useEffect, useState, type FormEvent, type ReactElement } from 'react'
-import { portfolioData } from '../data/portfolioData'
+import { portfolioService } from '../services/portfolioService'
+import type { DbProfile } from '../types/database'
 import Icon from '../components/Icon'
 
 export default function ContactPage(): ReactElement {
-  const { contact, profile, socials, ui } = portfolioData
+  const [profile, setProfile] = useState<DbProfile | null>(null)
   const [copied, setCopied] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [sentSuccess, setSentSuccess] = useState(false)
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+
+  useEffect(() => {
+    let mounted = true
+    portfolioService.getProfile().then((data) => {
+      if (mounted) setProfile(data)
+    })
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!copied) return
@@ -15,26 +26,34 @@ export default function ContactPage(): ReactElement {
     return () => window.clearTimeout(timer)
   }, [copied])
 
+  const email = profile?.email || 'contact@angy.dev'
+  const github = profile?.github_url || 'https://github.com/angyDev01'
+  const linkedin = profile?.linkedin_url || 'https://linkedin.com/in/angydev'
+
   const handleCopyEmail = async (): Promise<void> => {
     try {
-      await navigator.clipboard.writeText(profile.contact.email)
+      await navigator.clipboard.writeText(email)
       setCopied(true)
     } catch {
       // Fallback
     }
   }
 
-  const handleSubmit = (e: FormEvent): void => {
+  const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault()
     setSubmitting(true)
+    setFeedback(null)
 
-    // Simulation d'envoi immédiat avec validation UX
-    setTimeout(() => {
-      setSubmitting(false)
-      setSentSuccess(true)
+    const result = await portfolioService.submitContact(formData)
+    setSubmitting(false)
+
+    if (result.ok) {
+      setFeedback({ type: 'success', text: result.message })
       setFormData({ name: '', email: '', message: '' })
-      setTimeout(() => setSentSuccess(false), 5000)
-    }, 600)
+      setTimeout(() => setFeedback(null), 6000)
+    } else {
+      setFeedback({ type: 'error', text: result.message })
+    }
   }
 
   return (
@@ -43,13 +62,13 @@ export default function ContactPage(): ReactElement {
         {/* Header de la page */}
         <div className="max-w-2xl mx-auto text-center mb-12">
           <p className="text-xs font-mono font-medium text-indigo-400 uppercase tracking-widest mb-2">
-            {contact.eyebrow}
+            Contact Direct
           </p>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-100 mb-4">
-            {contact.title}
+            Démarrons un projet ensemble
           </h1>
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
-            {contact.description}
+            Que ce soit pour une opportunité d’embauche, un projet freelance ou une collaboration technique, n’hésitez pas à me joindre.
           </p>
         </div>
 
@@ -62,10 +81,10 @@ export default function ContactPage(): ReactElement {
               </span>
               <div className="flex flex-col text-left truncate">
                 <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
-                  {contact.emailLabel}
+                  Adresse email
                 </span>
                 <span className="font-mono text-sm text-zinc-100 font-medium select-all truncate">
-                  {profile.contact.email}
+                  {email}
                 </span>
               </div>
             </div>
@@ -78,14 +97,14 @@ export default function ContactPage(): ReactElement {
                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                   : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
               }`}
-              aria-label={ui.contact.copyAria(profile.contact.email)}
+              aria-label={`Copier l'email ${email}`}
             >
               <Icon name={copied ? 'check' : 'copy'} className="size-3.5" />
-              <span>{copied ? ui.contact.copied : ui.contact.copy}</span>
+              <span>{copied ? 'Copié !' : 'Copier'}</span>
             </button>
           </div>
 
-          {/* Formulaire de contact centré */}
+          {/* Formulaire de contact centré connecté à contact_messages */}
           <form
             onSubmit={handleSubmit}
             className="glass-card p-6 sm:p-8 flex flex-col gap-4 text-left"
@@ -104,7 +123,7 @@ export default function ContactPage(): ReactElement {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder={ui.contact.formName}
+                placeholder="Votre nom"
                 className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
               />
             </div>
@@ -119,7 +138,7 @@ export default function ContactPage(): ReactElement {
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder={ui.contact.formEmail}
+                placeholder="vous@exemple.com"
                 className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans"
               />
             </div>
@@ -134,7 +153,7 @@ export default function ContactPage(): ReactElement {
                 required
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                placeholder={ui.contact.formMessage}
+                placeholder="Votre message..."
                 className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/80 border border-zinc-800 text-zinc-100 text-sm focus:border-indigo-400 focus:outline-none placeholder:text-zinc-600 font-sans resize-y"
               />
             </div>
@@ -144,16 +163,20 @@ export default function ContactPage(): ReactElement {
               disabled={submitting}
               className="mt-2 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-100 text-zinc-950 font-semibold text-sm hover:bg-white hover:shadow-lg hover:shadow-zinc-100/10 transition-all cursor-pointer disabled:opacity-50"
             >
-              <span>{submitting ? ui.contact.formSubmitting : ui.contact.formSubmit}</span>
+              <span>{submitting ? 'Envoi en cours...' : 'Envoyer le message'}</span>
               <Icon name="send" className="size-3.5" />
             </button>
 
-            {sentSuccess && (
+            {feedback && (
               <p
                 role="status"
-                className="text-xs font-mono text-emerald-400 text-center mt-2 bg-emerald-500/10 border border-emerald-500/20 py-2 rounded-lg"
+                className={`text-xs font-mono text-center mt-2 py-2 rounded-lg border ${
+                  feedback.type === 'success'
+                    ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                    : 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+                }`}
               >
-                {ui.contact.formSuccess}
+                {feedback.text}
               </p>
             )}
           </form>
@@ -164,19 +187,34 @@ export default function ContactPage(): ReactElement {
               Retrouvez-moi également sur le web
             </span>
             <div className="flex items-center gap-3">
-              {socials.map((social) => (
-                <a
-                  key={social.name}
-                  href={social.href}
-                  target={social.external ? '_blank' : undefined}
-                  rel={social.external ? 'noopener noreferrer' : undefined}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80 transition-all text-xs font-mono"
-                  aria-label={social.label}
-                >
-                  <Icon name={social.icon} className="size-4 text-indigo-400" />
-                  <span>{social.name}</span>
-                </a>
-              ))}
+              <a
+                href={github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80 transition-all text-xs font-mono"
+                aria-label="GitHub (nouvel onglet)"
+              >
+                <Icon name="github" className="size-4 text-indigo-400" />
+                <span>GitHub</span>
+              </a>
+              <a
+                href={linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80 transition-all text-xs font-mono"
+                aria-label="LinkedIn (nouvel onglet)"
+              >
+                <Icon name="linkedin" className="size-4 text-indigo-400" />
+                <span>LinkedIn</span>
+              </a>
+              <a
+                href={`mailto:${email}`}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80 transition-all text-xs font-mono"
+                aria-label="Email"
+              >
+                <Icon name="mail" className="size-4 text-indigo-400" />
+                <span>Email</span>
+              </a>
             </div>
           </div>
         </div>
@@ -184,4 +222,3 @@ export default function ContactPage(): ReactElement {
     </div>
   )
 }
-

@@ -1,14 +1,29 @@
-import type { ReactElement } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
 import { Link } from 'react-router-dom'
-import { portfolioData } from '../data/portfolioData'
+import { portfolioService } from '../services/portfolioService'
+import type { DbProfile } from '../types/database'
 import Icon from './Icon'
 
 export default function Hero(): ReactElement {
-  const { profile, hero } = portfolioData
+  const [profile, setProfile] = useState<DbProfile | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let mounted = true
+    portfolioService.getProfile().then((data) => {
+      if (mounted) {
+        setProfile(data)
+        setLoading(false)
+      }
+    })
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   return (
     <section id="home" aria-labelledby="hero-title" className="relative isolate pt-32 pb-20 md:pt-40 md:pb-24 overflow-hidden">
-      {/* Halos décoratifs Linear / Vercel */}
+      {/* Halos décoratifs Vercel */}
       <div
         className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-140 h-88 max-w-full bg-indigo-600/15 rounded-full blur-[120px] -z-10"
         aria-hidden="true"
@@ -20,64 +35,77 @@ export default function Hero(): ReactElement {
 
       <div className="container-custom">
         <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
-          {/* Badge de disponibilité avec puce animée */}
+          {/* Badge de disponibilité dynamique */}
           <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 text-xs font-mono text-zinc-300 shadow-sm mb-6 backdrop-blur-md hover:border-zinc-700 transition-colors">
             <span className="relative flex size-2" aria-hidden="true">
               <span className="absolute inline-flex size-full motion-safe:animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
-            <span>{profile.status.label}</span>
+            <span>{profile?.status_label || 'Disponible pour de nouvelles opportunités'}</span>
           </div>
 
           {/* Salutation & Titre percutant */}
           <p className="text-sm font-mono text-indigo-400 font-medium mb-3 tracking-wide uppercase">
-            {hero.greeting} <span className="text-zinc-200">{profile.name}</span> ({profile.alias})
+            Bonjour, je suis{' '}
+            <span className="text-zinc-200">{profile?.name || 'Yao Jean Angoa'}</span>
+            {profile?.alias ? ` (${profile.alias})` : ' (Angy)'}
           </p>
 
           <h1 id="hero-title" className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-zinc-100 leading-[1.12] mb-6">
-            {hero.headline}{' '}
+            Concevoir des architectures web{' '}
             <span className="bg-linear-to-r from-indigo-400 via-indigo-300 to-violet-400 bg-clip-text text-transparent">
-              {hero.accentWord}
+              performantes & fluides.
             </span>
           </h1>
 
-          {/* Bio synthétique */}
-          <p className="text-base sm:text-lg text-zinc-400 max-w-2xl leading-relaxed mb-9">
-            {profile.shortBio} {hero.subheadline}
-          </p>
+          {/* Bio dynamique */}
+          {loading ? (
+            <div className="w-full max-w-xl mx-auto space-y-2 mb-9 animate-pulse">
+              <div className="h-4 bg-zinc-800/80 rounded w-full" />
+              <div className="h-4 bg-zinc-800/50 rounded w-4/5 mx-auto" />
+            </div>
+          ) : (
+            <p className="text-base sm:text-lg text-zinc-400 max-w-2xl leading-relaxed mb-9">
+              {profile?.short_bio ||
+                'Développeur Full-Stack autodidacte orienté React, Vite, TypeScript et Node.js. Je transforme des idées complexes en expériences numériques claires et percutantes.'}
+            </p>
+          )}
 
-          {/* Boutons CTA avec React Router Link */}
+          {/* Boutons CTA */}
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <Link
-              to={hero.primaryCta.href}
+              to="/projets"
+              onMouseEnter={() => portfolioService.prefetch('projects')}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-100 text-zinc-950 font-semibold text-sm hover:bg-white hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-200 group"
             >
-              <span>{hero.primaryCta.label}</span>
+              <span>Voir mes projets</span>
               <Icon
                 name="arrowRight"
                 className="size-4 group-hover:translate-x-0.5 transition-transform duration-200"
               />
             </Link>
             <Link
-              to={hero.secondaryCta.href}
+              to="/contact"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-300 font-medium text-sm hover:text-white hover:border-zinc-700 hover:bg-zinc-800/60 transition-all duration-200"
             >
-              <span>{hero.secondaryCta.label}</span>
+              <span>Me contacter</span>
             </Link>
           </div>
 
           {/* Métriques / Badges en monospace */}
           <div className="mt-14 pt-8 border-t border-zinc-900/80 grid grid-cols-3 gap-6 sm:gap-12 w-full max-w-lg">
-            {hero.stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center">
-                <span className="text-lg sm:text-xl font-bold font-mono text-zinc-100 tracking-tight">
-                  {stat.value}
-                </span>
-                <span className="text-[11px] sm:text-xs font-mono text-zinc-400 uppercase tracking-wider mt-0.5">
-                  {stat.label}
-                </span>
-              </div>
-            ))}
+            <div className="flex flex-col items-center">
+              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-100 tracking-tight">Supabase</span>
+              <span className="text-[11px] sm:text-xs font-mono text-zinc-400 uppercase tracking-wider mt-0.5">Database</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-100 tracking-tight">100%</span>
+              <span className="text-[11px] sm:text-xs font-mono text-zinc-400 uppercase tracking-wider mt-0.5">TypeScript</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-100 tracking-tight">Fast</span>
+              <span className="text-[11px] sm:text-xs font-mono text-zinc-400 uppercase tracking-wider mt-0.5">Vite & Tailwind</span>
+            </div>
           </div>
         </div>
       </div>

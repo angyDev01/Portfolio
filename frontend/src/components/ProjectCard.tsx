@@ -1,14 +1,14 @@
 import type { ReactElement } from 'react'
-import type { Project } from '../types/portfolio'
+import type { DbProject } from '../types/database'
 import Icon from './Icon'
 
 interface ProjectCardProps {
-  project: Project
+  project: DbProject
   className?: string
 }
 
 export default function ProjectCard({ project, className = '' }: ProjectCardProps): ReactElement {
-  const { title, tagline, description, technologies, links, featured } = project
+  const { title, tagline, description, summary, skills = [], demo_url, repo_url, is_featured } = project
 
   return (
     <article
@@ -21,7 +21,7 @@ export default function ProjectCard({ project, className = '' }: ProjectCardProp
             <h3 className="text-base sm:text-lg font-semibold text-zinc-100 group-hover:text-indigo-300 transition-colors">
               {title}
             </h3>
-            {featured && (
+            {is_featured && (
               <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                 Featured
               </span>
@@ -29,24 +29,24 @@ export default function ProjectCard({ project, className = '' }: ProjectCardProp
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            {links.repo && (
+            {repo_url && (
               <a
-                href={links.repo}
+                href={repo_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex size-8 items-center justify-center rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 transition-colors"
-                aria-label={`Code source de ${title}`}
+                aria-label={`Code source de ${title} (nouvel onglet)`}
               >
                 <Icon name="code" className="size-4" />
               </a>
             )}
-            {links.demo && (
+            {demo_url && (
               <a
-                href={links.demo}
+                href={demo_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex size-8 items-center justify-center rounded-md text-zinc-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
-                aria-label={`Démo en ligne de ${title}`}
+                aria-label={`Démo en ligne de ${title} (nouvel onglet)`}
               >
                 <Icon name="external" className="size-4" />
               </a>
@@ -55,17 +55,21 @@ export default function ProjectCard({ project, className = '' }: ProjectCardProp
         </div>
 
         <p className="text-xs font-mono text-indigo-400 mb-3">{tagline}</p>
-        <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed mb-5 line-clamp-3">{description}</p>
+        <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed mb-5 line-clamp-3">
+          {summary || description}
+        </p>
       </div>
 
       {/* Technologies */}
-      <ul className="pt-3 border-t border-zinc-800/60 flex flex-wrap gap-1.5">
-        {technologies.map((tech) => (
-          <li key={tech} className="tag-mono px-2 py-0.5 rounded-md bg-zinc-800/50 text-zinc-300 border border-zinc-800">
-            {tech}
-          </li>
-        ))}
-      </ul>
+      {skills.length > 0 && (
+        <ul className="pt-3 border-t border-zinc-800/60 flex flex-wrap gap-1.5" aria-label="Technologies du projet">
+          {skills.map((tech) => (
+            <li key={tech} className="tag-mono px-2 py-0.5 rounded-md bg-zinc-800/50 text-zinc-300 border border-zinc-800">
+              {tech}
+            </li>
+          ))}
+        </ul>
+      )}
     </article>
   )
 }

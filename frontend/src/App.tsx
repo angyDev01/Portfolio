@@ -1,4 +1,4 @@
-import { useEffect, type MouseEvent, type ReactElement } from 'react'
+import type { MouseEvent, ReactElement } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -6,9 +6,6 @@ import HomePage from './pages/HomePage'
 import ProjectsPage from './pages/ProjectsPage'
 import SkillsPage from './pages/SkillsPage'
 import ContactPage from './pages/ContactPage'
-import { portfolioData } from './data/portfolioData'
-
-const { ui } = portfolioData
 
 // Défilement automatique en haut à chaque changement de page
 function ScrollToTop(): null {
@@ -20,6 +17,8 @@ function ScrollToTop(): null {
 
   return null
 }
+
+import { useEffect } from 'react'
 
 export default function App(): ReactElement {
   const skipToMain = (e: MouseEvent<HTMLAnchorElement>): void => {
@@ -36,10 +35,10 @@ export default function App(): ReactElement {
           onClick={skipToMain}
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-60 focus:rounded-lg focus:bg-zinc-100 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-zinc-950"
         >
-          {ui.skipToContent}
+          Aller au contenu principal
         </a>
 
-        {/* Navigation fixe adaptée React Router */}
+        {/* Navigation fixe avec préchargement des données */}
         <Navbar />
 
         {/* Conteneur principal routé */}
@@ -49,7 +48,6 @@ export default function App(): ReactElement {
             <Route path="/projets" element={<ProjectsPage />} />
             <Route path="/competences" element={<SkillsPage />} />
             <Route path="/contact" element={<ContactPage />} />
-            {/* Redirection fallback */}
             <Route path="*" element={<HomePage />} />
           </Routes>
         </main>

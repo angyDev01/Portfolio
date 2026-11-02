@@ -1,5 +1,5 @@
 /**
- * Types des entités de la base de données.
+ * Modèles TypeScript stricts des entités de la base de données distante Supabase.
  */
 
 export interface DbProfile {
@@ -14,37 +14,45 @@ export interface DbProfile {
   linkedin_url: string
   is_available: boolean
   status_label: string
+  created_at?: string
+  updated_at?: string
 }
+
+export type SkillCategoryType = 'frontend' | 'backend' | 'tools'
 
 export interface DbSkill {
   id: string
   name: string
-  category: 'frontend' | 'backend' | 'tools'
+  category: SkillCategoryType
   icon: string
   description?: string
   is_featured: boolean
   display_order: number
+  created_at?: string
 }
+
+export type ProjectCategoryType = 'Full-Stack' | 'Frontend' | 'APIs'
 
 export interface DbProject {
   id: string
   slug: string
   title: string
   tagline: string
-  category: 'Full-Stack' | 'Frontend' | 'APIs'
+  category: ProjectCategoryType
   summary: string
   description: string
   images: string[]
-  demo_url?: string
-  repo_url?: string
+  demo_url?: string | null
+  repo_url?: string | null
   is_featured: boolean
   display_order: number
-  skills?: string[]
+  skills: string[]
+  created_at?: string
+  updated_at?: string
 }
 
-export interface DbContactMessage {
+export interface ContactMessagePayload {
   name: string
   email: string
   message: string
 }
-
