@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent, type ReactElement } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { portfolioService } from '../services/portfolioService'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import Icon from '../components/Icon'
 
 export default function AdminLoginPage(): ReactElement {
@@ -14,7 +14,7 @@ export default function AdminLoginPage(): ReactElement {
   // Rediriger automatiquement vers /admin si déjà connecté
   useEffect(() => {
     let mounted = true
-    portfolioService.getSession().then((session) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (mounted && session) {
         navigate('/admin', { replace: true })
       }
@@ -29,19 +29,63 @@ export default function AdminLoginPage(): ReactElement {
     setLoading(true)
     setErrorMsg('')
 
+    // Vérification de sécurité préalable
+    if (!isSupabaseConfigured) {
+      setLoading(false)
+      setErrorMsg(
+        'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
+      )
+      return
+    }
+
     if (!email.trim() || !password.trim()) {
       setLoading(false)
       setErrorMsg('Veuillez renseigner votre email et votre mot de passe.')
       return
     }
 
-    const res = await portfolioService.signInWithSupabase(email.trim(), password)
-    setLoading(false)
+    try {
+      // Appel standard Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
 
-    if (res.ok) {
-      navigate('/admin', { replace: true })
-    } else {
-      setErrorMsg(res.error || 'Identifiants administrateur incorrects.')
+      if (error) {
+        const lowerMsg = error.message.toLowerCase()
+        if (
+          lowerMsg.includes('invalid api key') ||
+          lowerMsg.includes('api key') ||
+          lowerMsg.includes('apikey') ||
+          error.status === 401 && lowerMsg.includes('jwt')
+        ) {
+          setErrorMsg(
+            'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
+          )
+        } else if (lowerMsg.includes('invalid login credentials')) {
+          setErrorMsg(
+            "Email ou mot de passe incorrect (Assurez-vous d'avoir créé votre compte dans Supabase > Authentication > Users)."
+          )
+        } else {
+          setErrorMsg(error.message)
+        }
+        return
+      }
+
+      if (data.session) {
+        navigate('/admin', { replace: true })
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erreur inattendue de connexion'
+      if (message.toLowerCase().includes('api key')) {
+        setErrorMsg(
+          'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
+        )
+      } else {
+        setErrorMsg(message)
+      }
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -68,6 +112,16 @@ export default function AdminLoginPage(): ReactElement {
           <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
             Authentification Supabase requise pour accéder au tableau de bord de gestion.
           </p>
+
+          {!isSupabaseConfigured && (
+            <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono text-left flex items-start gap-2">
+              <Icon name="alert" className="size-4 shrink-0 mt-0.5" />
+              <span>
+                Configuration Supabase manquante : renseignez <code>VITE_SUPABASE_URL</code> et{' '}
+                <code>VITE_SUPABASE_ANON_KEY</code> dans <code>frontend/.env</code>.
+              </span>
+            </div>
+          )}
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4 text-left">
             <div>
@@ -116,7 +170,7 @@ export default function AdminLoginPage(): ReactElement {
             </div>
 
             {errorMsg && (
-              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-mono flex items-start gap-2">
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-mono flex items-start gap-2 leading-relaxed">
                 <Icon name="alert" className="size-4 shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>
@@ -145,4 +199,3 @@ export default function AdminLoginPage(): ReactElement {
     </div>
   )
 }
-

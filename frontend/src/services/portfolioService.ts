@@ -1,4 +1,5 @@
-import { createClient, type SupabaseClient, type Session } from '@supabase/supabase-js'
+import type { Session } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabase'
 import type {
   DbProfile,
   DbProject,
@@ -10,16 +11,9 @@ import type {
   AnalyticsStats,
 } from '../types/database'
 
-// Variables Supabase déclarées côté client (Vite)
-const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL || 'https://bemwrrgnquvnuuxjghhm.supabase.co'
-const SUPABASE_ANON_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlbXdycmducXV2bnV1eGpnaGhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTgyNDQsImV4cCI6MjA1Njg3NDI0NH0.8M4J0fK3r88v2WfD3h3rC0d21gM2V3'
-
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
-export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+export { supabase }
 
 /**
  * Cache mémoire pour des navigations instantanées (0 ms de latence).
