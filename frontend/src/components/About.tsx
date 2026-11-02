@@ -55,7 +55,15 @@ export default function About(): ReactElement {
               </div>
               <div className="flex justify-between gap-4 py-1.5 border-b border-zinc-800">
                 <dt className="text-zinc-400">Statut</dt>
-                <dd className="text-right text-emerald-400">{profile?.is_available ? 'Disponible' : 'En poste'}</dd>
+                <dd className="text-right">
+                  {profile?.availability_status === 'employed' ? (
+                    <span className="text-indigo-400 font-medium">En poste</span>
+                  ) : profile?.availability_status === 'unavailable' ? (
+                    <span className="text-amber-400 font-medium">Non disponible</span>
+                  ) : (
+                    <span className="text-emerald-400 font-medium">Disponible</span>
+                  )}
+                </dd>
               </div>
             </dl>
           </aside>

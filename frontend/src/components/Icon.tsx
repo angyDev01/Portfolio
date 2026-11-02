@@ -11,7 +11,7 @@ import {
   Server,
   Sparkles,
   Wrench,
-  X,
+  X as CloseIcon,
   Send,
   Phone,
   MessageSquare,
@@ -23,12 +23,25 @@ import {
   RotateCw,
   Inbox,
   User,
+  Plus,
+  Pencil,
+  BarChart3,
+  FolderKanban,
+  Award,
+  TrendingUp,
+  LogOut,
+  Settings,
+  ShieldCheck,
+  AlertCircle,
+  Database,
   type LucideIcon,
 } from 'lucide-react'
 
 export type IconName =
   | 'github'
   | 'linkedin'
+  | 'x'
+  | 'facebook'
   | 'mail'
   | 'external'
   | 'code'
@@ -41,6 +54,7 @@ export type IconName =
   | 'frontend'
   | 'backend'
   | 'tools'
+  | 'database'
   | 'send'
   | 'phone'
   | 'messageSquare'
@@ -52,6 +66,16 @@ export type IconName =
   | 'refresh'
   | 'inbox'
   | 'user'
+  | 'plus'
+  | 'pencil'
+  | 'analytics'
+  | 'projects'
+  | 'skills'
+  | 'trending'
+  | 'logout'
+  | 'settings'
+  | 'shield'
+  | 'alert'
 
 type CustomIcon = (props: SVGProps<SVGSVGElement>) => ReactElement
 
@@ -86,9 +110,40 @@ const LinkedinIcon: CustomIcon = (props) => (
   </svg>
 )
 
+const TwitterXIcon: CustomIcon = (props) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+  </svg>
+)
+
+const FacebookIcon: CustomIcon = (props) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+)
+
 const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   github: GithubIcon,
   linkedin: LinkedinIcon,
+  x: TwitterXIcon,
+  facebook: FacebookIcon,
   mail: Mail,
   external: ExternalLink,
   code: Code,
@@ -96,11 +151,12 @@ const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   copy: Copy,
   check: Check,
   menu: Menu,
-  close: X,
+  close: CloseIcon,
   sparkles: Sparkles,
   frontend: MonitorSmartphone,
   backend: Server,
   tools: Wrench,
+  database: Database,
   send: Send,
   phone: Phone,
   messageSquare: MessageSquare,
@@ -112,6 +168,16 @@ const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   refresh: RotateCw,
   inbox: Inbox,
   user: User,
+  plus: Plus,
+  pencil: Pencil,
+  analytics: BarChart3,
+  projects: FolderKanban,
+  skills: Award,
+  trending: TrendingUp,
+  logout: LogOut,
+  settings: Settings,
+  shield: ShieldCheck,
+  alert: AlertCircle,
 }
 
 interface IconProps {

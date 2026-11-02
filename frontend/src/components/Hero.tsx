@@ -35,14 +35,39 @@ export default function Hero(): ReactElement {
 
       <div className="container-custom">
         <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
-          {/* Badge de disponibilité dynamique */}
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 text-xs font-mono text-zinc-300 shadow-sm mb-6 backdrop-blur-md hover:border-zinc-700 transition-colors">
-            <span className="relative flex size-2" aria-hidden="true">
-              <span className="absolute inline-flex size-full motion-safe:animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-            </span>
-            <span>{profile?.status_label || 'Disponible pour de nouvelles opportunités'}</span>
-          </div>
+          {/* Badge de disponibilité dynamique à 3 états */}
+          {(() => {
+            const status = profile?.availability_status || (profile?.is_available ? 'available' : 'employed')
+            if (status === 'employed') {
+              return (
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-xs font-mono text-indigo-300 shadow-sm mb-6 backdrop-blur-md">
+                  <span className="relative flex size-2" aria-hidden="true">
+                    <span className="absolute inline-flex size-full motion-safe:animate-ping rounded-full bg-indigo-400 opacity-75" />
+                    <span className="relative inline-flex size-2 rounded-full bg-indigo-500" />
+                  </span>
+                  <span>{profile?.status_label || 'En poste / Actuellement en mission'}</span>
+                </div>
+              )
+            }
+            if (status === 'unavailable') {
+              return (
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-xs font-mono text-amber-300 shadow-sm mb-6 backdrop-blur-md">
+                  <span className="size-2 rounded-full bg-amber-500" aria-hidden="true" />
+                  <span>{profile?.status_label || 'Non disponible pour le moment'}</span>
+                </div>
+              )
+            }
+            // Par défaut : 'available'
+            return (
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 text-xs font-mono text-zinc-300 shadow-sm mb-6 backdrop-blur-md hover:border-zinc-700 transition-colors">
+                <span className="relative flex size-2" aria-hidden="true">
+                  <span className="absolute inline-flex size-full motion-safe:animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                </span>
+                <span>{profile?.status_label || 'Disponible pour de nouvelles opportunités'}</span>
+              </div>
+            )
+          })()}
 
           {/* Salutation & Titre percutant */}
           <p className="text-sm font-mono text-indigo-400 font-medium mb-3 tracking-wide uppercase">

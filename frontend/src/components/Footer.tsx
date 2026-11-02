@@ -1,11 +1,16 @@
-import { useEffect, useState, type ReactElement } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState, type ReactElement } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { portfolioService } from '../services/portfolioService'
 import type { DbProfile } from '../types/database'
 import Icon from './Icon'
 
 export default function Footer(): ReactElement {
   const [profile, setProfile] = useState<DbProfile | null>(null)
+  const navigate = useNavigate()
+
+  // Références pour la détection du triple-clic et du long-press (2s)
+  const clickTimestampsRef = useRef<number[]>([])
+  const longPressTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -21,12 +26,50 @@ export default function Footer(): ReactElement {
   const alias = profile?.alias || 'Angy'
   const github = profile?.github_url || 'https://github.com/angyDev01'
   const linkedin = profile?.linkedin_url || 'https://linkedin.com/in/angydev'
-  const email = profile?.email || 'contact@angy.dev'
+  const twitter = profile?.twitter_url || 'https://x.com/angydev'
+  const facebook = profile?.facebook_url || 'https://facebook.com/angydev'
+
+  // Déclencheur secret 1 : Triple-clic rapide (<= 500ms)
+  const handleSecretClick = (): void => {
+    const now = Date.now()
+    // Conserve les clics survenus dans les 500 dernières millisecondes
+    clickTimestampsRef.current = [...clickTimestampsRef.current.filter((t) => now - t < 500), now]
+    if (clickTimestampsRef.current.length >= 3) {
+      clickTimestampsRef.current = []
+      navigate('/admin/login')
+    }
+  }
+
+  // Déclencheur secret 2 : Clic maintenu / appui long de 2 secondes
+  const handleTouchStart = (): void => {
+    if (longPressTimerRef.current) window.clearTimeout(longPressTimerRef.current)
+    longPressTimerRef.current = window.setTimeout(() => {
+      navigate('/admin/login')
+    }, 2000)
+  }
+
+  const handleTouchEnd = (): void => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+  }
 
   return (
     <footer className="border-t border-zinc-900 py-10 bg-zinc-950">
       <div className="container-custom flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-        <div className="flex flex-col gap-1">
+        {/* Bloc Copyright avec déclencheur tactile secret (triple-clic ou appui de 2s) sans changer le curseur */}
+        <div
+          onClick={handleSecretClick}
+          onMouseDown={handleTouchStart}
+          onMouseUp={handleTouchEnd}
+          onMouseLeave={handleTouchEnd}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+          className="p-2 cursor-default select-none rounded-lg flex flex-col gap-1 transition-colors"
+          title=""
+        >
           <p className="text-xs font-mono text-zinc-400">
             © {new Date().getFullYear()} {name} ({alias}). Tous droits réservés.
           </p>
@@ -35,6 +78,7 @@ export default function Footer(): ReactElement {
           </p>
         </div>
 
+        {/* Réseaux sociaux exclusively (aucun lien d'admin visible) */}
         <nav aria-label="Réseaux sociaux">
           <ul className="flex items-center gap-3">
             <li>
@@ -61,22 +105,25 @@ export default function Footer(): ReactElement {
             </li>
             <li>
               <a
-                href={`mailto:${email}`}
+                href={twitter}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-100 hover:border-zinc-700 hover:bg-zinc-800/60 motion-safe:hover:-translate-y-0.5 transition-all duration-200"
-                aria-label="Email"
+                aria-label="X (Twitter) (nouvel onglet)"
               >
-                <Icon name="mail" className="size-4" />
+                <Icon name="x" className="size-4" />
               </a>
             </li>
             <li>
-              <Link
-                to="/dashboard"
-                className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-indigo-300 hover:border-zinc-700 hover:bg-zinc-800/60 motion-safe:hover:-translate-y-0.5 transition-all duration-200"
-                aria-label="Tableau de bord administration"
-                title="Espace administration"
+              <a
+                href={facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-100 hover:border-zinc-700 hover:bg-zinc-800/60 motion-safe:hover:-translate-y-0.5 transition-all duration-200"
+                aria-label="Facebook (nouvel onglet)"
               >
-                <Icon name="lock" className="size-4" />
-              </Link>
+                <Icon name="facebook" className="size-4" />
+              </a>
             </li>
           </ul>
         </nav>

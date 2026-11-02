@@ -5,9 +5,10 @@ import Icon from '../components/Icon'
 import EmptyState from '../components/EmptyState'
 import { SkillCategorySkeleton } from '../components/Skeletons'
 
-const CATEGORY_META: Record<SkillCategoryType, { title: string; icon: 'frontend' | 'backend' | 'tools' }> = {
+const CATEGORY_META: Record<SkillCategoryType, { title: string; icon: 'frontend' | 'backend' | 'tools' | 'database' }> = {
   frontend: { title: 'Frontend Moderne', icon: 'frontend' },
-  backend: { title: 'Backend & Données', icon: 'backend' },
+  backend: { title: 'Backend & APIs', icon: 'backend' },
+  database: { title: 'Bases de données & Supabase', icon: 'database' },
   tools: { title: 'Outils & Pratiques', icon: 'tools' },
 }
 

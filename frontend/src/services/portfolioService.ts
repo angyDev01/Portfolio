@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient, type Session } from '@supabase/supabase-js'
 import type {
   DbProfile,
   DbProject,
@@ -7,6 +7,7 @@ import type {
   DirectMessagePayload,
   EmailContactPayload,
   ContactMessage,
+  AnalyticsStats,
 } from '../types/database'
 
 // Variables Supabase déclarées côté client (Vite)
@@ -18,19 +19,10 @@ const SUPABASE_ANON_KEY =
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
-let supabase: SupabaseClient | null = null
-
-try {
-  if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  }
-} catch (e) {
-  console.warn('Supabase client direct init fallback to API Gateway:', e)
-}
+export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 /**
  * Cache mémoire pour des navigations instantanées (0 ms de latence).
- * Stocke les promesses en cours ou résolues.
  */
 interface CacheStore {
   profile: Promise<DbProfile | null> | null
@@ -45,37 +37,224 @@ const cache: CacheStore = {
 }
 
 export const portfolioService = {
+  // ==========================================
+  // AUTHENTIFICATION SUPABASE
+  // ==========================================
+
+  async signInWithSupabase(email: string, password: string): Promise<{ ok: boolean; error?: string }> {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        return { ok: false, error: error.message }
+      }
+      return { ok: Boolean(data.session) }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erreur de connexion'
+      return { ok: false, error: message }
+    }
+  },
+
+  async signOutSupabase(): Promise<void> {
+    try {
+      await supabase.auth.signOut()
+    } catch {
+      /* ignore */
+    }
+  },
+
+  async getSession(): Promise<Session | null> {
+    try {
+      const { data } = await supabase.auth.getSession()
+      return data.session
+    } catch {
+      return null
+    }
+  },
+
+  onAuthStateChange(callback: (session: Session | null) => void) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      callback(session)
+    })
+    return subscription
+  },
+
+  // ==========================================
+  // ANALYTICS & STATS (Recharts)
+  // ==========================================
+
   /**
-   * Récupère le profil distant (avec cache mémoire & double stratégie API / Supabase direct)
+   * Enregistrement automatique d'une consultation de page
    */
+  async recordPageView(path: string): Promise<void> {
+    try {
+      await supabase.from('page_views').insert([
+        {
+          page_path: path,
+          referrer: document.referrer || null,
+          user_agent: navigator.userAgent || null,
+        },
+      ])
+    } catch {
+      /* ignore silencieusement pour ne pas bloquer l'expérience utilisateur */
+    }
+  },
+
+  /**
+   * Récupère les métriques consolidées et données pour Recharts
+   */
+  async getAnalyticsStats(rangeDays: 7 | 30 = 7): Promise<AnalyticsStats> {
+    const now = new Date()
+    const startDate = new Date()
+    startDate.setDate(now.getDate() - rangeDays)
+
+    const prevStartDate = new Date()
+    prevStartDate.setDate(now.getDate() - rangeDays * 2)
+
+    try {
+      // 1. Visites
+      const { data: viewsData } = await supabase
+        .from('page_views')
+        .select('created_at')
+        .gte('created_at', startDate.toISOString())
+
+      const { data: prevViewsData } = await supabase
+        .from('page_views')
+        .select('created_at')
+        .gte('created_at', prevStartDate.toISOString())
+        .lt('created_at', startDate.toISOString())
+
+      // 2. Messages
+      const { data: messagesData } = await supabase
+        .from('contact_messages')
+        .select('id, is_read, created_at')
+        .order('created_at', { ascending: false })
+
+      // 3. Projets
+      const { data: projectsData } = await supabase
+        .from('projects')
+        .select('id, is_featured, status')
+
+      const views = viewsData || []
+      const prevViews = prevViewsData || []
+      const messages = messagesData || []
+      const projects = projectsData || []
+
+      const totalViews = views.length
+      const prevTotalViews = prevViews.length
+      const viewsTrendPercent =
+        prevTotalViews > 0
+          ? Math.round(((totalViews - prevTotalViews) / prevTotalViews) * 100)
+          : totalViews > 0
+          ? 100
+          : 0
+
+      const unreadMessages = messages.filter((m) => !m.is_read).length
+      const featuredProjects = projects.filter((p) => p.is_featured).length
+      const inProgressProjects = projects.filter((p) => p.status === 'in_progress').length
+      const completedProjects = projects.filter((p) => p.status !== 'in_progress').length
+
+      // Construction des données jour par jour pour Recharts
+      const chartMap = new Map<string, { visites: number; messages: number }>()
+
+      for (let i = rangeDays - 1; i >= 0; i--) {
+        const d = new Date()
+        d.setDate(now.getDate() - i)
+        const dateKey = d.toISOString().slice(5, 10) // MM-DD
+        chartMap.set(dateKey, { visites: 0, messages: 0 })
+      }
+
+      for (const v of views) {
+        if (!v.created_at) continue
+        const k = v.created_at.slice(5, 10)
+        if (chartMap.has(k)) {
+          chartMap.get(k)!.visites += 1
+        }
+      }
+
+      for (const m of messages) {
+        if (!m.created_at) continue
+        const k = m.created_at.slice(5, 10)
+        if (chartMap.has(k)) {
+          chartMap.get(k)!.messages += 1
+        }
+      }
+
+      const chartData = Array.from(chartMap.entries()).map(([date, data]) => ({
+        date,
+        visites: data.visites,
+        messages: data.messages,
+      }))
+
+      return {
+        totalViews,
+        views7d: totalViews,
+        viewsTrendPercent,
+        totalMessages: messages.length,
+        unreadMessages,
+        featuredProjects,
+        inProgressProjects,
+        completedProjects,
+        chartData,
+      }
+    } catch (err) {
+      console.error('Analytics stats error:', err)
+      return {
+        totalViews: 0,
+        views7d: 0,
+        viewsTrendPercent: 0,
+        totalMessages: 0,
+        unreadMessages: 0,
+        featuredProjects: 0,
+        inProgressProjects: 0,
+        completedProjects: 0,
+        chartData: [],
+      }
+    }
+  },
+
+  // ==========================================
+  // PROFIL & DISPONIBILITÉ
+  // ==========================================
+
   async getProfile(): Promise<DbProfile | null> {
     if (cache.profile) return cache.profile
 
     cache.profile = (async () => {
-      // 1. Essai via l'API backend
+      // 1. Supabase direct
       try {
-        const res = await fetch(`${API_BASE_URL}/api/profile`, { signal: AbortSignal.timeout(3000) })
-        if (res.ok) {
-          const data = await res.json()
-          if (data) return data
+        const { data } = await supabase
+          .from('profile')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (data) {
+          return {
+            ...data,
+            availability_status: data.availability_status || (data.is_available ? 'available' : 'employed'),
+            accept_direct_messages: data.accept_direct_messages !== false,
+          } as DbProfile
         }
       } catch {
-        /* fallback to Supabase */
+        /* fallback to API */
       }
 
-      // 2. Essai direct via Supabase SDK
-      if (supabase) {
-        try {
-          const { data } = await supabase
-            .from('profile')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle()
-          if (data) return data as DbProfile
-        } catch (err) {
-          console.error('Supabase getProfile direct error:', err)
+      // 2. API fallback
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/profile`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data) {
+            return {
+              ...data,
+              availability_status: data.availability_status || (data.is_available ? 'available' : 'employed'),
+              accept_direct_messages: data.accept_direct_messages !== false,
+            } as DbProfile
+          }
         }
+      } catch {
+        /* ignore */
       }
 
       return null
@@ -84,54 +263,80 @@ export const portfolioService = {
     return cache.profile
   },
 
-  /**
-   * Récupère la liste de tous les projets avec leurs tags compétences associés
-   */
+  async updateProfile(updates: Partial<DbProfile>): Promise<{ ok: boolean; error?: string }> {
+    try {
+      this.invalidateCache('profile')
+      const profile = await this.getProfile()
+      if (!profile?.id) {
+        // Crée ou insère si absent
+        const { error } = await supabase.from('profile').insert([updates])
+        if (error) return { ok: false, error: error.message }
+        return { ok: true }
+      }
+
+      const { error } = await supabase
+        .from('profile')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', profile.id)
+
+      if (error) return { ok: false, error: error.message }
+      this.invalidateCache('profile')
+      return { ok: true }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur mise à jour profil'
+      return { ok: false, error: msg }
+    }
+  },
+
+  // ==========================================
+  // PROJETS (CRUD COMPLET)
+  // ==========================================
+
   async getProjects(): Promise<DbProject[]> {
     if (cache.projects) return cache.projects
 
     cache.projects = (async () => {
-      // 1. Essai via l'API backend
       try {
-        const res = await fetch(`${API_BASE_URL}/api/projects`, { signal: AbortSignal.timeout(3000) })
+        const { data, error } = await supabase
+          .from('projects')
+          .select(`
+            *,
+            project_skills (
+              skills (id, name)
+            )
+          `)
+          .order('is_featured', { ascending: false })
+          .order('display_order', { ascending: true })
+
+        if (!error && Array.isArray(data)) {
+          return data.map((item) => {
+            const skills = item.project_skills
+              ? item.project_skills
+                  .map((ps: { skills?: { name?: string } }) => ps.skills?.name)
+                  .filter((n: string | undefined): n is string => Boolean(n))
+              : []
+            return {
+              ...item,
+              status: item.status || 'completed',
+              skills,
+            } as DbProject
+          })
+        }
+      } catch {
+        /* fallback to API */
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/projects`)
         if (res.ok) {
           const data = await res.json()
           if (Array.isArray(data)) return data
         }
       } catch {
-        /* fallback to Supabase */
-      }
-
-      // 2. Essai direct via Supabase SDK avec jointure
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('projects')
-            .select(`
-              *,
-              project_skills (
-                skills (name)
-              )
-            `)
-            .order('is_featured', { ascending: false })
-            .order('display_order', { ascending: true })
-
-          if (!error && Array.isArray(data)) {
-            return data.map((item: { project_skills?: Array<{ skills?: { name?: string } }> }) => {
-              const skills = item.project_skills
-                ? item.project_skills
-                    .map((ps) => ps.skills?.name)
-                    .filter((n): n is string => Boolean(n))
-                : []
-              return {
-                ...item,
-                skills,
-              } as unknown as DbProject
-            })
-          }
-        } catch (err) {
-          console.error('Supabase getProjects direct error:', err)
-        }
+        /* ignore */
       }
 
       return []
@@ -140,38 +345,142 @@ export const portfolioService = {
     return cache.projects
   },
 
-  /**
-   * Récupère toutes les compétences ordonnées
-   */
+  async createProject(
+    project: Omit<DbProject, 'id' | 'created_at' | 'updated_at' | 'skills'>,
+    skillIds: string[] = []
+  ): Promise<{ ok: boolean; error?: string }> {
+    try {
+      this.invalidateCache('projects')
+      const { data, error } = await supabase
+        .from('projects')
+        .insert([
+          {
+            slug: project.slug,
+            title: project.title,
+            tagline: project.tagline,
+            category: project.category,
+            status: project.status || 'completed',
+            summary: project.summary,
+            description: project.description,
+            images: project.images || [],
+            demo_url: project.demo_url || null,
+            repo_url: project.repo_url || null,
+            is_featured: Boolean(project.is_featured),
+            display_order: Number(project.display_order) || 0,
+          },
+        ])
+        .select('id')
+        .single()
+
+      if (error || !data) return { ok: false, error: error?.message || 'Erreur création' }
+
+      if (skillIds.length > 0) {
+        const relations = skillIds.map((sId) => ({
+          project_id: data.id,
+          skill_id: sId,
+        }))
+        await supabase.from('project_skills').insert(relations)
+      }
+
+      this.invalidateCache('projects')
+      return { ok: true }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur création projet'
+      return { ok: false, error: msg }
+    }
+  },
+
+  async updateProject(
+    id: string,
+    project: Partial<DbProject>,
+    skillIds?: string[]
+  ): Promise<{ ok: boolean; error?: string }> {
+    try {
+      this.invalidateCache('projects')
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          slug: project.slug,
+          title: project.title,
+          tagline: project.tagline,
+          category: project.category,
+          status: project.status,
+          summary: project.summary,
+          description: project.description,
+          images: project.images,
+          demo_url: project.demo_url || null,
+          repo_url: project.repo_url || null,
+          is_featured: project.is_featured,
+          display_order: project.display_order,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+
+      if (error) return { ok: false, error: error.message }
+
+      if (skillIds !== undefined) {
+        // Synchroniser les compétences liées
+        await supabase.from('project_skills').delete().eq('project_id', id)
+        if (skillIds.length > 0) {
+          const relations = skillIds.map((sId) => ({
+            project_id: id,
+            skill_id: sId,
+          }))
+          await supabase.from('project_skills').insert(relations)
+        }
+      }
+
+      this.invalidateCache('projects')
+      return { ok: true }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur modification projet'
+      return { ok: false, error: msg }
+    }
+  },
+
+  async deleteProject(id: string): Promise<{ ok: boolean; error?: string }> {
+    try {
+      this.invalidateCache('projects')
+      await supabase.from('project_skills').delete().eq('project_id', id)
+      const { error } = await supabase.from('projects').delete().eq('id', id)
+      if (error) return { ok: false, error: error.message }
+      this.invalidateCache('projects')
+      return { ok: true }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur suppression projet'
+      return { ok: false, error: msg }
+    }
+  },
+
+  // ==========================================
+  // COMPÉTENCES (SKILLS - CRUD COMPLET)
+  // ==========================================
+
   async getSkills(): Promise<DbSkill[]> {
     if (cache.skills) return cache.skills
 
     cache.skills = (async () => {
-      // 1. Essai via l'API backend
       try {
-        const res = await fetch(`${API_BASE_URL}/api/skills`, { signal: AbortSignal.timeout(3000) })
+        const { data, error } = await supabase
+          .from('skills')
+          .select('*')
+          .order('display_order', { ascending: true })
+
+        if (!error && Array.isArray(data)) {
+          return data as DbSkill[]
+        }
+      } catch {
+        /* fallback */
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/skills`)
         if (res.ok) {
           const data = await res.json()
           if (Array.isArray(data)) return data
         }
       } catch {
-        /* fallback to Supabase */
-      }
-
-      // 2. Essai direct via Supabase SDK
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('skills')
-            .select('*')
-            .order('display_order', { ascending: true })
-
-          if (!error && Array.isArray(data)) {
-            return data as DbSkill[]
-          }
-        } catch (err) {
-          console.error('Supabase getSkills direct error:', err)
-        }
+        /* ignore */
       }
 
       return []
@@ -180,12 +489,51 @@ export const portfolioService = {
     return cache.skills
   },
 
-  /**
-   * CANAL 2 — Envoie un message direct stocké dans Supabase (contact_messages)
-   * 4 champs obligatoires : Nom, Email, Téléphone, Message
-   */
+  async createSkill(skill: Omit<DbSkill, 'id' | 'created_at'>): Promise<{ ok: boolean; error?: string }> {
+    try {
+      this.invalidateCache('skills')
+      const { error } = await supabase.from('skills').insert([skill])
+      if (error) return { ok: false, error: error.message }
+      this.invalidateCache('skills')
+      return { ok: true }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur création compétence'
+      return { ok: false, error: msg }
+    }
+  },
+
+  async updateSkill(id: string, skill: Partial<DbSkill>): Promise<{ ok: boolean; error?: string }> {
+    try {
+      this.invalidateCache('skills')
+      const { error } = await supabase.from('skills').update(skill).eq('id', id)
+      if (error) return { ok: false, error: error.message }
+      this.invalidateCache('skills')
+      return { ok: true }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur mise à jour compétence'
+      return { ok: false, error: msg }
+    }
+  },
+
+  async deleteSkill(id: string): Promise<{ ok: boolean; error?: string }> {
+    try {
+      this.invalidateCache('skills')
+      await supabase.from('project_skills').delete().eq('skill_id', id)
+      const { error } = await supabase.from('skills').delete().eq('id', id)
+      if (error) return { ok: false, error: error.message }
+      this.invalidateCache('skills')
+      return { ok: true }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur suppression compétence'
+      return { ok: false, error: msg }
+    }
+  },
+
+  // ==========================================
+  // CANAUX DE CONTACT PUBLICS
+  // ==========================================
+
   async submitDirectMessage(payload: DirectMessagePayload): Promise<{ ok: boolean; message: string }> {
-    // Validation stricte des 4 champs
     if (!payload.name.trim() || !payload.email.trim() || !payload.phone.trim() || !payload.message.trim()) {
       return {
         ok: false,
@@ -193,7 +541,39 @@ export const portfolioService = {
       }
     }
 
-    // 1. Essai via API backend
+    // Vérifier si la réception des messages directs est active
+    const profile = await this.getProfile()
+    if (profile && profile.accept_direct_messages === false) {
+      return {
+        ok: false,
+        message:
+          'La réception de messages directs est momentanément suspendue. Veuillez me contacter par email.',
+      }
+    }
+
+    // 1. Supabase direct
+    try {
+      const { error } = await supabase.from('contact_messages').insert([
+        {
+          name: payload.name.trim(),
+          email: payload.email.trim(),
+          phone: payload.phone.trim(),
+          message: payload.message.trim(),
+          is_read: false,
+        },
+      ])
+      if (!error) {
+        return {
+          ok: true,
+          message:
+            'Votre message a été transmis directement sur le site. Je pourrai vous recontacter par email ou téléphone/WhatsApp.',
+        }
+      }
+    } catch {
+      /* fallback to API */
+    }
+
+    // 2. API fallback
     try {
       const res = await fetch(`${API_BASE_URL}/api/contact/direct`, {
         method: 'POST',
@@ -210,31 +590,7 @@ export const portfolioService = {
         }
       }
     } catch {
-      /* fallback direct Supabase */
-    }
-
-    // 2. Essai direct via Supabase Client
-    if (supabase) {
-      try {
-        const { error } = await supabase.from('contact_messages').insert([
-          {
-            name: payload.name.trim(),
-            email: payload.email.trim(),
-            phone: payload.phone.trim(),
-            message: payload.message.trim(),
-            is_read: false,
-          },
-        ])
-        if (!error) {
-          return {
-            ok: true,
-            message:
-              'Votre message a été transmis directement sur le site. Je pourrai vous recontacter par email ou téléphone/WhatsApp.',
-          }
-        }
-      } catch (err) {
-        console.error('Supabase submitDirectMessage error:', err)
-      }
+      /* ignore */
     }
 
     return {
@@ -243,9 +599,6 @@ export const portfolioService = {
     }
   },
 
-  /**
-   * CANAL 1 — Envoi d'un email (Nom, Email, Objet, Message)
-   */
   async submitEmailMessage(payload: EmailContactPayload): Promise<{ ok: boolean; message: string }> {
     if (!payload.name.trim() || !payload.email.trim() || !payload.subject.trim() || !payload.message.trim()) {
       return {
@@ -254,19 +607,12 @@ export const portfolioService = {
       }
     }
 
-    // 1. Notifier l'API backend
     try {
-      const res = await fetch(`${API_BASE_URL}/api/contact/email`, {
+      await fetch(`${API_BASE_URL}/api/contact/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      if (res.ok) {
-        return {
-          ok: true,
-          message: 'Votre message a été préparé avec succès pour envoi par email.',
-        }
-      }
     } catch {
       /* ignore */
     }
@@ -277,9 +623,6 @@ export const portfolioService = {
     }
   },
 
-  /**
-   * Méthode générique de contact (rétro-compatibilité)
-   */
   async submitContact(payload: ContactMessagePayload): Promise<{ ok: boolean; message: string }> {
     return this.submitDirectMessage({
       name: payload.name,
@@ -290,150 +633,56 @@ export const portfolioService = {
   },
 
   // ==========================================
-  // SERVICES ADMINISTRATION (DASHBOARD)
+  // GESTION DES MESSAGES ADMIN
   // ==========================================
 
-  /**
-   * Authentification admin
-   */
-  async adminLogin(password: string): Promise<{ ok: boolean; message: string }> {
+  async getAdminMessages(): Promise<{ ok: boolean; messages: ContactMessage[]; unreadCount: number }> {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      })
-      const data = await res.json()
-      return { ok: res.ok && data.ok, message: data.message || (res.ok ? 'Connecté' : 'Erreur de connexion') }
-    } catch {
-      return { ok: false, message: 'Impossible de joindre le serveur API.' }
-    }
-  },
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-  /**
-   * Récupère la liste de tous les messages de contact reçus via Canal 2
-   */
-  async getAdminMessages(password: string): Promise<{ ok: boolean; messages: ContactMessage[]; unreadCount: number }> {
-    // 1. Essai API backend avec authentification
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/messages`, {
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
-      })
-      if (res.ok) {
-        const data = await res.json()
-        return {
-          ok: true,
-          messages: data.messages || [],
-          unreadCount: data.unreadCount ?? (data.messages || []).filter((m: ContactMessage) => !m.is_read).length,
-        }
+      if (!error && Array.isArray(data)) {
+        const messages = data as ContactMessage[]
+        const unreadCount = messages.filter((m) => !m.is_read).length
+        return { ok: true, messages, unreadCount }
       }
     } catch {
-      /* fallback to Supabase */
-    }
-
-    // 2. Fallback Supabase client
-    if (supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('contact_messages')
-          .select('*')
-          .order('created_at', { ascending: false })
-
-        if (!error && Array.isArray(data)) {
-          const messages = data as ContactMessage[]
-          const unreadCount = messages.filter((m) => !m.is_read).length
-          return { ok: true, messages, unreadCount }
-        }
-      } catch (err) {
-        console.error('Supabase getAdminMessages error:', err)
-      }
+      /* fallback */
     }
 
     return { ok: false, messages: [], unreadCount: 0 }
   },
 
-  /**
-   * Marquer un message comme lu ou non lu
-   */
-  async setMessageReadStatus(
-    id: string,
-    is_read: boolean,
-    password: string
-  ): Promise<{ ok: boolean; unreadCount?: number }> {
+  async setMessageReadStatus(id: string, is_read: boolean): Promise<{ ok: boolean; error?: string }> {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/messages/${id}/read`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${password}`,
-        },
-        body: JSON.stringify({ is_read }),
-      })
-      if (res.ok) {
-        const data = await res.json()
-        return { ok: true, unreadCount: data.unreadCount }
-      }
-    } catch {
-      /* fallback to Supabase */
+      const { error } = await supabase.from('contact_messages').update({ is_read }).eq('id', id)
+      if (error) return { ok: false, error: error.message }
+      return { ok: true }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur mise à jour statut'
+      return { ok: false, error: msg }
     }
-
-    if (supabase) {
-      try {
-        const { error } = await supabase.from('contact_messages').update({ is_read }).eq('id', id)
-        if (!error) return { ok: true }
-      } catch (err) {
-        console.error('Supabase setMessageReadStatus error:', err)
-      }
-    }
-
-    return { ok: false }
   },
 
-  /**
-   * Supprimer un message
-   */
-  async deleteMessage(id: string, password: string): Promise<{ ok: boolean; unreadCount?: number }> {
+  async deleteMessage(id: string): Promise<{ ok: boolean; error?: string }> {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/messages/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${password}`,
-        },
-      })
-      if (res.ok) {
-        const data = await res.json()
-        return { ok: true, unreadCount: data.unreadCount }
-      }
-    } catch {
-      /* fallback to Supabase */
+      const { error } = await supabase.from('contact_messages').delete().eq('id', id)
+      if (error) return { ok: false, error: error.message }
+      return { ok: true }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur suppression message'
+      return { ok: false, error: msg }
     }
-
-    if (supabase) {
-      try {
-        const { error } = await supabase.from('contact_messages').delete().eq('id', id)
-        if (!error) return { ok: true }
-      } catch (err) {
-        console.error('Supabase deleteMessage error:', err)
-      }
-    }
-
-    return { ok: false }
   },
 
-  /**
-   * Précharge les données au survol d'un lien pour assurer un chargement à 0 ms
-   */
   prefetch(resource: 'profile' | 'projects' | 'skills' | 'all'): void {
     if (resource === 'profile' || resource === 'all') this.getProfile()
     if (resource === 'projects' || resource === 'all') this.getProjects()
     if (resource === 'skills' || resource === 'all') this.getSkills()
   },
 
-  /**
-   * Invalide le cache pour forcer un rafraîchissement
-   */
   invalidateCache(resource?: 'profile' | 'projects' | 'skills'): void {
     if (!resource) {
       cache.profile = null

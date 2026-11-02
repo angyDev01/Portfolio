@@ -49,6 +49,8 @@ export default function ContactPage(): ReactElement {
   const recipientEmail = profile?.email || 'contact@angy.dev'
   const github = profile?.github_url || 'https://github.com/angyDev01'
   const linkedin = profile?.linkedin_url || 'https://linkedin.com/in/angydev'
+  const twitter = profile?.twitter_url || 'https://x.com/angydev'
+  const facebook = profile?.facebook_url || 'https://facebook.com/angydev'
 
   const handleCopyEmail = async (): Promise<void> => {
     try {
@@ -234,7 +236,18 @@ export default function ContactPage(): ReactElement {
                 </p>
               </div>
 
-              <form onSubmit={handleDirectSubmit} className="flex flex-col gap-4">
+              {profile?.accept_direct_messages === false ? (
+                <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-mono flex items-start gap-2.5">
+                  <Icon name="alert" className="size-4 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold mb-0.5">Réception directe momentanément suspendue</p>
+                    <p className="text-zinc-400">
+                      Veuillez utiliser le canal « M'envoyer un email » en sélectionnant l'onglet ci-dessus.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleDirectSubmit} className="flex flex-col gap-4">
                 {/* 1. Nom complet */}
                 <div>
                   <label htmlFor="direct-name" className="block text-xs font-mono text-zinc-300 mb-1.5">
@@ -335,11 +348,12 @@ export default function ContactPage(): ReactElement {
                   </div>
                 )}
               </form>
-            </div>
-          )}
+            )}
+          </div>
+        )}
 
-          {/* ============================================================== */}
-          {/* CANAL 1 : M'ENVOYER UN EMAIL (Nom, Email, Objet, Message)      */}
+        {/* ============================================================== */}
+        {/* CANAL 1 : M'ENVOYER UN EMAIL (Nom, Email, Objet, Message)      */}
           {/* ============================================================== */}
           {activeChannel === 'email' && (
             <div className="glass-card p-6 sm:p-8 flex flex-col gap-5 text-left">
@@ -452,10 +466,10 @@ export default function ContactPage(): ReactElement {
             </div>
           )}
 
-          {/* Liens réseaux & professionnels */}
+          {/* Réseaux sociaux : Retrouvez-moi aussi sur le web (exclusif GitHub, LinkedIn, X, Facebook) */}
           <div className="glass-card p-6 flex flex-col items-center gap-4 text-center">
             <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider">
-              Réseaux professionnels & Profils
+              Retrouvez-moi aussi sur le web
             </span>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <a
@@ -479,12 +493,24 @@ export default function ContactPage(): ReactElement {
                 <span>LinkedIn</span>
               </a>
               <a
-                href={`mailto:${recipientEmail}`}
+                href={twitter}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80 transition-all text-xs font-mono"
-                aria-label="Email direct"
+                aria-label="X (Twitter) (nouvel onglet)"
               >
-                <Icon name="mail" className="size-4 text-indigo-400" />
-                <span>Email</span>
+                <Icon name="x" className="size-4 text-indigo-400" />
+                <span>X (Twitter)</span>
+              </a>
+              <a
+                href={facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80 transition-all text-xs font-mono"
+                aria-label="Facebook (nouvel onglet)"
+              >
+                <Icon name="facebook" className="size-4 text-indigo-400" />
+                <span>Facebook</span>
               </a>
             </div>
           </div>

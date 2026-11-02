@@ -2,6 +2,8 @@
  * Modèles TypeScript stricts des entités de la base de données distante Supabase.
  */
 
+export type AvailabilityStatusType = 'available' | 'employed' | 'unavailable'
+
 export interface DbProfile {
   id: string
   name: string
@@ -12,13 +14,17 @@ export interface DbProfile {
   email: string
   github_url: string
   linkedin_url: string
+  twitter_url?: string
+  facebook_url?: string
   is_available: boolean
   status_label: string
+  availability_status: AvailabilityStatusType
+  accept_direct_messages: boolean
   created_at?: string
   updated_at?: string
 }
 
-export type SkillCategoryType = 'frontend' | 'backend' | 'tools'
+export type SkillCategoryType = 'frontend' | 'backend' | 'tools' | 'database'
 
 export interface DbSkill {
   id: string
@@ -32,6 +38,7 @@ export interface DbSkill {
 }
 
 export type ProjectCategoryType = 'Full-Stack' | 'Frontend' | 'APIs'
+export type ProjectStatusType = 'in_progress' | 'completed'
 
 export interface DbProject {
   id: string
@@ -39,6 +46,7 @@ export interface DbProject {
   title: string
   tagline: string
   category: ProjectCategoryType
+  status: ProjectStatusType
   summary: string
   description: string
   images: string[]
@@ -82,4 +90,28 @@ export interface ContactMessage {
   created_at: string
   ip_address?: string | null
   user_agent?: string | null
+}
+
+export interface PageView {
+  id: string
+  page_path: string
+  referrer?: string | null
+  user_agent?: string | null
+  created_at: string
+}
+
+export interface AnalyticsStats {
+  totalViews: number
+  views7d: number
+  viewsTrendPercent: number
+  totalMessages: number
+  unreadMessages: number
+  featuredProjects: number
+  inProgressProjects: number
+  completedProjects: number
+  chartData: Array<{
+    date: string
+    visites: number
+    messages: number
+  }>
 }
