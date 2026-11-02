@@ -52,3 +52,4 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps): React
 
   return children ? children : <Outlet />
 }
+
