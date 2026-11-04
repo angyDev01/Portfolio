@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import type { DbProject } from '../types/database'
 import Icon from './Icon'
+import { sanitizeUrl, isSafeUrl } from '../utils/security'
 
 interface ProjectCardProps {
   project: DbProject
@@ -29,9 +30,9 @@ export default function ProjectCard({ project, className = '' }: ProjectCardProp
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            {repo_url && (
+            {repo_url && isSafeUrl(repo_url) && (
               <a
-                href={repo_url}
+                href={sanitizeUrl(repo_url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex size-8 items-center justify-center rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
@@ -40,9 +41,9 @@ export default function ProjectCard({ project, className = '' }: ProjectCardProp
                 <Icon name="code" className="size-4" />
               </a>
             )}
-            {demo_url && (
+            {demo_url && isSafeUrl(demo_url) && (
               <a
-                href={demo_url}
+                href={sanitizeUrl(demo_url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex size-8 items-center justify-center rounded-md text-zinc-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"

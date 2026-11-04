@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactElement } from 'react'
 import { portfolioService } from '../services/portfolioService'
 import type { DbProfile, DirectMessagePayload, EmailContactPayload } from '../types/database'
 import Icon from '../components/Icon'
+import { directMessageSchema, emailContactSchema, getZodErrorMessage } from '../utils/security'
 
 type ContactChannel = 'direct' | 'email'
 
@@ -67,23 +68,27 @@ export default function ContactPage(): ReactElement {
     setSubmittingEmail(true)
     setEmailFeedback(null)
 
-    if (!emailForm.name.trim() || !emailForm.email.trim() || !emailForm.subject.trim() || !emailForm.message.trim()) {
+    // Validation stricte Zod et assainissement Anti-XSS
+    const validation = emailContactSchema.safeParse(emailForm)
+    if (!validation.success) {
       setSubmittingEmail(false)
       setEmailFeedback({
         type: 'error',
-        text: 'Veuillez renseigner tous les champs (Nom, Email, Objet, Message).',
+        text: getZodErrorMessage(validation.error),
       })
       return
     }
 
+    const cleanData = validation.data
+
     try {
-      await portfolioService.submitEmailMessage(emailForm)
+      await portfolioService.submitEmailMessage(cleanData)
 
       // Ouverture du client mailto pour assurer l'envoi direct vers la boîte
       const mailtoUrl = `mailto:${recipientEmail}?subject=${encodeURIComponent(
-        emailForm.subject
+        cleanData.subject
       )}&body=${encodeURIComponent(
-        `Bonjour Angy,\n\n${emailForm.message}\n\n---\nDe: ${emailForm.name}\nEmail: ${emailForm.email}`
+        `Bonjour Angy,\n\n${cleanData.message}\n\n---\nDe: ${cleanData.name}\nEmail: ${cleanData.email}`
       )}`
       window.location.href = mailtoUrl
 
@@ -108,21 +113,20 @@ export default function ContactPage(): ReactElement {
     setSubmittingDirect(true)
     setDirectFeedback(null)
 
-    if (
-      !directForm.name.trim() ||
-      !directForm.email.trim() ||
-      !directForm.phone.trim() ||
-      !directForm.message.trim()
-    ) {
+    // Validation stricte Zod et assainissement Anti-XSS
+    const validation = directMessageSchema.safeParse(directForm)
+    if (!validation.success) {
       setSubmittingDirect(false)
+      setEmailFeedback(null)
       setDirectFeedback({
         type: 'error',
-        text: 'Les 4 champs (Nom complet, Email, Téléphone, Message) sont obligatoires pour un message direct.',
+        text: getZodErrorMessage(validation.error),
       })
       return
     }
 
-    const result = await portfolioService.submitDirectMessage(directForm)
+    const cleanData = validation.data
+    const result = await portfolioService.submitDirectMessage(cleanData)
     setSubmittingDirect(false)
 
     if (result.ok) {
@@ -176,8 +180,8 @@ export default function ContactPage(): ReactElement {
               type="button"
               onClick={handleCopyEmail}
               className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-mono transition-all cursor-pointer ${copied
-                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-700'
+                ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-700'
                 }`}
               aria-label={`Copier l'email ${recipientEmail}`}
             >
@@ -192,8 +196,8 @@ export default function ContactPage(): ReactElement {
               type="button"
               onClick={() => setActiveChannel('direct')}
               className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer text-xs sm:text-sm ${activeChannel === 'direct'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs border border-zinc-200 dark:border-zinc-700/80 font-semibold'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/40'
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs border border-zinc-200 dark:border-zinc-700/80 font-semibold'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/40'
                 }`}
               aria-selected={activeChannel === 'direct'}
             >
@@ -205,8 +209,8 @@ export default function ContactPage(): ReactElement {
               type="button"
               onClick={() => setActiveChannel('email')}
               className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer text-xs sm:text-sm ${activeChannel === 'email'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs border border-zinc-200 dark:border-zinc-700/80 font-semibold'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/40'
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs border border-zinc-200 dark:border-zinc-700/80 font-semibold'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/40'
                 }`}
               aria-selected={activeChannel === 'email'}
             >
@@ -330,8 +334,8 @@ export default function ContactPage(): ReactElement {
                     <div
                       role="status"
                       className={`text-xs p-3.5 rounded-lg border leading-relaxed flex items-start gap-2.5 ${directFeedback.type === 'success'
-                          ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
-                          : 'text-rose-300 bg-rose-500/10 border-rose-500/30'
+                        ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                        : 'text-rose-300 bg-rose-500/10 border-rose-500/30'
                         }`}
                     >
                       <span className="shrink-0 mt-0.5">
@@ -444,8 +448,8 @@ export default function ContactPage(): ReactElement {
                   <div
                     role="status"
                     className={`text-xs p-3.5 rounded-lg border leading-relaxed flex items-start gap-2.5 ${emailFeedback.type === 'success'
-                        ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
-                        : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/30'
+                      ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                      : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/30'
                       }`}
                   >
                     <span className="shrink-0 mt-0.5">

@@ -135,6 +135,11 @@ ON contact_messages FOR DELETE
 TO authenticated 
 USING (auth.uid() IS NOT NULL);
 
+-- Révocation explicite au niveau des privilèges PostgreSQL (Défense en profondeur)
+REVOKE SELECT, UPDATE, DELETE ON TABLE contact_messages FROM anon;
+GRANT INSERT ON TABLE contact_messages TO anon, authenticated;
+GRANT ALL ON TABLE contact_messages TO authenticated;
+
 -- ==============================================================================
 -- TABLE : page_views (Analytics)
 -- ==============================================================================

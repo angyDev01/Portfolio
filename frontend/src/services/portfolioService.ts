@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { trackVisit } from '../utils/visitorTracker'
+import { directMessageSchema, emailContactSchema, getZodErrorMessage } from '../utils/security'
 import type {
   DbProfile,
   DbProject,
@@ -550,12 +551,16 @@ export const portfolioService = {
   // ==========================================
 
   async submitDirectMessage(payload: DirectMessagePayload): Promise<{ ok: boolean; message: string }> {
-    if (!payload.name.trim() || !payload.email.trim() || !payload.phone.trim() || !payload.message.trim()) {
+    // 1. Validation stricte Zod et assainissement Anti-XSS
+    const validation = directMessageSchema.safeParse(payload)
+    if (!validation.success) {
       return {
         ok: false,
-        message: 'Les 4 champs (Nom complet, Email, Téléphone, Message) sont obligatoires.',
+        message: getZodErrorMessage(validation.error),
       }
     }
+
+    const cleanPayload = validation.data
 
     // Vérifier si la réception des messages directs est active
     const profile = await this.getProfile()
@@ -567,14 +572,14 @@ export const portfolioService = {
       }
     }
 
-    // 1. Supabase direct
+    // 2. Supabase direct
     try {
       const { error } = await supabase.from('contact_messages').insert([
         {
-          name: payload.name.trim(),
-          email: payload.email.trim(),
-          phone: payload.phone.trim(),
-          message: payload.message.trim(),
+          name: cleanPayload.name,
+          email: cleanPayload.email,
+          phone: cleanPayload.phone,
+          message: cleanPayload.message,
           is_read: false,
         },
       ])
@@ -589,12 +594,12 @@ export const portfolioService = {
       /* fallback to API */
     }
 
-    // 2. API fallback
+    // 3. API fallback
     try {
       const res = await fetch(`${API_BASE_URL}/api/contact/direct`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(cleanPayload),
       })
       const result = await res.json()
       if (res.ok && result.ok) {
@@ -616,18 +621,22 @@ export const portfolioService = {
   },
 
   async submitEmailMessage(payload: EmailContactPayload): Promise<{ ok: boolean; message: string }> {
-    if (!payload.name.trim() || !payload.email.trim() || !payload.subject.trim() || !payload.message.trim()) {
+    // Validation stricte Zod et assainissement Anti-XSS
+    const validation = emailContactSchema.safeParse(payload)
+    if (!validation.success) {
       return {
         ok: false,
-        message: 'Tous les champs (Nom, Email, Objet, Message) sont obligatoires.',
+        message: getZodErrorMessage(validation.error),
       }
     }
+
+    const cleanPayload = validation.data
 
     try {
       await fetch(`${API_BASE_URL}/api/contact/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(cleanPayload),
       })
     } catch {
       /* ignore */

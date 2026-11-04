@@ -10,7 +10,6 @@ import AdminLoginPage from './pages/AdminLoginPage'
 import DashboardPage from './pages/DashboardPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import { ThemeProvider } from './context/ThemeContext'
-import { portfolioService } from './services/portfolioService'
 import { trackVisit } from './utils/visitorTracker'
 
 // Défilement automatique en haut & enregistrement automatique page_views (Analytics)

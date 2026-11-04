@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import Icon from './Icon'
+import { sanitizeUrl, isSafeUrl } from '../utils/security'
 
 interface EmptyStateProps {
   title?: string
@@ -22,9 +23,11 @@ export default function EmptyState({
       </div>
       <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-200 mb-2">{title}</h3>
       <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-sm mb-6">{description}</p>
-      {actionLabel && actionHref && (
+      {actionLabel && actionHref && isSafeUrl(actionHref) && (
         <a
-          href={actionHref}
+          href={sanitizeUrl(actionHref)}
+          target={actionHref.startsWith('http') ? '_blank' : undefined}
+          rel={actionHref.startsWith('http') ? 'noopener noreferrer' : undefined}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xs font-mono dark:text-zinc-200 transition-colors"
         >
           <span>{actionLabel}</span>

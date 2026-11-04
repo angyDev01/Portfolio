@@ -23,6 +23,7 @@ import type {
 import Icon from '../components/Icon'
 import { useTheme } from '../context/ThemeContext'
 import { CountUp } from '../hooks/useCountUp'
+import { sanitizeUrl } from '../utils/security'
 
 type AdminTab = 'analytics' | 'projects' | 'skills' | 'profile' | 'messages'
 
@@ -571,10 +572,10 @@ export default function DashboardPage(): ReactElement {
               <div className="flex items-center gap-2 mb-0.5">
                 <span
                   className={`size-2 rounded-full ${profile?.availability_status === 'employed'
-                      ? 'bg-indigo-500 animate-pulse'
-                      : profile?.availability_status === 'unavailable'
-                        ? 'bg-amber-500'
-                        : 'bg-emerald-500 animate-pulse'
+                    ? 'bg-indigo-500 animate-pulse'
+                    : profile?.availability_status === 'unavailable'
+                      ? 'bg-amber-500'
+                      : 'bg-emerald-500 animate-pulse'
                     }`}
                   aria-hidden="true"
                 />
@@ -653,8 +654,8 @@ export default function DashboardPage(): ReactElement {
         {toast && (
           <div
             className={`mb-6 p-3 rounded-lg border text-xs font-mono flex items-center gap-2.5 transition-all shadow-xs ${toast.type === 'success'
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
-                : 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300'
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+              : 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300'
               }`}
           >
             <Icon name={toast.type === 'success' ? 'check' : 'alert'} className="size-4" />
@@ -674,8 +675,8 @@ export default function DashboardPage(): ReactElement {
             type="button"
             onClick={() => setActiveTab('analytics')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${activeTab === 'analytics'
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+              ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
           >
             <Icon name="analytics" className="size-3.5 text-indigo-500" />
@@ -687,8 +688,8 @@ export default function DashboardPage(): ReactElement {
             type="button"
             onClick={() => setActiveTab('projects')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${activeTab === 'projects'
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+              ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
           >
             <Icon name="projects" className="size-3.5 text-indigo-500" />
@@ -700,8 +701,8 @@ export default function DashboardPage(): ReactElement {
             type="button"
             onClick={() => setActiveTab('skills')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${activeTab === 'skills'
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+              ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
           >
             <Icon name="skills" className="size-3.5 text-indigo-500" />
@@ -713,8 +714,8 @@ export default function DashboardPage(): ReactElement {
             type="button"
             onClick={() => setActiveTab('profile')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${activeTab === 'profile'
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+              ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
           >
             <Icon name="user" className="size-3.5 text-indigo-500" />
@@ -762,8 +763,8 @@ export default function DashboardPage(): ReactElement {
                   </span>
                   <span
                     className={`text-xs font-mono font-medium flex items-center gap-0.5 ${analytics.viewsTrendPercent >= 0
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-rose-600 dark:text-rose-400'
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'
                       }`}
                   >
                     <Icon name="trending" className="size-3" />
@@ -873,8 +874,8 @@ export default function DashboardPage(): ReactElement {
                     type="button"
                     onClick={() => setAnalyticsRange(7)}
                     className={`px-3 py-1.5 rounded-md cursor-pointer transition-colors ${analyticsRange === 7
-                        ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                       }`}
                   >
                     7 jours
@@ -883,8 +884,8 @@ export default function DashboardPage(): ReactElement {
                     type="button"
                     onClick={() => setAnalyticsRange(30)}
                     className={`px-3 py-1.5 rounded-md cursor-pointer transition-colors ${analyticsRange === 30
-                        ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                       }`}
                   >
                     30 jours
@@ -1007,8 +1008,8 @@ export default function DashboardPage(): ReactElement {
                       <div className="flex items-center gap-2">
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-semibold ${p.status === 'in_progress'
-                              ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                              : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                            ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                            : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
                             }`}
                         >
                           {p.status === 'in_progress' ? 'En cours' : 'Terminé'}
@@ -1312,8 +1313,8 @@ export default function DashboardPage(): ReactElement {
                                 })
                               }}
                               className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-colors ${isSel
-                                  ? 'bg-indigo-600 text-white font-medium'
-                                  : 'bg-zinc-200 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                                ? 'bg-indigo-600 text-white font-medium'
+                                : 'bg-zinc-200 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                                 }`}
                             >
                               {s.name}
@@ -1575,8 +1576,8 @@ export default function DashboardPage(): ReactElement {
                   type="button"
                   onClick={() => handleUpdateAvailability('available')}
                   className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${profileForm.availability_status === 'available'
-                      ? 'bg-emerald-500/15 border-emerald-500/50 shadow-md shadow-emerald-500/10'
-                      : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+                    ? 'bg-emerald-500/15 border-emerald-500/50 shadow-md shadow-emerald-500/10'
+                    : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -1598,8 +1599,8 @@ export default function DashboardPage(): ReactElement {
                   type="button"
                   onClick={() => handleUpdateAvailability('employed')}
                   className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${profileForm.availability_status === 'employed'
-                      ? 'bg-indigo-500/15 border-indigo-500/50 shadow-md shadow-indigo-500/10'
-                      : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+                    ? 'bg-indigo-500/15 border-indigo-500/50 shadow-md shadow-indigo-500/10'
+                    : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -1621,8 +1622,8 @@ export default function DashboardPage(): ReactElement {
                   type="button"
                   onClick={() => handleUpdateAvailability('unavailable')}
                   className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${profileForm.availability_status === 'unavailable'
-                      ? 'bg-amber-500/15 border-amber-500/50 shadow-md shadow-amber-500/10'
-                      : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+                    ? 'bg-amber-500/15 border-amber-500/50 shadow-md shadow-amber-500/10'
+                    : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -1852,8 +1853,8 @@ export default function DashboardPage(): ReactElement {
               type="button"
               onClick={handleToggleAcceptMessages}
               className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer ${profile?.accept_direct_messages !== false
-                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40'
-                  : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/40'
+                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40'
+                : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/40'
                 }`}
             >
               <span
@@ -1871,8 +1872,8 @@ export default function DashboardPage(): ReactElement {
                 type="button"
                 onClick={() => setMessagesFilter('all')}
                 className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${messagesFilter === 'all'
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
-                    : 'text-zinc-600 dark:text-zinc-400'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
+                  : 'text-zinc-600 dark:text-zinc-400'
                   }`}
               >
                 Tous ({messages.length})
@@ -1881,8 +1882,8 @@ export default function DashboardPage(): ReactElement {
                 type="button"
                 onClick={() => setMessagesFilter('unread')}
                 className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${messagesFilter === 'unread'
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
-                    : 'text-zinc-600 dark:text-zinc-400'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
+                  : 'text-zinc-600 dark:text-zinc-400'
                   }`}
               >
                 Non lus ({unreadMessagesCount})
@@ -1941,8 +1942,8 @@ export default function DashboardPage(): ReactElement {
                 <article
                   key={msg.id}
                   className={`p-4 rounded-xl border transition-all duration-200 ${!msg.is_read
-                      ? 'border-indigo-500/40 bg-indigo-500/5 dark:bg-zinc-800/80 shadow-xs'
-                      : 'border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/40'
+                    ? 'border-indigo-500/40 bg-indigo-500/5 dark:bg-zinc-800/80 shadow-xs'
+                    : 'border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/40'
                     }`}
                 >
                   {/* Top Row : Nom, Badge lu/non-lu, Date */}
@@ -2004,7 +2005,7 @@ export default function DashboardPage(): ReactElement {
                   <div className="grid grid-cols-3 gap-1.5">
                     {/* WhatsApp */}
                     <a
-                      href={msg.phone ? whatsappUrl : '#'}
+                      href={msg.phone ? sanitizeUrl(whatsappUrl) : '#'}
                       target={msg.phone ? '_blank' : undefined}
                       rel={msg.phone ? 'noopener noreferrer' : undefined}
                       onClick={(e) => {
@@ -2014,8 +2015,8 @@ export default function DashboardPage(): ReactElement {
                         }
                       }}
                       className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${msg.phone
-                          ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-60 cursor-not-allowed border border-transparent'
+                        ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-60 cursor-not-allowed border border-transparent'
                         }`}
                       title={msg.phone ? 'Ouvrir WhatsApp' : 'Téléphone non fourni'}
                     >
@@ -2025,7 +2026,7 @@ export default function DashboardPage(): ReactElement {
 
                     {/* Appeler */}
                     <a
-                      href={msg.phone ? `tel:${msg.phone}` : '#'}
+                      href={msg.phone ? sanitizeUrl(`tel:${msg.phone}`) : '#'}
                       onClick={(e) => {
                         if (!msg.phone) {
                           e.preventDefault()
@@ -2033,8 +2034,8 @@ export default function DashboardPage(): ReactElement {
                         }
                       }}
                       className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${msg.phone
-                          ? 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30'
-                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-60 cursor-not-allowed border border-transparent'
+                        ? 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30'
+                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-60 cursor-not-allowed border border-transparent'
                         }`}
                       title={msg.phone ? 'Composer le numéro' : 'Téléphone non fourni'}
                     >
@@ -2044,7 +2045,7 @@ export default function DashboardPage(): ReactElement {
 
                     {/* Email */}
                     <a
-                      href={`mailto:${msg.email}?subject=Suite à votre message sur le portfolio Angy.dev`}
+                      href={sanitizeUrl(`mailto:${encodeURIComponent(msg.email)}?subject=${encodeURIComponent('Suite à votre message sur le portfolio Angy.dev')}`)}
                       className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono bg-zinc-200/70 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 transition-all"
                     >
                       <Icon name="mail" className="size-3" />
@@ -2070,8 +2071,8 @@ export default function DashboardPage(): ReactElement {
           type="button"
           onClick={() => setActiveTab('analytics')}
           className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${activeTab === 'analytics'
-              ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-              : 'text-zinc-500 dark:text-zinc-400'
+            ? 'text-indigo-600 dark:text-indigo-400 font-bold'
+            : 'text-zinc-500 dark:text-zinc-400'
             }`}
         >
           <Icon name="analytics" className="size-4.5" />
@@ -2083,8 +2084,8 @@ export default function DashboardPage(): ReactElement {
           type="button"
           onClick={() => setActiveTab('projects')}
           className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${activeTab === 'projects'
-              ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-              : 'text-zinc-500 dark:text-zinc-400'
+            ? 'text-indigo-600 dark:text-indigo-400 font-bold'
+            : 'text-zinc-500 dark:text-zinc-400'
             }`}
         >
           <Icon name="projects" className="size-4.5" />
@@ -2096,8 +2097,8 @@ export default function DashboardPage(): ReactElement {
           type="button"
           onClick={() => setActiveTab('skills')}
           className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${activeTab === 'skills'
-              ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-              : 'text-zinc-500 dark:text-zinc-400'
+            ? 'text-indigo-600 dark:text-indigo-400 font-bold'
+            : 'text-zinc-500 dark:text-zinc-400'
             }`}
         >
           <Icon name="skills" className="size-4.5" />
@@ -2109,8 +2110,8 @@ export default function DashboardPage(): ReactElement {
           type="button"
           onClick={() => setActiveTab('profile')}
           className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${activeTab === 'profile'
-              ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-              : 'text-zinc-500 dark:text-zinc-400'
+            ? 'text-indigo-600 dark:text-indigo-400 font-bold'
+            : 'text-zinc-500 dark:text-zinc-400'
             }`}
         >
           <Icon name="user" className="size-4.5" />
