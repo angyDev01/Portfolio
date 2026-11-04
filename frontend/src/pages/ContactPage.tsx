@@ -47,11 +47,15 @@ export default function ContactPage(): ReactElement {
     return () => window.clearTimeout(timer)
   }, [copied])
 
-  const recipientEmail = profile?.email || 'contact@angy.dev'
+  const recipientEmail = profile?.email || 'angynewdev@gmail.com'
+  const primaryPhone = profile?.phone || '+225 07 20 64 65 26'
+  const secondaryPhone = profile?.phone_secondary || '+225 05 66 40 29 73'
+  const whatsappUrl = profile?.whatsapp_url || 'https://wa.me/2250720646526'
+  const location = profile?.location || "Abidjan, Côte d'Ivoire (Ouvert au télétravail / remote)"
   const github = profile?.github_url || 'https://github.com/angyDev01'
-  const linkedin = profile?.linkedin_url || 'https://linkedin.com/in/angydev'
-  const twitter = profile?.twitter_url || 'https://x.com/angydev'
-  const facebook = profile?.facebook_url || 'https://facebook.com/angydev'
+  const linkedin = profile?.linkedin_url || 'https://www.linkedin.com/in/angy-dev-532293357'
+  const twitter = profile?.twitter_url || 'https://x.com/Angy656261'
+  const facebook = profile?.facebook_url || 'https://www.facebook.com/share/1FGHSoJjo9/'
 
   const handleCopyEmail = async (): Promise<void> => {
     try {
@@ -160,6 +164,59 @@ export default function ContactPage(): ReactElement {
         </div>
 
         <div className="max-w-xl mx-auto space-y-6">
+          {/* Bloc Coordonnées Directes & WhatsApp */}
+          <div className="glass-card p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-zinc-200 dark:border-zinc-800">
+              <div className="flex items-center gap-3">
+                <span className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <Icon name="phone" className="size-5" />
+                </span>
+                <div className="flex flex-col text-left">
+                  <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                    Ligne Directe & WhatsApp
+                  </span>
+                  <span className="font-mono text-sm text-zinc-900 dark:text-zinc-100 font-semibold select-all">
+                    {primaryPhone}
+                  </span>
+                </div>
+              </div>
+
+              {/* Boutons d'Action Rapide : WhatsApp & Appel */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono font-medium transition-colors shadow-sm"
+                  aria-label="Contacter sur WhatsApp (nouvel onglet)"
+                >
+                  <Icon name="messageSquare" className="size-3.5" />
+                  <span>WhatsApp</span>
+                </a>
+                <a
+                  href="tel:+2250720646526"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-mono font-medium transition-colors"
+                  aria-label="Appeler le numéro principal"
+                >
+                  <Icon name="phone" className="size-3.5" />
+                  <span>Appeler</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Infos complémentaires : Téléphone secondaire & Localisation */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono text-zinc-600 dark:text-zinc-400 pt-1">
+              <div className="flex items-center gap-2">
+                <Icon name="phone" className="size-3.5 text-zinc-400 shrink-0" />
+                <span>Secondaire : <strong className="text-zinc-800 dark:text-zinc-200">{secondaryPhone}</strong></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Icon name="sparkles" className="size-3.5 text-indigo-500 shrink-0" />
+                <span className="truncate">{location}</span>
+              </div>
+            </div>
+          </div>
+
           {/* Bloc d'adresse email avec bouton Copie */}
           <div className="glass-card p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 w-full sm:w-auto">

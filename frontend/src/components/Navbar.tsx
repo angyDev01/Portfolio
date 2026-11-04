@@ -48,16 +48,16 @@ export default function Navbar(): ReactElement {
   const closeMenu = (): void => setIsOpen(false)
   const solid = scrolled || isOpen
 
-  const name = profile?.name || 'Yao Jean Angoa'
-  const alias = profile?.alias || 'Angy'
+  const name = profile?.name || 'Angoa Yao Jean'
+  const alias = profile?.alias || "Angy's"
   const github = profile?.github_url || 'https://github.com/angyDev01'
-  const linkedin = profile?.linkedin_url || 'https://linkedin.com/in/angydev'
+  const linkedin = profile?.linkedin_url || 'https://www.linkedin.com/in/angy-dev-532293357'
 
   return (
     <header
       className={`fixed top-0 inset-x-0 z-50 border-b transition-all duration-300 ease-out ${solid
-          ? 'bg-white/85 dark:bg-zinc-950/85 backdrop-blur-md border-zinc-200/80 dark:border-zinc-800/80 py-3 shadow-lg shadow-black/5 dark:shadow-black/30'
-          : 'bg-transparent border-transparent py-5'
+        ? 'bg-white/85 dark:bg-zinc-950/85 backdrop-blur-md border-zinc-200/80 dark:border-zinc-800/80 py-3 shadow-lg shadow-black/5 dark:shadow-black/30'
+        : 'bg-transparent border-transparent py-5'
         }`}
     >
       <div className="container-custom flex items-center justify-between">

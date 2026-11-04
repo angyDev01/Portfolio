@@ -7,11 +7,19 @@ export type AvailabilityStatusType = 'available' | 'employed' | 'unavailable'
 export interface DbProfile {
   id: string
   name: string
+  full_name?: string
   alias: string
   role: string
+  title?: string
   short_bio: string
+  bio_short?: string
   full_bio: string[]
+  bio_full?: string
   email: string
+  phone?: string
+  phone_secondary?: string
+  whatsapp_url?: string
+  location?: string
   github_url: string
   linkedin_url: string
   twitter_url?: string

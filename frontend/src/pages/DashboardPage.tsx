@@ -117,20 +117,28 @@ export default function DashboardPage(): ReactElement {
     linkedin_url: string
     twitter_url: string
     facebook_url: string
+    phone: string
+    phone_secondary: string
+    whatsapp_url: string
+    location: string
     availability_status: AvailabilityStatusType
     status_label: string
   }>({
-    name: '',
-    alias: '',
-    role: '',
-    short_bio: '',
-    full_bio_text: '',
-    github_url: '',
-    linkedin_url: '',
-    twitter_url: '',
-    facebook_url: '',
+    name: 'Angoa Yao Jean',
+    alias: "Angy's",
+    role: 'Développeur Full-Stack Junior',
+    short_bio: "Développeur Full-Stack autodidacte passionné par la conception d'applications web modernes, réactives et performantes sous React, Vite et Node.js.",
+    full_bio_text: "Basé à Abidjan, Côte d'Ivoire, et ouvert au télétravail à l'international, je conçois des solutions logicielles complètes avec une attention particulière portée au clean code, à l'ergonomie et à la sécurité.",
+    github_url: 'https://github.com/angyDev01',
+    linkedin_url: 'https://www.linkedin.com/in/angy-dev-532293357',
+    twitter_url: 'https://x.com/Angy656261',
+    facebook_url: 'https://www.facebook.com/share/1FGHSoJjo9/',
+    phone: '+225 07 20 64 65 26',
+    phone_secondary: '+225 05 66 40 29 73',
+    whatsapp_url: 'https://wa.me/2250720646526',
+    location: "Abidjan, Côte d'Ivoire (Ouvert au télétravail / remote)",
     availability_status: 'available',
-    status_label: 'Disponible pour de nouvelles opportunités',
+    status_label: 'Disponible',
   })
 
   // Messages State
@@ -180,8 +188,12 @@ export default function DashboardPage(): ReactElement {
           linkedin_url: profData.linkedin_url || '',
           twitter_url: profData.twitter_url || '',
           facebook_url: profData.facebook_url || '',
+          phone: profData.phone || '',
+          phone_secondary: profData.phone_secondary || '',
+          whatsapp_url: profData.whatsapp_url || '',
+          location: profData.location || '',
           availability_status: profData.availability_status || 'available',
-          status_label: profData.status_label || 'Disponible pour de nouvelles opportunités',
+          status_label: profData.status_label || 'Disponible',
         })
       }
 
@@ -263,6 +275,10 @@ export default function DashboardPage(): ReactElement {
       linkedin_url: profileForm.linkedin_url.trim() || undefined,
       twitter_url: profileForm.twitter_url.trim() || undefined,
       facebook_url: profileForm.facebook_url.trim() || undefined,
+      phone: profileForm.phone.trim() || undefined,
+      phone_secondary: profileForm.phone_secondary.trim() || undefined,
+      whatsapp_url: profileForm.whatsapp_url.trim() || undefined,
+      location: profileForm.location.trim() || undefined,
       status_label: profileForm.status_label.trim(),
     })
 
@@ -1775,6 +1791,66 @@ export default function DashboardPage(): ReactElement {
                     onChange={(e) =>
                       setProfileForm({ ...profileForm, facebook_url: e.target.value })
                     }
+                    className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Coordonnées & Contact Direct */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div>
+                  <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                    Téléphone Principal & WhatsApp
+                  </label>
+                  <input
+                    type="text"
+                    value={profileForm.phone}
+                    onChange={(e) =>
+                      setProfileForm({ ...profileForm, phone: e.target.value })
+                    }
+                    placeholder="+225 07 20 64 65 26"
+                    className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                    Téléphone Secondaire
+                  </label>
+                  <input
+                    type="text"
+                    value={profileForm.phone_secondary}
+                    onChange={(e) =>
+                      setProfileForm({ ...profileForm, phone_secondary: e.target.value })
+                    }
+                    placeholder="+225 05 66 40 29 73"
+                    className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                    Lien WhatsApp Direct
+                  </label>
+                  <input
+                    type="url"
+                    value={profileForm.whatsapp_url}
+                    onChange={(e) =>
+                      setProfileForm({ ...profileForm, whatsapp_url: e.target.value })
+                    }
+                    placeholder="https://wa.me/2250720646526"
+                    className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                    Localisation Affichée
+                  </label>
+                  <input
+                    type="text"
+                    value={profileForm.location}
+                    onChange={(e) =>
+                      setProfileForm({ ...profileForm, location: e.target.value })
+                    }
+                    placeholder="Abidjan, Côte d'Ivoire (Ouvert au télétravail / remote)"
                     className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
                   />
                 </div>

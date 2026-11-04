@@ -22,12 +22,12 @@ export default function Footer(): ReactElement {
     }
   }, [])
 
-  const name = profile?.name || 'Yao Jean Angoa'
+  const name = profile?.name || 'Angoa Yao Jean'
   const alias = profile?.alias || "Angy's"
   const github = profile?.github_url || 'https://github.com/angyDev01'
-  const linkedin = profile?.linkedin_url || 'https://linkedin.com/in/angydev'
-  const twitter = profile?.twitter_url || 'https://x.com/angydev'
-  const facebook = profile?.facebook_url || 'https://facebook.com/angydev'
+  const linkedin = profile?.linkedin_url || 'https://www.linkedin.com/in/angy-dev-532293357'
+  const twitter = profile?.twitter_url || 'https://x.com/Angy656261'
+  const facebook = profile?.facebook_url || 'https://www.facebook.com/share/1FGHSoJjo9/'
 
   // Déclencheur secret 1 : Triple-clic rapide (<= 500ms)
   const handleSecretClick = (): void => {

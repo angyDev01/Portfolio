@@ -59,22 +59,34 @@ export default function Hero(): ReactElement {
             }
             // Par défaut : 'available'
             return (
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 shadow-sm mb-6 backdrop-blur-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono text-emerald-700 dark:text-emerald-300 shadow-sm mb-6 backdrop-blur-md">
                 <span className="relative flex size-2" aria-hidden="true">
                   <span className="absolute inline-flex size-full motion-safe:animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
                 </span>
-                <span>{profile?.status_label || 'Disponible pour de nouvelles opportunités'}</span>
+                <span>{profile?.status_label || 'Disponible'}</span>
               </div>
             )
           })()}
 
-          {/* Salutation & Titre percutant */}
-          <p className="text-sm font-mono text-indigo-600 dark:text-indigo-400 font-medium mb-3 tracking-wide uppercase">
-            Bonjour, je suis{' '}
-            <span className="text-zinc-900 dark:text-zinc-200">{profile?.name || 'Yao Jean Angoa'}</span>
-            {profile?.alias ? ` (${profile.alias})` : " (Angy's)"}
-          </p>
+          {/* Salutation, Rôle & Nom */}
+          <div className="flex flex-col items-center gap-1.5 mb-3">
+            <p className="text-sm font-mono text-indigo-600 dark:text-indigo-400 font-medium tracking-wide uppercase">
+              Bonjour, je suis{' '}
+              <span className="text-zinc-900 dark:text-zinc-100 font-bold">{profile?.name || 'Angoa Yao Jean'}</span>
+              {profile?.alias ? ` (${profile.alias})` : " (Angy's)"}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400">
+              <span className="px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-semibold">
+                {profile?.role || 'Développeur Full-Stack Junior'}
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <Icon name="sparkles" className="size-3 text-indigo-500" />
+                {profile?.location || "Abidjan, Côte d'Ivoire (Ouvert au télétravail / remote)"}
+              </span>
+            </div>
+          </div>
 
           <h1 id="hero-title" className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 leading-[1.12] mb-6">
             Concevoir des architectures web{' '}
@@ -92,7 +104,7 @@ export default function Hero(): ReactElement {
           ) : (
             <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed mb-9">
               {profile?.short_bio ||
-                'Développeur Full-Stack autodidacte orienté React, Vite, TypeScript et Node.js. Je transforme des idées complexes en expériences numériques claires et percutantes.'}
+                "Développeur Full-Stack autodidacte passionné par la conception d'applications web modernes, réactives et performantes sous React, Vite et Node.js."}
             </p>
           )}
 

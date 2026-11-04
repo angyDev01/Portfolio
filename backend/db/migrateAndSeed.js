@@ -44,24 +44,38 @@ async function runMigrationAndSeed() {
 
     // 1. Insertion du profil
     await client.query(`
-      INSERT INTO profile (name, alias, role, short_bio, full_bio, email, github_url, linkedin_url, is_available, status_label)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO profile (
+        name, full_name, alias, role, title, short_bio, bio_short, full_bio, bio_full,
+        location, email, phone, phone_secondary, whatsapp_url, github_url, linkedin_url,
+        twitter_url, facebook_url, is_available, status_label, availability_status, accept_direct_messages
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
       ON CONFLICT DO NOTHING
     `, [
-      'Yao Jean Angoa',
-      'Angy',
-      'Développeur Full-Stack Web',
-      'Développeur autodidacte passionné par la conception d’applications web réactives, modulaires et performantes.',
+      'Angoa Yao Jean',
+      'Angoa Yao Jean',
+      "Angy's",
+      'Développeur Full-Stack Junior',
+      'Développeur Full-Stack Junior',
+      "Développeur Full-Stack autodidacte passionné par la conception d'applications web modernes, réactives et performantes sous React, Vite et Node.js.",
+      "Développeur Full-Stack autodidacte passionné par la conception d'applications web modernes, réactives et performantes sous React, Vite et Node.js.",
       JSON.stringify([
-        'Développeur autodidacte passionné par l’ingénierie logicielle web moderne. Je conçois des interfaces nettes, accessibles et des architectures serveur robustes.',
-        'Spécialisé dans l’écosystème React, Vite, Node.js et TypeScript, j’accorde une attention méticuleuse à l’ergonomie, aux performances et à la qualité du code.',
-        'Constamment en veille technologique, j’aime transformer des exigences complexes en composants réutilisables et faciles à maintenir.'
+        "Basé à Abidjan, Côte d'Ivoire, et ouvert au télétravail à l'international, je conçois des solutions logicielles complètes avec une attention particulière portée au clean code, à l'ergonomie et à la sécurité."
       ]),
-      'contact@angy.dev',
+      "Basé à Abidjan, Côte d'Ivoire, et ouvert au télétravail à l'international, je conçois des solutions logicielles complètes avec une attention particulière portée au clean code, à l'ergonomie et à la sécurité.",
+      "Abidjan, Côte d'Ivoire (Ouvert au télétravail / remote)",
+      'angynewdev@gmail.com',
+      '+225 07 20 64 65 26',
+      '+225 05 66 40 29 73',
+      'https://wa.me/2250720646526',
       'https://github.com/angyDev01',
-      'https://linkedin.com/in/angydev',
+      'https://www.linkedin.com/in/angy-dev-532293357',
+      'https://x.com/Angy656261',
+      'https://www.facebook.com/share/1FGHSoJjo9/',
       true,
-      'Disponible pour de nouvelles opportunités'
+      'Disponible',
+      'available',
+      true
     ])
 
     // 2. Insertion des compétences
