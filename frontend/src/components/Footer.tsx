@@ -23,7 +23,7 @@ export default function Footer(): ReactElement {
   }, [])
 
   const name = profile?.name || 'Yao Jean Angoa'
-  const alias = profile?.alias || 'Angy'
+  const alias = profile?.alias || "Angy's"
   const github = profile?.github_url || 'https://github.com/angyDev01'
   const linkedin = profile?.linkedin_url || 'https://linkedin.com/in/angydev'
   const twitter = profile?.twitter_url || 'https://x.com/angydev'
@@ -74,7 +74,7 @@ export default function Footer(): ReactElement {
             © {new Date().getFullYear()} {name} ({alias}). Tous droits réservés.
           </p>
           <p className="text-[11px] text-zinc-500 font-mono">
-            Conçu avec React, Vite, TypeScript, Tailwind CSS & Supabase.
+            Fait avec beaucoup d'amour par <a href="/">{alias}</a>.
           </p>
         </div>
 

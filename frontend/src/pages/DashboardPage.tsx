@@ -746,11 +746,11 @@ export default function DashboardPage(): ReactElement {
           <div className="space-y-6">
             {/* 4 Cartes d'indicateurs avec effet CountUp */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Carte 1 : Total Visites avec Tendance */}
+              {/* Carte 1 : Visiteurs Uniques avec Tendance */}
               <div className="glass-card p-5 border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Total Visites
+                    Visiteurs Uniques
                   </span>
                   <div className="size-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                     <Icon name="analytics" className="size-4" />
@@ -864,7 +864,7 @@ export default function DashboardPage(): ReactElement {
                     Évolution de l'Audience & Messagerie
                   </h3>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Suivi quotidien des consultations de pages et des messages directs reçus.
+                    Suivi quotidien des visiteurs uniques et des messages directs reçus.
                   </p>
                 </div>
 
@@ -938,7 +938,7 @@ export default function DashboardPage(): ReactElement {
                     <Area
                       type="monotone"
                       dataKey="visites"
-                      name="Visites (page_views)"
+                      name="Visiteurs Uniques"
                       stroke="#6366f1"
                       strokeWidth={2}
                       fillOpacity={1}
@@ -960,7 +960,7 @@ export default function DashboardPage(): ReactElement {
               <div className="flex items-center justify-center gap-6 mt-4 text-xs font-mono text-zinc-500 dark:text-zinc-400">
                 <div className="flex items-center gap-2">
                   <span className="size-2.5 rounded-full bg-indigo-500" />
-                  <span>Pages Vues (visites)</span>
+                  <span>Visiteurs Uniques</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="size-2.5 rounded-full bg-emerald-500" />

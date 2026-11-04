@@ -10,7 +10,7 @@ import AdminLoginPage from './pages/AdminLoginPage'
 import DashboardPage from './pages/DashboardPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import { ThemeProvider } from './context/ThemeContext'
-import { portfolioService } from './services/portfolioService'
+import { trackVisit } from './utils/visitorTracker'
 
 // Défilement automatique en haut & enregistrement automatique page_views (Analytics)
 function PageWatcher(): null {
@@ -20,10 +20,8 @@ function PageWatcher(): null {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
 
-    // Enregistrement automatique dans la table page_views pour toute page publique
-    if (!pathname.startsWith('/admin')) {
-      portfolioService.recordPageView(pathname)
-    }
+    // Suivi de visite avec exclusion de l'administrateur et temporisation 24h
+    trackVisit(pathname)
   }, [pathname])
 
   // Raccourci Clavier Global : Ctrl + Shift + A (ou Cmd + Shift + A)

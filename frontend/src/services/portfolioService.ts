@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import { trackVisit } from '../utils/visitorTracker'
 import type {
   DbProfile,
   DbProject,
@@ -28,26 +29,6 @@ const cache: CacheStore = {
   profile: null,
   projects: null,
   skills: null,
-}
-
-/**
- * Récupère ou génère un identifiant anonyme persistant pour le visiteur
- */
-function getVisitorId(): string {
-  const STORAGE_KEY = 'angy_visitor_id'
-  try {
-    let id = localStorage.getItem(STORAGE_KEY)
-    if (!id) {
-      id =
-        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-          ? crypto.randomUUID()
-          : 'v_' + Math.random().toString(36).substring(2) + Date.now().toString(36)
-      localStorage.setItem(STORAGE_KEY, id)
-    }
-    return id
-  } catch {
-    return 'anon_guest'
-  }
 }
 
 export const portfolioService = {
@@ -101,26 +82,7 @@ export const portfolioService = {
    */
   async recordPageView(path: string): Promise<void> {
     try {
-      const visitorId = getVisitorId()
-      const pagePath = path || '/'
-
-      // 1. Appel de la fonction RPC sécurisée track_unique_visit
-      const { error } = await supabase.rpc('track_unique_visit', {
-        p_visitor_id: visitorId,
-        p_page_path: pagePath,
-      })
-
-      // 2. Fallback si la fonction RPC n'est pas encore créée dans Supabase
-      if (error) {
-        await supabase.from('page_views').insert([
-          {
-            visitor_id: visitorId,
-            page_path: pagePath,
-            referrer: document.referrer || null,
-            user_agent: navigator.userAgent || null,
-          },
-        ])
-      }
+      await trackVisit(path)
     } catch {
       /* ignore silencieusement pour ne pas bloquer l'expérience utilisateur */
     }
@@ -138,15 +100,15 @@ export const portfolioService = {
     prevStartDate.setDate(now.getDate() - rangeDays * 2)
 
     try {
-      // 1. Visites
+      // 1. Visites (avec visitor_id pour calcul du nombre de visiteurs uniques réels)
       const { data: viewsData } = await supabase
         .from('page_views')
-        .select('created_at, view_date')
+        .select('created_at, view_date, visitor_id')
         .gte('created_at', startDate.toISOString())
 
       const { data: prevViewsData } = await supabase
         .from('page_views')
-        .select('created_at, view_date')
+        .select('created_at, view_date, visitor_id')
         .gte('created_at', prevStartDate.toISOString())
         .lt('created_at', startDate.toISOString())
 
@@ -166,14 +128,28 @@ export const portfolioService = {
       const messages = messagesData || []
       const projects = projectsData || []
 
-      const totalViews = views.length
-      const prevTotalViews = prevViews.length
+      // Calcul des visiteurs uniques réels (nettoyage des doublons / rafraîchissements multiples)
+      const uniqueVisitors = new Set(
+        views
+          .map((v) => (v as { visitor_id?: string }).visitor_id)
+          .filter((id): id is string => Boolean(id))
+      )
+      const totalViews = uniqueVisitors.size > 0 ? uniqueVisitors.size : views.length
+
+      const prevUniqueVisitors = new Set(
+        prevViews
+          .map((v) => (v as { visitor_id?: string }).visitor_id)
+          .filter((id): id is string => Boolean(id))
+      )
+      const prevTotalViews =
+        prevUniqueVisitors.size > 0 ? prevUniqueVisitors.size : prevViews.length
+
       const viewsTrendPercent =
         prevTotalViews > 0
           ? Math.round(((totalViews - prevTotalViews) / prevTotalViews) * 100)
           : totalViews > 0
-          ? 100
-          : 0
+            ? 100
+            : 0
 
       const unreadMessages = messages.filter((m) => !m.is_read).length
       const featuredProjects = projects.filter((p) => p.is_featured).length
@@ -190,12 +166,24 @@ export const portfolioService = {
         chartMap.set(dateKey, { visites: 0, messages: 0 })
       }
 
+      // Déduplication des visiteurs uniques par jour
+      const dailyUniqueVisitors = new Set<string>()
+
       for (const v of views) {
-        const rawDate = (v as { view_date?: string; created_at?: string }).view_date || v.created_at
+        const item = v as { view_date?: string; created_at?: string; visitor_id?: string }
+        const rawDate = item.view_date || item.created_at
         if (!rawDate) continue
         const k = rawDate.slice(5, 10)
         if (chartMap.has(k)) {
-          chartMap.get(k)!.visites += 1
+          if (item.visitor_id) {
+            const visitorKey = `${k}_${item.visitor_id}`
+            if (!dailyUniqueVisitors.has(visitorKey)) {
+              dailyUniqueVisitors.add(visitorKey)
+              chartMap.get(k)!.visites += 1
+            }
+          } else {
+            chartMap.get(k)!.visites += 1
+          }
         }
       }
 
@@ -343,8 +331,8 @@ export const portfolioService = {
           return data.map((item) => {
             const skills = item.project_skills
               ? item.project_skills
-                  .map((ps: { skills?: { name?: string } }) => ps.skills?.name)
-                  .filter((n: string | undefined): n is string => Boolean(n))
+                .map((ps: { skills?: { name?: string } }) => ps.skills?.name)
+                .filter((n: string | undefined): n is string => Boolean(n))
               : []
             return {
               ...item,
