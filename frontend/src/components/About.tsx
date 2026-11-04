@@ -18,10 +18,10 @@ export default function About(): ReactElement {
   const fullBio = profile?.full_bio && Array.isArray(profile.full_bio) && profile.full_bio.length > 0
     ? profile.full_bio
     : [
-        'Développeur autodidacte passionné par l’ingénierie logicielle web moderne. Je conçois des interfaces nettes, accessibles et des architectures serveur robustes.',
-        'Spécialisé dans l’écosystème React, Vite, Node.js et TypeScript, j’accorde une attention méticuleuse à l’ergonomie, aux performances et à la qualité du code.',
-        'Constamment en veille technologique, j’aime transformer des exigences complexes en composants réutilisables et faciles à maintenir.',
-      ]
+      'Développeur autodidacte passionné par l’ingénierie logicielle web moderne. Je conçois des interfaces nettes, accessibles et des architectures serveur robustes.',
+      'Spécialisé dans l’écosystème React, Vite, Node.js et TypeScript, j’accorde une attention méticuleuse à l’ergonomie, aux performances et à la qualité du code.',
+      'Constamment en veille technologique, j’aime transformer des exigences complexes en composants réutilisables et faciles à maintenir.',
+    ]
 
   return (
     <section id="about" aria-labelledby="about-title" className="py-20 border-t border-zinc-200 dark:border-zinc-900">

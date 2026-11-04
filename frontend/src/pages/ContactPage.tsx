@@ -175,11 +175,10 @@ export default function ContactPage(): ReactElement {
             <button
               type="button"
               onClick={handleCopyEmail}
-              className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-mono transition-all cursor-pointer ${
-                copied
+              className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-mono transition-all cursor-pointer ${copied
                   ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
                   : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-700'
-              }`}
+                }`}
               aria-label={`Copier l'email ${recipientEmail}`}
             >
               <Icon name={copied ? 'check' : 'copy'} className="size-3.5" />
@@ -192,11 +191,10 @@ export default function ContactPage(): ReactElement {
             <button
               type="button"
               onClick={() => setActiveChannel('direct')}
-              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer text-xs sm:text-sm ${
-                activeChannel === 'direct'
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer text-xs sm:text-sm ${activeChannel === 'direct'
                   ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs border border-zinc-200 dark:border-zinc-700/80 font-semibold'
                   : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/40'
-              }`}
+                }`}
               aria-selected={activeChannel === 'direct'}
             >
               <Icon name="messageSquare" className="size-4 text-indigo-500 dark:text-indigo-400" />
@@ -206,11 +204,10 @@ export default function ContactPage(): ReactElement {
             <button
               type="button"
               onClick={() => setActiveChannel('email')}
-              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer text-xs sm:text-sm ${
-                activeChannel === 'email'
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg transition-all cursor-pointer text-xs sm:text-sm ${activeChannel === 'email'
                   ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs border border-zinc-200 dark:border-zinc-700/80 font-semibold'
                   : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/40'
-              }`}
+                }`}
               aria-selected={activeChannel === 'email'}
             >
               <Icon name="mail" className="size-4 text-indigo-500 dark:text-indigo-400" />
@@ -248,272 +245,270 @@ export default function ContactPage(): ReactElement {
                 </div>
               ) : (
                 <form onSubmit={handleDirectSubmit} className="flex flex-col gap-4">
-                {/* 1. Nom complet */}
+                  {/* 1. Nom complet */}
+                  <div>
+                    <label htmlFor="direct-name" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      Nom complet <span className="text-indigo-500 dark:text-indigo-400">*</span>
+                    </label>
+                    <input
+                      id="direct-name"
+                      type="text"
+                      required
+                      value={directForm.name}
+                      onChange={(e) => setDirectForm({ ...directForm, name: e.target.value })}
+                      placeholder="Ex: Jean Dupont"
+                      className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
+                    />
+                  </div>
+
+                  {/* 2. Adresse email */}
+                  <div>
+                    <label htmlFor="direct-email" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      Adresse email <span className="text-indigo-500 dark:text-indigo-400">*</span>
+                    </label>
+                    <input
+                      id="direct-email"
+                      type="email"
+                      required
+                      value={directForm.email}
+                      onChange={(e) => setDirectForm({ ...directForm, email: e.target.value })}
+                      placeholder="jean.dupont@entreprise.com"
+                      className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
+                    />
+                  </div>
+
+                  {/* 3. Numéro de téléphone */}
+                  <div>
+                    <label htmlFor="direct-phone" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      Numéro de téléphone <span className="text-indigo-500 dark:text-indigo-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="direct-phone"
+                        type="tel"
+                        required
+                        value={directForm.phone}
+                        onChange={(e) => setDirectForm({ ...directForm, phone: e.target.value })}
+                        placeholder="+33 6 12 34 56 78 (ou WhatsApp)"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
+                      />
+                      <span className="absolute left-3 top-3 text-zinc-400 dark:text-zinc-500 pointer-events-none">
+                        <Icon name="phone" className="size-4" />
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 mt-1">
+                      Pour pouvoir vous recontacter directement ou via WhatsApp.
+                    </p>
+                  </div>
+
+                  {/* 4. Le message */}
+                  <div>
+                    <label htmlFor="direct-message" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      Votre message <span className="text-indigo-500 dark:text-indigo-400">*</span>
+                    </label>
+                    <textarea
+                      id="direct-message"
+                      rows={4}
+                      required
+                      value={directForm.message}
+                      onChange={(e) => setDirectForm({ ...directForm, message: e.target.value })}
+                      placeholder="Décrivez votre besoin, projet ou proposition..."
+                      className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans resize-y"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={submittingDirect}
+                    className="mt-1 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all cursor-pointer disabled:opacity-50 shadow-md shadow-indigo-600/20"
+                  >
+                    <span>{submittingDirect ? 'Transmission en cours...' : 'Transmettre le message direct'}</span>
+                    <Icon name="send" className="size-4" />
+                  </button>
+
+                  {directFeedback && (
+                    <div
+                      role="status"
+                      className={`text-xs p-3.5 rounded-lg border leading-relaxed flex items-start gap-2.5 ${directFeedback.type === 'success'
+                          ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                          : 'text-rose-300 bg-rose-500/10 border-rose-500/30'
+                        }`}
+                    >
+                      <span className="shrink-0 mt-0.5">
+                        <Icon
+                          name={directFeedback.type === 'success' ? 'checkCircle' : 'close'}
+                          className="size-4"
+                        />
+                      </span>
+                      <span>{directFeedback.text}</span>
+                    </div>
+                  )}
+                </form>
+              )}
+            </div>
+          )}
+
+          {/* ============================================================== */}
+          {/* CANAL 1 : M'ENVOYER UN EMAIL (Nom, Email, Objet, Message)      */}
+          {/* ============================================================== */}
+          {activeChannel === 'email' && (
+            <div className="glass-card p-6 sm:p-8 flex flex-col gap-5 text-left">
+              <div>
+                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-xs font-mono uppercase tracking-wider mb-1">
+                  <Icon name="mail" className="size-3.5" />
+                  <span>Canal 1 — Messagerie Électronique</span>
+                </div>
+                <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                  M'envoyer un email direct
+                </h2>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                  Ce formulaire transmet votre demande directement à ma boîte de réception ({recipientEmail}).
+                </p>
+              </div>
+
+              <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
+                {/* 1. Nom */}
                 <div>
-                  <label htmlFor="direct-name" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label htmlFor="email-name" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
                     Nom complet <span className="text-indigo-500 dark:text-indigo-400">*</span>
                   </label>
                   <input
-                    id="direct-name"
+                    id="email-name"
                     type="text"
                     required
-                    value={directForm.name}
-                    onChange={(e) => setDirectForm({ ...directForm, name: e.target.value })}
-                    placeholder="Ex: Jean Dupont"
+                    value={emailForm.name}
+                    onChange={(e) => setEmailForm({ ...emailForm, name: e.target.value })}
+                    placeholder="Votre nom"
                     className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
                   />
                 </div>
 
-                {/* 2. Adresse email */}
+                {/* 2. Email */}
                 <div>
-                  <label htmlFor="direct-email" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label htmlFor="email-address" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
                     Adresse email <span className="text-indigo-500 dark:text-indigo-400">*</span>
                   </label>
                   <input
-                    id="direct-email"
+                    id="email-address"
                     type="email"
                     required
-                    value={directForm.email}
-                    onChange={(e) => setDirectForm({ ...directForm, email: e.target.value })}
-                    placeholder="jean.dupont@entreprise.com"
+                    value={emailForm.email}
+                    onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
+                    placeholder="votre.email@exemple.com"
                     className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
                   />
                 </div>
 
-                {/* 3. Numéro de téléphone */}
+                {/* 3. Objet */}
                 <div>
-                  <label htmlFor="direct-phone" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Numéro de téléphone <span className="text-indigo-500 dark:text-indigo-400">*</span>
+                  <label htmlFor="email-subject" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    Objet <span className="text-indigo-500 dark:text-indigo-400">*</span>
                   </label>
-                  <div className="relative">
-                    <input
-                      id="direct-phone"
-                      type="tel"
-                      required
-                      value={directForm.phone}
-                      onChange={(e) => setDirectForm({ ...directForm, phone: e.target.value })}
-                      placeholder="+33 6 12 34 56 78 (ou WhatsApp)"
-                      className="w-full pl-9 pr-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
-                    />
-                    <span className="absolute left-3 top-3 text-zinc-400 dark:text-zinc-500 pointer-events-none">
-                      <Icon name="phone" className="size-4" />
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-zinc-500 mt-1">
-                    Pour pouvoir vous recontacter directement ou via WhatsApp.
-                  </p>
+                  <input
+                    id="email-subject"
+                    type="text"
+                    required
+                    value={emailForm.subject}
+                    onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                    placeholder="Ex: Proposition de mission / Recrutement"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
+                  />
                 </div>
 
-                {/* 4. Le message */}
+                {/* 4. Message */}
                 <div>
-                  <label htmlFor="direct-message" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Votre message <span className="text-indigo-500 dark:text-indigo-400">*</span>
+                  <label htmlFor="email-body" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    Message <span className="text-indigo-500 dark:text-indigo-400">*</span>
                   </label>
                   <textarea
-                    id="direct-message"
+                    id="email-body"
                     rows={4}
                     required
-                    value={directForm.message}
-                    onChange={(e) => setDirectForm({ ...directForm, message: e.target.value })}
-                    placeholder="Décrivez votre besoin, projet ou proposition..."
+                    value={emailForm.message}
+                    onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
+                    placeholder="Votre message complet..."
                     className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans resize-y"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  disabled={submittingDirect}
-                  className="mt-1 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all cursor-pointer disabled:opacity-50 shadow-md shadow-indigo-600/20"
+                  disabled={submittingEmail}
+                  className="mt-1 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 font-semibold text-sm transition-all cursor-pointer disabled:opacity-50 shadow-md"
                 >
-                  <span>{submittingDirect ? 'Transmission en cours...' : 'Transmettre le message direct'}</span>
-                  <Icon name="send" className="size-4" />
+                  <span>{submittingEmail ? 'Préparation de l’envoi...' : 'Envoyer l’email'}</span>
+                  <Icon name="mail" className="size-4" />
                 </button>
 
-                {directFeedback && (
+                {emailFeedback && (
                   <div
                     role="status"
-                    className={`text-xs p-3.5 rounded-lg border leading-relaxed flex items-start gap-2.5 ${
-                      directFeedback.type === 'success'
-                        ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
-                        : 'text-rose-300 bg-rose-500/10 border-rose-500/30'
-                    }`}
+                    className={`text-xs p-3.5 rounded-lg border leading-relaxed flex items-start gap-2.5 ${emailFeedback.type === 'success'
+                        ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                        : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/30'
+                      }`}
                   >
                     <span className="shrink-0 mt-0.5">
                       <Icon
-                        name={directFeedback.type === 'success' ? 'checkCircle' : 'close'}
+                        name={emailFeedback.type === 'success' ? 'checkCircle' : 'close'}
                         className="size-4"
                       />
                     </span>
-                    <span>{directFeedback.text}</span>
+                    <span>{emailFeedback.text}</span>
                   </div>
                 )}
               </form>
-            )}
-          </div>
-        )}
-
-        {/* ============================================================== */}
-        {/* CANAL 1 : M'ENVOYER UN EMAIL (Nom, Email, Objet, Message)      */}
-        {/* ============================================================== */}
-        {activeChannel === 'email' && (
-          <div className="glass-card p-6 sm:p-8 flex flex-col gap-5 text-left">
-            <div>
-              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-xs font-mono uppercase tracking-wider mb-1">
-                <Icon name="mail" className="size-3.5" />
-                <span>Canal 1 — Messagerie Électronique</span>
-              </div>
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-                M'envoyer un email direct
-              </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                Ce formulaire transmet votre demande directement à ma boîte de réception ({recipientEmail}).
-              </p>
             </div>
+          )}
 
-            <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
-              {/* 1. Nom */}
-              <div>
-                <label htmlFor="email-name" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Nom complet <span className="text-indigo-500 dark:text-indigo-400">*</span>
-                </label>
-                <input
-                  id="email-name"
-                  type="text"
-                  required
-                  value={emailForm.name}
-                  onChange={(e) => setEmailForm({ ...emailForm, name: e.target.value })}
-                  placeholder="Votre nom"
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
-                />
-              </div>
-
-              {/* 2. Email */}
-              <div>
-                <label htmlFor="email-address" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Adresse email <span className="text-indigo-500 dark:text-indigo-400">*</span>
-                </label>
-                <input
-                  id="email-address"
-                  type="email"
-                  required
-                  value={emailForm.email}
-                  onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
-                  placeholder="votre.email@exemple.com"
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
-                />
-              </div>
-
-              {/* 3. Objet */}
-              <div>
-                <label htmlFor="email-subject" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Objet <span className="text-indigo-500 dark:text-indigo-400">*</span>
-                </label>
-                <input
-                  id="email-subject"
-                  type="text"
-                  required
-                  value={emailForm.subject}
-                  onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
-                  placeholder="Ex: Proposition de mission / Recrutement"
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
-                />
-              </div>
-
-              {/* 4. Message */}
-              <div>
-                <label htmlFor="email-body" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Message <span className="text-indigo-500 dark:text-indigo-400">*</span>
-                </label>
-                <textarea
-                  id="email-body"
-                  rows={4}
-                  required
-                  value={emailForm.message}
-                  onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
-                  placeholder="Votre message complet..."
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans resize-y"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={submittingEmail}
-                className="mt-1 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 font-semibold text-sm transition-all cursor-pointer disabled:opacity-50 shadow-md"
+          {/* Réseaux sociaux : Retrouvez-moi aussi sur le web (exclusif GitHub, LinkedIn, X, Facebook) */}
+          <div className="glass-card p-6 flex flex-col items-center gap-4 text-center">
+            <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+              Retrouvez-moi aussi sur le web
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <a
+                href={github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-all text-xs font-mono"
+                aria-label="GitHub (nouvel onglet)"
               >
-                <span>{submittingEmail ? 'Préparation de l’envoi...' : 'Envoyer l’email'}</span>
-                <Icon name="mail" className="size-4" />
-              </button>
-
-              {emailFeedback && (
-                <div
-                  role="status"
-                  className={`text-xs p-3.5 rounded-lg border leading-relaxed flex items-start gap-2.5 ${
-                    emailFeedback.type === 'success'
-                      ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
-                      : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/30'
-                  }`}
-                >
-                  <span className="shrink-0 mt-0.5">
-                    <Icon
-                      name={emailFeedback.type === 'success' ? 'checkCircle' : 'close'}
-                      className="size-4"
-                    />
-                  </span>
-                  <span>{emailFeedback.text}</span>
-                </div>
-              )}
-            </form>
+                <Icon name="github" className="size-4 text-indigo-500 dark:text-indigo-400" />
+                <span>GitHub</span>
+              </a>
+              <a
+                href={linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-all text-xs font-mono"
+                aria-label="LinkedIn (nouvel onglet)"
+              >
+                <Icon name="linkedin" className="size-4 text-indigo-500 dark:text-indigo-400" />
+                <span>LinkedIn</span>
+              </a>
+              <a
+                href={twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-all text-xs font-mono"
+                aria-label="X (Twitter) (nouvel onglet)"
+              >
+                <Icon name="x" className="size-4 text-indigo-500 dark:text-indigo-400" />
+                <span>X (Twitter)</span>
+              </a>
+              <a
+                href={facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-all text-xs font-mono"
+                aria-label="Facebook (nouvel onglet)"
+              >
+                <Icon name="facebook" className="size-4 text-indigo-500 dark:text-indigo-400" />
+                <span>Facebook</span>
+              </a>
+            </div>
           </div>
-        )}
-
-        {/* Réseaux sociaux : Retrouvez-moi aussi sur le web (exclusif GitHub, LinkedIn, X, Facebook) */}
-        <div className="glass-card p-6 flex flex-col items-center gap-4 text-center">
-          <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-            Retrouvez-moi aussi sur le web
-          </span>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <a
-              href={github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-all text-xs font-mono"
-              aria-label="GitHub (nouvel onglet)"
-            >
-              <Icon name="github" className="size-4 text-indigo-500 dark:text-indigo-400" />
-              <span>GitHub</span>
-            </a>
-            <a
-              href={linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-all text-xs font-mono"
-              aria-label="LinkedIn (nouvel onglet)"
-            >
-              <Icon name="linkedin" className="size-4 text-indigo-500 dark:text-indigo-400" />
-              <span>LinkedIn</span>
-            </a>
-            <a
-              href={twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-all text-xs font-mono"
-              aria-label="X (Twitter) (nouvel onglet)"
-            >
-              <Icon name="x" className="size-4 text-indigo-500 dark:text-indigo-400" />
-              <span>X (Twitter)</span>
-            </a>
-            <a
-              href={facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-all text-xs font-mono"
-              aria-label="Facebook (nouvel onglet)"
-            >
-              <Icon name="facebook" className="size-4 text-indigo-500 dark:text-indigo-400" />
-              <span>Facebook</span>
-            </a>
-          </div>
-        </div>
         </div>
       </div>
     </div>

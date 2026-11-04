@@ -55,11 +55,10 @@ export default function Navbar(): ReactElement {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 border-b transition-all duration-300 ease-out ${
-        solid
+      className={`fixed top-0 inset-x-0 z-50 border-b transition-all duration-300 ease-out ${solid
           ? 'bg-white/85 dark:bg-zinc-950/85 backdrop-blur-md border-zinc-200/80 dark:border-zinc-800/80 py-3 shadow-lg shadow-black/5 dark:shadow-black/30'
           : 'bg-transparent border-transparent py-5'
-      }`}
+        }`}
     >
       <div className="container-custom flex items-center justify-between">
         {/* Logo / Marque vers '/' */}
@@ -92,10 +91,9 @@ export default function Navbar(): ReactElement {
             to="/projets"
             onMouseEnter={() => portfolioService.prefetch('projects')}
             className={({ isActive }) =>
-              `px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${
-                isActive
-                  ? 'bg-white text-zinc-900 dark:bg-zinc-800 dark:text-white font-semibold shadow-xs'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
+              `px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${isActive
+                ? 'bg-white text-zinc-900 dark:bg-zinc-800 dark:text-white font-semibold shadow-xs'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
               }`
             }
           >
@@ -105,10 +103,9 @@ export default function Navbar(): ReactElement {
             to="/competences"
             onMouseEnter={() => portfolioService.prefetch('skills')}
             className={({ isActive }) =>
-              `px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${
-                isActive
-                  ? 'bg-white text-zinc-900 dark:bg-zinc-800 dark:text-white font-semibold shadow-xs'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
+              `px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${isActive
+                ? 'bg-white text-zinc-900 dark:bg-zinc-800 dark:text-white font-semibold shadow-xs'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
               }`
             }
           >
@@ -118,10 +115,9 @@ export default function Navbar(): ReactElement {
             to="/contact"
             onMouseEnter={() => portfolioService.prefetch('profile')}
             className={({ isActive }) =>
-              `px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${
-                isActive
-                  ? 'bg-indigo-500 text-white shadow-sm shadow-indigo-500/20'
-                  : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 hover:bg-indigo-500/20 hover:text-indigo-700 dark:hover:text-white'
+              `px-3.5 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${isActive
+                ? 'bg-indigo-500 text-white shadow-sm shadow-indigo-500/20'
+                : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 hover:bg-indigo-500/20 hover:text-indigo-700 dark:hover:text-white'
               }`
             }
           >
@@ -199,10 +195,9 @@ export default function Navbar(): ReactElement {
               to="/projets"
               onClick={closeMenu}
               className={({ isActive }) =>
-                `px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white font-semibold'
-                    : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'
+                `px-4 py-3 text-sm font-medium rounded-lg transition-colors ${isActive
+                  ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white font-semibold'
+                  : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'
                 }`
               }
             >
@@ -212,10 +207,9 @@ export default function Navbar(): ReactElement {
               to="/competences"
               onClick={closeMenu}
               className={({ isActive }) =>
-                `px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white font-semibold'
-                    : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'
+                `px-4 py-3 text-sm font-medium rounded-lg transition-colors ${isActive
+                  ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white font-semibold'
+                  : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'
                 }`
               }
             >
@@ -225,10 +219,9 @@ export default function Navbar(): ReactElement {
               to="/contact"
               onClick={closeMenu}
               className={({ isActive }) =>
-                `px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-indigo-500 text-white'
-                    : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 dark:border-indigo-500/30'
+                `px-4 py-3 text-sm font-medium rounded-lg transition-colors ${isActive
+                  ? 'bg-indigo-500 text-white'
+                  : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 dark:border-indigo-500/30'
                 }`
               }
             >

@@ -232,11 +232,11 @@ export default function DashboardPage(): ReactElement {
       setProfile((prev) =>
         prev
           ? {
-              ...prev,
-              availability_status: status,
-              status_label: defaultLabel,
-              is_available: isAvail,
-            }
+            ...prev,
+            availability_status: status,
+            status_label: defaultLabel,
+            is_available: isAvail,
+          }
           : null
       )
     } else {
@@ -570,13 +570,12 @@ export default function DashboardPage(): ReactElement {
             <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-0.5">
                 <span
-                  className={`size-2 rounded-full ${
-                    profile?.availability_status === 'employed'
+                  className={`size-2 rounded-full ${profile?.availability_status === 'employed'
                       ? 'bg-indigo-500 animate-pulse'
                       : profile?.availability_status === 'unavailable'
-                      ? 'bg-amber-500'
-                      : 'bg-emerald-500 animate-pulse'
-                  }`}
+                        ? 'bg-amber-500'
+                        : 'bg-emerald-500 animate-pulse'
+                    }`}
                   aria-hidden="true"
                 />
                 <span className="text-[11px] font-mono font-medium text-zinc-500 dark:text-zinc-400">
@@ -653,11 +652,10 @@ export default function DashboardPage(): ReactElement {
         {/* Toast de notification */}
         {toast && (
           <div
-            className={`mb-6 p-3 rounded-lg border text-xs font-mono flex items-center gap-2.5 transition-all shadow-xs ${
-              toast.type === 'success'
+            className={`mb-6 p-3 rounded-lg border text-xs font-mono flex items-center gap-2.5 transition-all shadow-xs ${toast.type === 'success'
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
                 : 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300'
-            }`}
+              }`}
           >
             <Icon name={toast.type === 'success' ? 'check' : 'alert'} className="size-4" />
             <span>{toast.text}</span>
@@ -675,11 +673,10 @@ export default function DashboardPage(): ReactElement {
           <button
             type="button"
             onClick={() => setActiveTab('analytics')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
-              activeTab === 'analytics'
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${activeTab === 'analytics'
                 ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
                 : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-            }`}
+              }`}
           >
             <Icon name="analytics" className="size-3.5 text-indigo-500" />
             <span>Vue d'ensemble</span>
@@ -689,11 +686,10 @@ export default function DashboardPage(): ReactElement {
           <button
             type="button"
             onClick={() => setActiveTab('projects')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
-              activeTab === 'projects'
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${activeTab === 'projects'
                 ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
                 : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-            }`}
+              }`}
           >
             <Icon name="projects" className="size-3.5 text-indigo-500" />
             <span>Projets ({projects.length})</span>
@@ -703,11 +699,10 @@ export default function DashboardPage(): ReactElement {
           <button
             type="button"
             onClick={() => setActiveTab('skills')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
-              activeTab === 'skills'
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${activeTab === 'skills'
                 ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
                 : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-            }`}
+              }`}
           >
             <Icon name="skills" className="size-3.5 text-indigo-500" />
             <span>Compétences ({skills.length})</span>
@@ -717,11 +712,10 @@ export default function DashboardPage(): ReactElement {
           <button
             type="button"
             onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
-              activeTab === 'profile'
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${activeTab === 'profile'
                 ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
                 : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-            }`}
+              }`}
           >
             <Icon name="user" className="size-3.5 text-indigo-500" />
             <span>Profil & Statut</span>
@@ -767,11 +761,10 @@ export default function DashboardPage(): ReactElement {
                     <CountUp end={analytics.totalViews} />
                   </span>
                   <span
-                    className={`text-xs font-mono font-medium flex items-center gap-0.5 ${
-                      analytics.viewsTrendPercent >= 0
+                    className={`text-xs font-mono font-medium flex items-center gap-0.5 ${analytics.viewsTrendPercent >= 0
                         ? 'text-emerald-600 dark:text-emerald-400'
                         : 'text-rose-600 dark:text-rose-400'
-                    }`}
+                      }`}
                   >
                     <Icon name="trending" className="size-3" />
                     <span>
@@ -879,22 +872,20 @@ export default function DashboardPage(): ReactElement {
                   <button
                     type="button"
                     onClick={() => setAnalyticsRange(7)}
-                    className={`px-3 py-1.5 rounded-md cursor-pointer transition-colors ${
-                      analyticsRange === 7
+                    className={`px-3 py-1.5 rounded-md cursor-pointer transition-colors ${analyticsRange === 7
                         ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
                         : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-                    }`}
+                      }`}
                   >
                     7 jours
                   </button>
                   <button
                     type="button"
                     onClick={() => setAnalyticsRange(30)}
-                    className={`px-3 py-1.5 rounded-md cursor-pointer transition-colors ${
-                      analyticsRange === 30
+                    className={`px-3 py-1.5 rounded-md cursor-pointer transition-colors ${analyticsRange === 30
                         ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
                         : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-                    }`}
+                      }`}
                   >
                     30 jours
                   </button>
@@ -1015,11 +1006,10 @@ export default function DashboardPage(): ReactElement {
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-semibold ${
-                            p.status === 'in_progress'
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-semibold ${p.status === 'in_progress'
                               ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30'
                               : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                          }`}
+                            }`}
                         >
                           {p.status === 'in_progress' ? 'En cours' : 'Terminé'}
                         </span>
@@ -1118,9 +1108,9 @@ export default function DashboardPage(): ReactElement {
                               slug:
                                 !editingProject && !projectForm.slug
                                   ? val
-                                      .toLowerCase()
-                                      .replace(/[^a-z0-9]+/g, '-')
-                                      .replace(/^-|-$/g, '')
+                                    .toLowerCase()
+                                    .replace(/[^a-z0-9]+/g, '-')
+                                    .replace(/^-|-$/g, '')
                                   : projectForm.slug,
                             })
                           }}
@@ -1321,11 +1311,10 @@ export default function DashboardPage(): ReactElement {
                                     : [...projectForm.selectedSkills, s.name],
                                 })
                               }}
-                              className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-colors ${
-                                isSel
+                              className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-colors ${isSel
                                   ? 'bg-indigo-600 text-white font-medium'
                                   : 'bg-zinc-200 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-                              }`}
+                                }`}
                             >
                               {s.name}
                             </button>
@@ -1585,11 +1574,10 @@ export default function DashboardPage(): ReactElement {
                 <button
                   type="button"
                   onClick={() => handleUpdateAvailability('available')}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-                    profileForm.availability_status === 'available'
+                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${profileForm.availability_status === 'available'
                       ? 'bg-emerald-500/15 border-emerald-500/50 shadow-md shadow-emerald-500/10'
                       : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <span className="relative flex size-2.5">
@@ -1609,11 +1597,10 @@ export default function DashboardPage(): ReactElement {
                 <button
                   type="button"
                   onClick={() => handleUpdateAvailability('employed')}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-                    profileForm.availability_status === 'employed'
+                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${profileForm.availability_status === 'employed'
                       ? 'bg-indigo-500/15 border-indigo-500/50 shadow-md shadow-indigo-500/10'
                       : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <span className="relative flex size-2.5">
@@ -1633,11 +1620,10 @@ export default function DashboardPage(): ReactElement {
                 <button
                   type="button"
                   onClick={() => handleUpdateAvailability('unavailable')}
-                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-                    profileForm.availability_status === 'unavailable'
+                  className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${profileForm.availability_status === 'unavailable'
                       ? 'bg-amber-500/15 border-amber-500/50 shadow-md shadow-amber-500/10'
                       : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <span className="size-2.5 rounded-full bg-amber-500" />
@@ -1821,9 +1807,8 @@ export default function DashboardPage(): ReactElement {
         role="dialog"
         aria-label="Messagerie Directe"
         aria-modal="true"
-        className={`fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white dark:bg-zinc-900 shadow-2xl border-l border-zinc-200 dark:border-zinc-800 flex flex-col transform transition-transform duration-300 ease-in-out ${
-          isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white dark:bg-zinc-900 shadow-2xl border-l border-zinc-200 dark:border-zinc-800 flex flex-col transform transition-transform duration-300 ease-in-out ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-zinc-200 dark:border-zinc-800">
@@ -1866,16 +1851,14 @@ export default function DashboardPage(): ReactElement {
             <button
               type="button"
               onClick={handleToggleAcceptMessages}
-              className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer ${
-                profile?.accept_direct_messages !== false
+              className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer ${profile?.accept_direct_messages !== false
                   ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40'
                   : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/40'
-              }`}
+                }`}
             >
               <span
-                className={`size-2 rounded-full ${
-                  profile?.accept_direct_messages !== false ? 'bg-emerald-500' : 'bg-rose-500'
-                }`}
+                className={`size-2 rounded-full ${profile?.accept_direct_messages !== false ? 'bg-emerald-500' : 'bg-rose-500'
+                  }`}
               />
               <span>{profile?.accept_direct_messages !== false ? 'Actif' : 'Suspendu'}</span>
             </button>
@@ -1887,22 +1870,20 @@ export default function DashboardPage(): ReactElement {
               <button
                 type="button"
                 onClick={() => setMessagesFilter('all')}
-                className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${
-                  messagesFilter === 'all'
+                className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${messagesFilter === 'all'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
                     : 'text-zinc-600 dark:text-zinc-400'
-                }`}
+                  }`}
               >
                 Tous ({messages.length})
               </button>
               <button
                 type="button"
                 onClick={() => setMessagesFilter('unread')}
-                className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${
-                  messagesFilter === 'unread'
+                className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${messagesFilter === 'unread'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
                     : 'text-zinc-600 dark:text-zinc-400'
-                }`}
+                  }`}
               >
                 Non lus ({unreadMessagesCount})
               </button>
@@ -1940,8 +1921,8 @@ export default function DashboardPage(): ReactElement {
                 {messagesSearch
                   ? 'Aucun résultat pour cette recherche'
                   : messagesFilter === 'unread'
-                  ? 'Aucun message non lu. Tout est à jour !'
-                  : 'Aucun message reçu pour le moment.'}
+                    ? 'Aucun message non lu. Tout est à jour !'
+                    : 'Aucun message reçu pour le moment.'}
               </p>
             </div>
           ) : (
@@ -1959,11 +1940,10 @@ export default function DashboardPage(): ReactElement {
               return (
                 <article
                   key={msg.id}
-                  className={`p-4 rounded-xl border transition-all duration-200 ${
-                    !msg.is_read
+                  className={`p-4 rounded-xl border transition-all duration-200 ${!msg.is_read
                       ? 'border-indigo-500/40 bg-indigo-500/5 dark:bg-zinc-800/80 shadow-xs'
                       : 'border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/40'
-                  }`}
+                    }`}
                 >
                   {/* Top Row : Nom, Badge lu/non-lu, Date */}
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -2033,11 +2013,10 @@ export default function DashboardPage(): ReactElement {
                           alert('Aucun numéro de téléphone renseigné.')
                         }
                       }}
-                      className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${
-                        msg.phone
+                      className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${msg.phone
                           ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
                           : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-60 cursor-not-allowed border border-transparent'
-                      }`}
+                        }`}
                       title={msg.phone ? 'Ouvrir WhatsApp' : 'Téléphone non fourni'}
                     >
                       <Icon name="messageSquare" className="size-3" />
@@ -2053,11 +2032,10 @@ export default function DashboardPage(): ReactElement {
                           alert('Aucun numéro de téléphone renseigné.')
                         }
                       }}
-                      className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${
-                        msg.phone
+                      className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${msg.phone
                           ? 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30'
                           : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-60 cursor-not-allowed border border-transparent'
-                      }`}
+                        }`}
                       title={msg.phone ? 'Composer le numéro' : 'Téléphone non fourni'}
                     >
                       <Icon name="phone" className="size-3" />
@@ -2091,11 +2069,10 @@ export default function DashboardPage(): ReactElement {
         <button
           type="button"
           onClick={() => setActiveTab('analytics')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${
-            activeTab === 'analytics'
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${activeTab === 'analytics'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
               : 'text-zinc-500 dark:text-zinc-400'
-          }`}
+            }`}
         >
           <Icon name="analytics" className="size-4.5" />
           <span>Dashboard</span>
@@ -2105,11 +2082,10 @@ export default function DashboardPage(): ReactElement {
         <button
           type="button"
           onClick={() => setActiveTab('projects')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${
-            activeTab === 'projects'
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${activeTab === 'projects'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
               : 'text-zinc-500 dark:text-zinc-400'
-          }`}
+            }`}
         >
           <Icon name="projects" className="size-4.5" />
           <span>Projets</span>
@@ -2119,11 +2095,10 @@ export default function DashboardPage(): ReactElement {
         <button
           type="button"
           onClick={() => setActiveTab('skills')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${
-            activeTab === 'skills'
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${activeTab === 'skills'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
               : 'text-zinc-500 dark:text-zinc-400'
-          }`}
+            }`}
         >
           <Icon name="skills" className="size-4.5" />
           <span>Skills</span>
@@ -2133,11 +2108,10 @@ export default function DashboardPage(): ReactElement {
         <button
           type="button"
           onClick={() => setActiveTab('profile')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${
-            activeTab === 'profile'
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${activeTab === 'profile'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
               : 'text-zinc-500 dark:text-zinc-400'
-          }`}
+            }`}
         >
           <Icon name="user" className="size-4.5" />
           <span>Profil</span>
