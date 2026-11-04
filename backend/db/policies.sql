@@ -157,3 +157,6 @@ CREATE POLICY "Authenticated admin can delete page_views"
 ON page_views FOR DELETE 
 TO authenticated 
 USING (auth.uid() IS NOT NULL);
+
+-- Droit d'exécution de la fonction RPC track_unique_visit
+GRANT EXECUTE ON FUNCTION track_unique_visit(VARCHAR, VARCHAR) TO anon, authenticated;

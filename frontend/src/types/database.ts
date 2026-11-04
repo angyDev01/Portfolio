@@ -94,7 +94,9 @@ export interface ContactMessage {
 
 export interface PageView {
   id: string
+  visitor_id: string
   page_path: string
+  view_date?: string
   referrer?: string | null
   user_agent?: string | null
   created_at: string

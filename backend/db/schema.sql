@@ -86,3 +86,29 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 
 CREATE INDEX IF NOT EXISTS idx_contact_messages_created ON contact_messages(created_at DESC);
 
+-- 6. Table PAGE_VIEWS : Suivi d'audience et visites uniques quotidiennes
+CREATE TABLE IF NOT EXISTS page_views (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    visitor_id VARCHAR(100) NOT NULL,
+    page_path VARCHAR(100) DEFAULT '/',
+    view_date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    -- Empêche le même visiteur d'être compté deux fois le même jour sur la même page
+    CONSTRAINT unique_daily_visitor UNIQUE (visitor_id, view_date, page_path)
+);
+
+-- Index pour la rapidité des requêtes analytics
+CREATE INDEX IF NOT EXISTS idx_page_views_date ON page_views(view_date);
+
+-- Fonction RPC sécurisée pour enregistrer une visite unique
+CREATE OR REPLACE FUNCTION track_unique_visit(p_visitor_id VARCHAR, p_page_path VARCHAR)
+RETURNS BOOLEAN AS $$
+BEGIN
+    INSERT INTO page_views (visitor_id, page_path, view_date)
+    VALUES (p_visitor_id, p_page_path, CURRENT_DATE)
+    ON CONFLICT (visitor_id, view_date, page_path) DO NOTHING;
+    
+    RETURN FOUND;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
