@@ -73,7 +73,7 @@ export default function Hero(): ReactElement {
           <p className="text-sm font-mono text-indigo-600 dark:text-indigo-400 font-medium mb-3 tracking-wide uppercase">
             Bonjour, je suis{' '}
             <span className="text-zinc-900 dark:text-zinc-200">{profile?.name || 'Yao Jean Angoa'}</span>
-            {profile?.alias ? ` (${profile.alias})` : ' (Angy)'}
+            {profile?.alias ? ` (${profile.alias})` : " (Angy's)"}
           </p>
 
           <h1 id="hero-title" className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 leading-[1.12] mb-6">
