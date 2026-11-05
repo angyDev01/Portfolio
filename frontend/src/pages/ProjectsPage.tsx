@@ -42,7 +42,7 @@ export default function ProjectsPage(): ReactElement {
             Catalogue des Projets
           </h1>
           <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            Une sélection de projets complets alimentés par Supabase, des interfaces dynamiques aux architectures d’APIs modulaires.
+            Une sélection de projets complets, des interfaces dynamiques aux architectures d’APIs modulaires.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function ProjectsPage(): ReactElement {
         ) : (
           <EmptyState
             title="Aucun projet pour le moment"
-            description="La base de données Supabase a été initialisée. Les projets ajoutés s'afficheront instantanément ici."
+            description="La base de données a été initialisée. Les projets ajoutés s'afficheront instantanément ici."
           />
         )}
       </div>

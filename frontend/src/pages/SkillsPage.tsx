@@ -3,12 +3,13 @@ import { portfolioService } from '../services/portfolioService'
 import type { DbSkill, SkillCategoryType } from '../types/database'
 import Icon from '../components/Icon'
 import EmptyState from '../components/EmptyState'
+import TechCard from '../components/TechCard'
 import { SkillCategorySkeleton } from '../components/Skeletons'
 
 const CATEGORY_META: Record<SkillCategoryType, { title: string; icon: 'frontend' | 'backend' | 'tools' | 'database' }> = {
   frontend: { title: 'Frontend Moderne', icon: 'frontend' },
   backend: { title: 'Backend & APIs', icon: 'backend' },
-  database: { title: 'Bases de données & Supabase', icon: 'database' },
+  database: { title: 'Bases de données & Cloud', icon: 'database' },
   tools: { title: 'Outils & Pratiques', icon: 'tools' },
 }
 
@@ -58,7 +59,7 @@ export default function SkillsPage(): ReactElement {
         ) : skills.length === 0 ? (
           <EmptyState
             title="Aucune compétence pour le moment"
-            description="La table 'skills' sur Supabase est prête. Vos compétences ajoutées s'afficheront ici automatiquement."
+            description="La base de données des compétences est prête. Vos compétences ajoutées s'afficheront ici automatiquement."
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -67,7 +68,7 @@ export default function SkillsPage(): ReactElement {
               const meta = CATEGORY_META[catKey]
 
               return (
-                <div key={catKey} className="glass-card p-6 sm:p-7 flex flex-col justify-between">
+                <div key={catKey} className="glass-card p-5 sm:p-6 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-200 dark:border-zinc-800">
                       <span className="flex size-10 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
@@ -81,31 +82,19 @@ export default function SkillsPage(): ReactElement {
                       </div>
                     </div>
 
-                    <ul className="space-y-4">
+                    <div className="space-y-3">
                       {catSkills.length === 0 ? (
-                        <li className="text-xs font-mono text-zinc-400 italic">Aucune entrée</li>
+                        <p className="text-xs font-mono text-zinc-400 italic">Aucune entrée</p>
                       ) : (
                         catSkills.map((skill) => (
-                          <li key={skill.id} className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                              <span className="size-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400 shrink-0" />
-                              <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-sm font-mono">
-                                {skill.name}
-                              </span>
-                            </div>
-                            {skill.description && (
-                              <p className="text-xs text-zinc-600 dark:text-zinc-400 pl-3.5 leading-relaxed">
-                                {skill.description}
-                              </p>
-                            )}
-                          </li>
+                          <TechCard key={skill.id} skill={skill} showDescription />
                         ))
                       )}
-                    </ul>
+                    </div>
                   </div>
 
                   <div className="mt-8 pt-4 border-t border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400">
-                    <span>Synchronisé Supabase</span>
+                    <span>Synchronisé en direct</span>
                     <span className="text-indigo-600 dark:text-indigo-400">Temps réel</span>
                   </div>
                 </div>

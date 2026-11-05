@@ -4,6 +4,7 @@ import { portfolioService } from '../services/portfolioService'
 import type { DbSkill } from '../types/database'
 import EmptyState from './EmptyState'
 import Icon from './Icon'
+import TechCard from './TechCard'
 
 export default function HomeSkillsPreview(): ReactElement {
   const [skills, setSkills] = useState<DbSkill[]>([])
@@ -51,26 +52,13 @@ export default function HomeSkillsPreview(): ReactElement {
           <div className="mb-10">
             <EmptyState
               title="Aucune compétence pour le moment"
-              description="Les technologies et compétences seront chargées depuis Supabase très prochainement."
+              description="Les technologies et compétences seront chargées très prochainement."
             />
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-10">
             {displaySkills.map((skill) => (
-              <div
-                key={skill.id}
-                className="glass-card p-4 flex flex-col items-center text-center group hover:border-indigo-400/50 hover:bg-zinc-100 dark:hover:bg-zinc-900/90 transition-all"
-              >
-                <div className="size-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-mono font-bold text-sm mb-3 group-hover:scale-105 group-hover:bg-indigo-500/20 transition-all">
-                  {skill.name.slice(0, 2).toUpperCase()}
-                </div>
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm tracking-tight mb-1 truncate max-w-full">
-                  {skill.name}
-                </span>
-                <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 leading-tight capitalize">
-                  {skill.category}
-                </span>
-              </div>
+              <TechCard key={skill.id} skill={skill} compact />
             ))}
           </div>
         )}

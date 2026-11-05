@@ -32,7 +32,7 @@ export default function AdminLoginPage(): ReactElement {
     if (!isSupabaseConfigured) {
       setLoading(false)
       setErrorMsg(
-        'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
+        'Configuration d’authentification introuvable. Veuillez vérifier vos paramètres d’accès.'
       )
       return
     }
@@ -50,7 +50,7 @@ export default function AdminLoginPage(): ReactElement {
     }
 
     try {
-      // Appel standard Supabase Auth
+      // Appel standard de connexion
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: password.trim(),
@@ -65,11 +65,11 @@ export default function AdminLoginPage(): ReactElement {
           (error.status === 401 && lowerMsg.includes('jwt'))
         ) {
           setErrorMsg(
-            'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
+            'Erreur de configuration du service d’authentification.'
           )
         } else if (lowerMsg.includes('invalid login credentials')) {
           setErrorMsg(
-            "Email ou mot de passe incorrect (Assurez-vous d'avoir créé votre compte dans Supabase > Authentication > Users)."
+            'Identifiants incorrects ou compte administrateur non autorisé.'
           )
         } else {
           setErrorMsg(error.message)
@@ -84,7 +84,7 @@ export default function AdminLoginPage(): ReactElement {
       const message = err instanceof Error ? err.message : 'Erreur inattendue de connexion'
       if (message.toLowerCase().includes('api key')) {
         setErrorMsg(
-          'Vérifiez vos clés VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY dans le fichier .env et redémarrez le serveur (npm run dev).'
+          'Erreur de configuration du service d’authentification.'
         )
       } else {
         setErrorMsg(message)
@@ -109,13 +109,13 @@ export default function AdminLoginPage(): ReactElement {
           </div>
 
           <p className="text-xs font-mono font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">
-            Espace Protégé
+            Espace Sécurisé
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 mb-2">
-            Connexion Administrateur
+            Espace Administrateur
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-6 leading-relaxed">
-            Authentification Supabase requise pour accéder au tableau de bord de gestion.
+            Authentification requise pour accéder au tableau de bord de gestion.
           </p>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4 text-left">

@@ -144,7 +144,7 @@ export default function Hero(): ReactElement {
           {/* Métriques / Badges en monospace */}
           <div className="mt-14 pt-8 border-t border-zinc-200 dark:border-zinc-900/80 grid grid-cols-3 gap-6 sm:gap-12 w-full max-w-lg">
             <div className="flex flex-col items-center">
-              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 tracking-tight">Supabase</span>
+              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 tracking-tight">PostgreSQL</span>
               <span className="text-[11px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-0.5">Database</span>
             </div>
             <div className="flex flex-col items-center">

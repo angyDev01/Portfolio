@@ -71,7 +71,7 @@ function MainLayout(): ReactElement {
           <Route path="/competences" element={<SkillsPage />} />
           <Route path="/contact" element={<ContactPage />} />
 
-          {/* Connexion Admin Supabase Auth */}
+          {/* Connexion Admin */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
 
           {/* Routes d'Administration Verrouillées par ProtectedRoute */}

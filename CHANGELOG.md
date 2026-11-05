@@ -4,6 +4,39 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 
 ---
 
+## [2026-11-05] — Logos Officiels des Technologies, Discrétion Backend & Mise en Valeur des Projets Phares
+
+### 1. Affichage des Vrais Logos Officiels des Technologies (`react-icons/si`)
+- **Bibliothèque intégrée** : Installation de `react-icons` et exploitation de Simple Icons (`react-icons/si`) couvrant l'ensemble de l'écosystème moderne (Python, JavaScript, Django, Git, React, TypeScript, Node.js, Tailwind CSS, PostgreSQL, Docker, Vite, Next.js, HTML5, CSS3, etc.).
+- **Composant dédié `TechLogo` & `TechCard`** :
+  - Chaque compétence / technologie dispose d'un conteneur sombre zinc élégant (`bg-zinc-100 dark:bg-zinc-950/90 border border-zinc-200/80 dark:border-zinc-800`).
+  - Au survol de la carte, une lueur colorée (glow / reflet) et une bordure subtile correspondant exactement à la couleur officielle de la technologie (ex: `#61DAFB` pour React, `#3776AB` pour Python, `#44B78B` pour Django, `#06B6D4` pour Tailwind) s'animent en douceur.
+- **Déploiement sur le site** :
+  - **Accueil / "Cœur de ma stack"** (`HomeSkillsPreview.tsx`) : cartes avec logo officiel centré bien visible et glow interactif.
+  - **Page "Compétences & Écosystème"** (`SkillsPage.tsx`) : cartes détaillées par pilier (Frontend, Backend, Bases de données & Cloud, Outils) avec logos officiels et badges.
+  - **Cartes de Projets** (`ProjectCard.tsx`) : tags de compétences enrichis avec leur micro-logo officiel.
+
+---
+
+### 2. Discrétion Technique Backend & Suppression Totale des Mentions "Supabase" en Dur
+- **Principe de discrétion d'infrastructure** : Aucune mention publique d'infrastructure propriétaire en dur (comme "Supabase") n'est désormais visible pour les visiteurs.
+- **Remplacements effectués** :
+  - Page Projets (`ProjectsPage.tsx`) : suppression de "alimentés par Supabase" et "base de données Supabase", remplacés par des descriptions professionnelles et neutres.
+  - Page Compétences (`SkillsPage.tsx`) : catégorie renommée en "Bases de données & Cloud", badge mis à jour en "Synchronisé en direct".
+  - Section Hero (`Hero.tsx`) : badge de métrique mis à jour avec la technologie standard "PostgreSQL / Database".
+  - Page de connexion administrateur (`AdminLoginPage.tsx`) : en-tête sobrement intitulé **"Espace Administrateur"**, sous-titre "Authentification requise", et messages d'erreur génériques protégeant la configuration interne.
+
+---
+
+### 3. Mise en Valeur Visuelle du Projet "À la une" (`is_featured: true`)
+- **Badge distinctif chic** : Ajout d'un badge pill exclusif avec une étoile discrète `★ Projet à la une` (dégradé subtil ambre/indigo, bordure dorée fine `border-amber-500/30 dark:border-amber-400/30`, typographie monospace soignée).
+- **Filigrane & Lueur d'ambiance technologique** :
+  - Extraction automatique de la technologie principale du projet (`skills[0]`).
+  - Projection en arrière-plan d'un filigrane grand format du logo officiel de cette technologie (opacité subtile et zoom doux au survol).
+  - Lueur d'ambiance diffuse reprenant la couleur officielle de cette technologie principale, conférant un contraste et un impact visuel immédiat par rapport aux réalisations standards.
+
+---
+
 ## [2026-11-05] — Résolution Définitive du Cache Avatar & Rendu Instantané Synchrone
 
 ### 1. Problème Identifié & Cause Racine
