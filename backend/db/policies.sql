@@ -167,3 +167,28 @@ USING (auth.uid() IS NOT NULL);
 
 GRANT INSERT ON TABLE page_views TO anon, authenticated;
 GRANT ALL ON TABLE page_views TO authenticated;
+
+-- ==============================================================================
+-- STORAGE : Bucket 'portfolio' (Images & Avatars)
+-- ==============================================================================
+-- 1. Création du bucket public
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('portfolio', 'portfolio', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- 2. Politiques d'accès au stockage (Lecture pour tous, Upload/Modif/Suppr pour l'admin)
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
+CREATE POLICY "Public Access" ON storage.objects
+FOR SELECT USING (bucket_id = 'portfolio');
+
+DROP POLICY IF EXISTS "Admin Upload" ON storage.objects;
+CREATE POLICY "Admin Upload" ON storage.objects
+FOR INSERT WITH CHECK (bucket_id = 'portfolio' AND auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "Admin Update" ON storage.objects;
+CREATE POLICY "Admin Update" ON storage.objects
+FOR UPDATE USING (bucket_id = 'portfolio' AND auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "Admin Delete" ON storage.objects;
+CREATE POLICY "Admin Delete" ON storage.objects
+FOR DELETE USING (bucket_id = 'portfolio' AND auth.uid() IS NOT NULL);

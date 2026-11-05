@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS profile (
   full_bio JSONB DEFAULT '[]'::jsonb,
   bio_full TEXT,
   email VARCHAR(150),
+  avatar_url TEXT,
   phone VARCHAR(50),
   phone_secondary VARCHAR(50),
   whatsapp_url VARCHAR(255),

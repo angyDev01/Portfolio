@@ -68,12 +68,20 @@ export default function Navbar(): ReactElement {
           className="group flex items-center gap-2.5 rounded-lg text-zinc-900 dark:text-zinc-100 hover:text-indigo-600 dark:hover:text-white transition-colors"
           aria-label={`${name} — retour à l'accueil`}
         >
-          <span
-            className="flex size-8 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 dark:text-indigo-400 font-mono font-bold text-sm group-hover:border-indigo-400 group-hover:bg-indigo-500/20 transition-all"
-            aria-hidden="true"
-          >
-            {alias.charAt(0)}
-          </span>
+          {profile?.avatar_url ? (
+            <img
+              src={profile.avatar_url}
+              alt={name}
+              className="size-8 rounded-lg object-cover border border-zinc-200 dark:border-zinc-800"
+            />
+          ) : (
+            <span
+              className="flex size-8 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 dark:text-indigo-400 font-mono font-bold text-sm group-hover:border-indigo-400 group-hover:bg-indigo-500/20 transition-all"
+              aria-hidden="true"
+            >
+              {alias.charAt(0)}
+            </span>
+          )}
           <span className="flex flex-col" aria-hidden="true">
             <span className="font-semibold text-sm tracking-tight">{name}</span>
             <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300">

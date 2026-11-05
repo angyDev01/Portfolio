@@ -308,6 +308,31 @@ export const portfolioService = {
     }
   },
 
+  /**
+   * Téléversement d'image dans le bucket public Supabase 'portfolio'
+   */
+  async uploadMedia(file: File, folder = 'avatars'): Promise<{ ok: boolean; url?: string; error?: string }> {
+    try {
+      const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').toLowerCase()
+      const filePath = `${folder}/${Date.now()}_${cleanFileName}`
+
+      const { data, error } = await supabase.storage.from('portfolio').upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true,
+      })
+
+      if (error) {
+        return { ok: false, error: error.message }
+      }
+
+      const { data: publicData } = supabase.storage.from('portfolio').getPublicUrl(data.path)
+      return { ok: true, url: publicData.publicUrl }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur téléversement média'
+      return { ok: false, error: msg }
+    }
+  },
+
   // ==========================================
   // PROJETS (CRUD COMPLET)
   // ==========================================

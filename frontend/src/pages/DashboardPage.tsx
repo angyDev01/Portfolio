@@ -117,6 +117,7 @@ export default function DashboardPage(): ReactElement {
     linkedin_url: string
     twitter_url: string
     facebook_url: string
+    avatar_url: string
     phone: string
     phone_secondary: string
     whatsapp_url: string
@@ -133,6 +134,7 @@ export default function DashboardPage(): ReactElement {
     linkedin_url: 'https://www.linkedin.com/in/angy-dev-532293357',
     twitter_url: 'https://x.com/Angy656261',
     facebook_url: 'https://www.facebook.com/share/1FGHSoJjo9/',
+    avatar_url: '',
     phone: '+225 07 20 64 65 26',
     phone_secondary: '+225 05 66 40 29 73',
     whatsapp_url: 'https://wa.me/2250720646526',
@@ -140,6 +142,7 @@ export default function DashboardPage(): ReactElement {
     availability_status: 'available',
     status_label: 'Disponible',
   })
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
   // Messages State
   const [messages, setMessages] = useState<ContactMessage[]>([])
@@ -188,6 +191,7 @@ export default function DashboardPage(): ReactElement {
           linkedin_url: profData.linkedin_url || '',
           twitter_url: profData.twitter_url || '',
           facebook_url: profData.facebook_url || '',
+          avatar_url: profData.avatar_url || '',
           phone: profData.phone || '',
           phone_secondary: profData.phone_secondary || '',
           whatsapp_url: profData.whatsapp_url || '',
@@ -275,6 +279,7 @@ export default function DashboardPage(): ReactElement {
       linkedin_url: profileForm.linkedin_url.trim() || undefined,
       twitter_url: profileForm.twitter_url.trim() || undefined,
       facebook_url: profileForm.facebook_url.trim() || undefined,
+      avatar_url: profileForm.avatar_url.trim() || undefined,
       phone: profileForm.phone.trim() || undefined,
       phone_secondary: profileForm.phone_secondary.trim() || undefined,
       whatsapp_url: profileForm.whatsapp_url.trim() || undefined,
@@ -288,6 +293,22 @@ export default function DashboardPage(): ReactElement {
       setProfile(updated)
     } else {
       setToast({ type: 'error', text: res.error || 'Erreur lors de la mise à jour du profil.' })
+    }
+  }
+
+  const handleAvatarFileSelect = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadingAvatar(true)
+    const res = await portfolioService.uploadMedia(file, 'avatars')
+    setUploadingAvatar(false)
+
+    if (res.ok && res.url) {
+      setProfileForm((prev) => ({ ...prev, avatar_url: res.url! }))
+      setToast({ type: 'success', text: 'Avatar téléversé dans le bucket portfolio ! Enregistrez le profil pour appliquer.' })
+    } else {
+      setToast({ type: 'error', text: res.error || 'Erreur lors du téléversement de l’avatar.' })
     }
   }
 
@@ -1675,6 +1696,51 @@ export default function DashboardPage(): ReactElement {
               <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
                 Informations & Bios
               </h2>
+
+              {/* Photo de Profil / Avatar & Bucket Supabase */}
+              <div className="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800">
+                <div className="relative group shrink-0">
+                  {profileForm.avatar_url ? (
+                    <img
+                      src={profileForm.avatar_url}
+                      alt="Avatar prévisualisation"
+                      className="size-20 rounded-full object-cover border-2 border-indigo-500 shadow-md"
+                    />
+                  ) : (
+                    <div className="size-20 rounded-full bg-indigo-500/10 border-2 border-dashed border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold font-mono text-xl">
+                      {profileForm.alias?.charAt(0) || "A"}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-2 text-center sm:text-left">
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-medium transition-colors shadow-xs">
+                      <Icon name="sparkles" className="size-3.5" />
+                      <span>{uploadingAvatar ? 'Téléversement...' : 'Changer l’avatar (Stockage)'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingAvatar}
+                        onChange={handleAvatarFileSelect}
+                        className="hidden"
+                      />
+                    </label>
+                    {profileForm.avatar_url && (
+                      <button
+                        type="button"
+                        onClick={() => setProfileForm((prev) => ({ ...prev, avatar_url: '' }))}
+                        className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-600 text-xs font-mono transition-colors"
+                      >
+                        Retirer
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-zinc-500 font-mono">
+                    Hébergé sur le bucket public <strong>portfolio</strong> (JPG, PNG, WebP).
+                  </p>
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>

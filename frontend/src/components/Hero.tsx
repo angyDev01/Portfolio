@@ -35,6 +35,18 @@ export default function Hero(): ReactElement {
 
       <div className="container-custom">
         <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
+          {/* Avatar si configuré */}
+          {profile?.avatar_url && (
+            <div className="relative mb-5 group">
+              <div className="absolute -inset-1 bg-linear-to-r from-indigo-500 to-violet-600 rounded-full blur-xs opacity-50 group-hover:opacity-80 transition duration-300" />
+              <img
+                src={profile.avatar_url}
+                alt={profile.name || "Angy's"}
+                className="relative size-20 sm:size-24 rounded-full object-cover border-2 border-white dark:border-zinc-900 shadow-xl"
+              />
+            </div>
+          )}
+
           {/* Badge de disponibilité dynamique à 3 états */}
           {(() => {
             const status = profile?.availability_status || (profile?.is_available ? 'available' : 'employed')

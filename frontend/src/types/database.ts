@@ -16,6 +16,7 @@ export interface DbProfile {
   full_bio: string[]
   bio_full?: string
   email: string
+  avatar_url?: string | null
   phone?: string
   phone_secondary?: string
   whatsapp_url?: string
@@ -70,6 +71,7 @@ export interface DbProject {
 export interface ContactMessagePayload {
   name: string
   email: string
+  avatar_url?: string | null
   phone?: string
   message: string
 }
