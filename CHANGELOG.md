@@ -60,6 +60,11 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 - **Supabase Storage - Bucket `portfolio` (Public)** :
   - Dossier `avatars/` : Stockage des photos de profil au format `avatars/{timestamp}-{clean_filename}`.
   - Dossier `projects/` : Stockage des captures de projets au format `projects/{timestamp}-{clean_filename}`.
+  - Politiques RLS actives sur `storage.objects` :
+    - `Public Access` (SELECT) : Lecture publique de tous les objets du bucket `portfolio`.
+    - `Admin Upload` (INSERT) : Upload réservé à l'administrateur authentifié (`auth.uid() IS NOT NULL`).
+    - `Admin Update` (UPDATE) : Remplacement / mise à jour d'un fichier existant réservé à l'administrateur (`bucket_id = 'portfolio' AND auth.uid() IS NOT NULL`).
+    - `Admin Delete` (DELETE) : Suppression de fichiers (anciennes photos / captures) réservée à l'administrateur (`bucket_id = 'portfolio' AND auth.uid() IS NOT NULL`).
 
 ---
 
@@ -67,3 +72,4 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 - **Vitest** : 14/14 tests validés avec succès (`npm --prefix frontend test`).
 - **TypeScript & Vite** : Compilation stricte réussie sans aucune erreur ni warning bloquant (`npm --prefix frontend run build`).
 - **Persistance** : Validée par requêtes directes en base de données sur la table `profile` et `projects`.
+
