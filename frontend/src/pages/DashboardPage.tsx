@@ -1520,11 +1520,10 @@ export default function DashboardPage(): ReactElement {
                                       : [...projectForm.selectedSkills, s.name],
                                   })
                                 }}
-                                className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-colors ${
-                                  isSel
+                                className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-colors ${isSel
                                     ? 'bg-indigo-600 text-white font-medium shadow-xs'
                                     : 'bg-zinc-200 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-                                }`}
+                                  }`}
                               >
                                 {isSel ? '✓ ' : ''}{s.name}
                               </button>
