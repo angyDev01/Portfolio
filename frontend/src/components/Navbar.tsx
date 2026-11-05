@@ -72,14 +72,14 @@ export default function Navbar(): ReactElement {
             <img
               src={profile.avatar_url}
               alt={name}
-              className="size-8 rounded-lg object-cover border border-zinc-200 dark:border-zinc-800"
+              className="size-8.5 rounded-full object-cover border border-zinc-200 dark:border-zinc-700 shadow-xs shrink-0"
             />
           ) : (
             <span
-              className="flex size-8 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 dark:text-indigo-400 font-mono font-bold text-sm group-hover:border-indigo-400 group-hover:bg-indigo-500/20 transition-all"
+              className="flex size-8.5 items-center justify-center rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 dark:text-indigo-400 group-hover:border-indigo-400 group-hover:bg-indigo-500/20 transition-all shadow-xs shrink-0"
               aria-hidden="true"
             >
-              {alias.charAt(0)}
+              <Icon name="user" className="size-4.5" />
             </span>
           )}
           <span className="flex flex-col" aria-hidden="true">

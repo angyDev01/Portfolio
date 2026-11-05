@@ -329,10 +329,10 @@ export const portfolioService = {
   /**
    * Téléversement d'image dans le bucket public Supabase 'portfolio'
    */
-  async uploadMedia(file: File, folder = 'avatars'): Promise<{ ok: boolean; url?: string; error?: string }> {
+  async uploadMedia(file: File, folder: 'avatars' | 'projects' = 'avatars'): Promise<{ ok: boolean; url?: string; error?: string }> {
     try {
       const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').toLowerCase()
-      const filePath = `${folder}/${Date.now()}_${cleanFileName}`
+      const filePath = `${folder}/${Date.now()}-${cleanFileName}`
 
       const { data, error } = await supabase.storage.from('portfolio').upload(filePath, file, {
         cacheControl: '3600',
@@ -378,9 +378,12 @@ export const portfolioService = {
                 .map((ps: { skills?: { name?: string } }) => ps.skills?.name)
                 .filter((n: string | undefined): n is string => Boolean(n))
               : []
+            const cover_image_url = item.cover_image_url || (Array.isArray(item.images) && item.images[0]) || null
             return {
               ...item,
               status: item.status || 'completed',
+              cover_image_url,
+              images: item.images || (cover_image_url ? [cover_image_url] : []),
               skills,
             } as DbProject
           })
@@ -393,7 +396,18 @@ export const portfolioService = {
         const res = await fetch(`${API_BASE_URL}/api/projects`)
         if (res.ok) {
           const data = await res.json()
-          if (Array.isArray(data)) return data
+          if (Array.isArray(data)) {
+            return data.map((item) => {
+              const cover_image_url = item.cover_image_url || (Array.isArray(item.images) && item.images[0]) || null
+              return {
+                ...item,
+                status: item.status || 'completed',
+                cover_image_url,
+                images: item.images || (cover_image_url ? [cover_image_url] : []),
+                skills: Array.isArray(item.skills) ? item.skills : [],
+              } as DbProject
+            })
+          }
         }
       } catch {
         /* ignore */
@@ -411,6 +425,9 @@ export const portfolioService = {
   ): Promise<{ ok: boolean; error?: string }> {
     try {
       this.invalidateCache('projects')
+      const cover_image_url = project.cover_image_url || (Array.isArray(project.images) && project.images[0]) || null
+      const images = cover_image_url ? [cover_image_url] : (project.images || [])
+
       const { data, error } = await supabase
         .from('projects')
         .insert([
@@ -422,7 +439,8 @@ export const portfolioService = {
             status: project.status || 'completed',
             summary: project.summary,
             description: project.description,
-            images: project.images || [],
+            cover_image_url,
+            images,
             demo_url: project.demo_url || null,
             repo_url: project.repo_url || null,
             is_featured: Boolean(project.is_featured),
@@ -457,6 +475,11 @@ export const portfolioService = {
   ): Promise<{ ok: boolean; error?: string }> {
     try {
       this.invalidateCache('projects')
+      const cover_image_url = project.cover_image_url !== undefined
+        ? project.cover_image_url
+        : (Array.isArray(project.images) && project.images[0]) || null
+      const images = cover_image_url ? [cover_image_url] : (project.images || [])
+
       const { error } = await supabase
         .from('projects')
         .update({
@@ -467,7 +490,8 @@ export const portfolioService = {
           status: project.status,
           summary: project.summary,
           description: project.description,
-          images: project.images,
+          cover_image_url,
+          images,
           demo_url: project.demo_url || null,
           repo_url: project.repo_url || null,
           is_featured: project.is_featured,

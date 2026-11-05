@@ -54,11 +54,12 @@ error.log
 report.*.json
 
 # 5. Documentations internes & notes de conception (privées)
-# Bloque tous les fichiers Markdown sauf le README principal du projet
+# Bloque tous les fichiers Markdown sauf le README principal du projet et le CHANGELOG
 *.md
 */*.md
 **/*.md
 !README.md
+!CHANGELOG.md
 
 # 6. Agents & Skills CLI
 .agents/

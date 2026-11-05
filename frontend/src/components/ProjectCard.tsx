@@ -9,13 +9,29 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project, className = '' }: ProjectCardProps): ReactElement {
-  const { title, tagline, description, summary, skills = [], demo_url, repo_url, is_featured } = project
+  const { title, tagline, description, summary, skills = [], demo_url, repo_url, is_featured, cover_image_url, images = [] } = project
+  const cover = cover_image_url || images[0]
 
   return (
     <article
       className={`glass-card group relative flex flex-col justify-between p-5 sm:p-6 motion-safe:hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/5 ${className}`}
     >
       <div>
+        {/* Image de couverture du projet si disponible */}
+        {cover && (
+          <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-4 border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950">
+            <img
+              src={cover}
+              alt={title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLImageElement).parentElement!.style.display = 'none'
+              }}
+            />
+          </div>
+        )}
+
         {/* En-tête : titre + badge + liens */}
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex items-center gap-2">

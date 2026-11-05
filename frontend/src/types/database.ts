@@ -59,6 +59,7 @@ export interface DbProject {
   summary: string
   description: string
   images: string[]
+  cover_image_url?: string | null
   demo_url?: string | null
   repo_url?: string | null
   is_featured: boolean

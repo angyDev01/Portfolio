@@ -85,7 +85,8 @@ export default function DashboardPage(): ReactElement {
     display_order: 0,
     selectedSkills: [],
   })
-  const [uploadingProjectImage, setUploadingProjectImage] = useState<boolean>(false)
+  const [projectCoverFile, setProjectCoverFile] = useState<File | null>(null)
+  const [projectCoverPreview, setProjectCoverPreview] = useState<string | null>(null)
   const [savingProject, setSavingProject] = useState<boolean>(false)
 
   // Skills State
@@ -273,19 +274,15 @@ export default function DashboardPage(): ReactElement {
 
     const res = await portfolioService.updateProfile({
       name: profileForm.name.trim(),
-      full_name: profileForm.name.trim(),
       alias: profileForm.alias.trim() || undefined,
       role: profileForm.role.trim() || undefined,
-      title: profileForm.role.trim() || undefined,
       short_bio: profileForm.short_bio.trim(),
-      bio_short: profileForm.short_bio.trim(),
       full_bio: paragraphs,
-      bio_full: paragraphs.join('\n\n'),
       github_url: profileForm.github_url.trim() || undefined,
       linkedin_url: profileForm.linkedin_url.trim() || undefined,
       twitter_url: profileForm.twitter_url.trim() || undefined,
       facebook_url: profileForm.facebook_url.trim() || undefined,
-      avatar_url: profileForm.avatar_url.trim() || null,
+      avatar_url: profileForm.avatar_url.trim() || undefined,
       phone: profileForm.phone.trim() || undefined,
       phone_secondary: profileForm.phone_secondary.trim() || undefined,
       whatsapp_url: profileForm.whatsapp_url.trim() || undefined,
@@ -311,46 +308,10 @@ export default function DashboardPage(): ReactElement {
     setUploadingAvatar(false)
 
     if (res.ok && res.url) {
-      const newAvatarUrl = res.url
-      setProfileForm((prev) => ({ ...prev, avatar_url: newAvatarUrl }))
-      setProfile((prev) => (prev ? { ...prev, avatar_url: newAvatarUrl } : null))
-
-      // Enregistre immédiatement en base de données pour synchronisation persistante
-      const saveRes = await portfolioService.updateProfile({ avatar_url: newAvatarUrl })
-      if (saveRes.ok) {
-        setToast({ type: 'success', text: 'Photo de profil mise à jour et enregistrée avec succès !' })
-      } else {
-        setToast({ type: 'error', text: saveRes.error || 'Erreur lors de la synchronisation de l’avatar.' })
-      }
+      setProfileForm((prev) => ({ ...prev, avatar_url: res.url! }))
+      setToast({ type: 'success', text: 'Avatar téléversé dans le bucket portfolio ! Enregistrez le profil pour appliquer.' })
     } else {
       setToast({ type: 'error', text: res.error || 'Erreur lors du téléversement de l’avatar.' })
-    }
-  }
-
-  const handleRemoveAvatar = async (): Promise<void> => {
-    setProfileForm((prev) => ({ ...prev, avatar_url: '' }))
-    setProfile((prev) => (prev ? { ...prev, avatar_url: '' } : null))
-    const saveRes = await portfolioService.updateProfile({ avatar_url: '' })
-    if (saveRes.ok) {
-      setToast({ type: 'success', text: 'Photo de profil retirée avec succès.' })
-    } else {
-      setToast({ type: 'error', text: 'Erreur lors du retrait de la photo.' })
-    }
-  }
-
-  const handleProjectImageUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setUploadingProjectImage(true)
-    const res = await portfolioService.uploadMedia(file, 'projects')
-    setUploadingProjectImage(false)
-
-    if (res.ok && res.url) {
-      setProjectForm((prev) => ({ ...prev, image_url: res.url! }))
-      setToast({ type: 'success', text: 'Image de couverture téléversée avec succès !' })
-    } else {
-      setToast({ type: 'error', text: res.error || 'Erreur lors du téléversement de l’image.' })
     }
   }
 
@@ -383,6 +344,8 @@ export default function DashboardPage(): ReactElement {
 
   const openProjectCreate = (): void => {
     setEditingProject(null)
+    setProjectCoverFile(null)
+    setProjectCoverPreview(null)
     setProjectForm({
       title: '',
       slug: '',
@@ -403,6 +366,9 @@ export default function DashboardPage(): ReactElement {
 
   const openProjectEdit = (p: DbProject): void => {
     setEditingProject(p)
+    setProjectCoverFile(null)
+    const existingCover = p.cover_image_url || (p.images && p.images[0]) || ''
+    setProjectCoverPreview(existingCover || null)
     setProjectForm({
       title: p.title,
       slug: p.slug,
@@ -413,7 +379,7 @@ export default function DashboardPage(): ReactElement {
       description: p.description,
       demo_url: p.demo_url || '',
       repo_url: p.repo_url || '',
-      image_url: p.images && p.images[0] ? p.images[0] : '',
+      image_url: existingCover,
       is_featured: p.is_featured,
       display_order: p.display_order,
       selectedSkills: [...p.skills],
@@ -421,12 +387,40 @@ export default function DashboardPage(): ReactElement {
     setProjectModalOpen(true)
   }
 
+  const handleProjectFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setProjectCoverFile(file)
+    setProjectCoverPreview(URL.createObjectURL(file))
+  }
+
+  const handleRemoveProjectCover = (): void => {
+    setProjectCoverFile(null)
+    setProjectCoverPreview(null)
+  }
+
   const handleProjectSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault()
     setSavingProject(true)
 
     try {
-      const images = projectForm.image_url.trim() ? [projectForm.image_url.trim()] : []
+      let finalCoverUrl: string | null = projectCoverPreview
+
+      // Si un nouveau fichier local / photothèque a été sélectionné, le téléverser sur Supabase storage
+      if (projectCoverFile) {
+        const uploadRes = await portfolioService.uploadMedia(projectCoverFile, 'projects')
+        if (!uploadRes.ok || !uploadRes.url) {
+          setToast({
+            type: 'error',
+            text: uploadRes.error || 'Erreur lors du téléversement de la capture du projet.',
+          })
+          setSavingProject(false)
+          return
+        }
+        finalCoverUrl = uploadRes.url
+      }
+
+      const images = finalCoverUrl ? [finalCoverUrl] : []
 
       if (editingProject) {
         const res = await portfolioService.updateProject(
@@ -439,6 +433,7 @@ export default function DashboardPage(): ReactElement {
             status: projectForm.status,
             summary: projectForm.summary.trim(),
             description: projectForm.description.trim(),
+            cover_image_url: finalCoverUrl,
             images,
             demo_url: projectForm.demo_url.trim() || null,
             repo_url: projectForm.repo_url.trim() || null,
@@ -465,6 +460,7 @@ export default function DashboardPage(): ReactElement {
             status: projectForm.status,
             summary: projectForm.summary.trim(),
             description: projectForm.description.trim(),
+            cover_image_url: finalCoverUrl,
             images,
             demo_url: projectForm.demo_url.trim() || null,
             repo_url: projectForm.repo_url.trim() || null,
@@ -652,6 +648,17 @@ export default function DashboardPage(): ReactElement {
         <header className="flex items-center justify-between gap-4 pb-5 border-b border-zinc-200 dark:border-zinc-800/80 mb-6">
           {/* Titre discret à gauche avec indicateur en direct du statut actuel */}
           <div className="flex items-center gap-3">
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.name || 'Admin'}
+                className="size-10 rounded-full object-cover border-2 border-indigo-500 shadow-xs shrink-0"
+              />
+            ) : (
+              <div className="size-10 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 shadow-xs">
+                <Icon name="user" className="size-5" />
+              </div>
+            )}
             <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-0.5">
                 <span
@@ -1161,45 +1168,105 @@ export default function DashboardPage(): ReactElement {
             {/* Modal de Projet */}
             {projectModalOpen && (
               <div
-                className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-xs animate-fade-in"
+                className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in"
                 role="dialog"
                 aria-modal="true"
               >
-                {/* Backdrop click to dismiss */}
+                {/* Backdrop dismiss */}
                 <div
                   className="fixed inset-0"
                   onClick={() => setProjectModalOpen(false)}
                 />
 
-                <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[88vh] overflow-hidden">
+                <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
                   {/* Sticky Header */}
-                  <div className="px-5 py-3.5 sm:py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between shrink-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md">
+                  <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between shrink-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md">
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="size-2 rounded-full bg-indigo-500 animate-pulse" />
                         <h3 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
-                          {editingProject ? 'Modifier le projet' : 'Nouveau projet'}
+                          {editingProject ? 'Modifier le projet' : 'Ajouter un nouveau projet'}
                         </h3>
                       </div>
                       <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
-                        {editingProject ? editingProject.title : 'Remplissez les informations ci-dessous'}
+                        {editingProject ? editingProject.title : 'Remplissez les détails et importez une capture de votre projet'}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setProjectModalOpen(false)}
-                      className="size-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                      className="size-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                       title="Fermer"
                     >
                       ✕
                     </button>
                   </div>
 
-                  {/* Scrollable Content Body */}
+                  {/* Scrollable Form Body */}
                   <form onSubmit={handleProjectSubmit} className="flex flex-col flex-1 min-h-0">
-                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 overscroll-contain">
+                    <div className="flex-1 overflow-y-auto p-6 space-y-4 overscroll-contain">
+                      {/* Capture / Image de couverture (Téléversement direct - aucun champ URL) */}
+                      <div>
+                        <label className="block text-xs font-mono font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                          Capture d'écran / Photo du projet *
+                        </label>
+
+                        {projectCoverPreview ? (
+                          <div className="space-y-2">
+                            <div className="relative w-full h-44 sm:h-52 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-950">
+                              <img
+                                src={projectCoverPreview}
+                                alt="Aperçu du projet"
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md text-white text-[11px] font-mono flex items-center gap-1.5 shadow-sm">
+                                <span className="size-2 rounded-full bg-emerald-400" />
+                                <span>Aperçu de la capture</span>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs font-mono transition-colors">
+                                <Icon name="sparkles" className="size-3.5 text-indigo-500" />
+                                <span>Changer la capture</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleProjectFileChange}
+                                  className="hidden"
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                onClick={handleRemoveProjectCover}
+                                className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-rose-500/10 hover:border-rose-500/30 text-rose-600 text-xs font-mono transition-colors cursor-pointer"
+                              >
+                                Retirer la capture
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-xl cursor-pointer bg-zinc-50/50 dark:bg-zinc-950/50 hover:bg-indigo-50/20 dark:hover:bg-indigo-950/20 transition-all p-4 text-center group">
+                            <div className="size-10 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                              <Icon name="sparkles" className="size-5" />
+                            </div>
+                            <span className="text-xs font-mono font-semibold text-zinc-800 dark:text-zinc-200">
+                              Importer une capture ou photo du projet
+                            </span>
+                            <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">
+                              Photothèque smartphone ou explorateur PC (PNG, JPG, WebP)
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleProjectFileChange}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+                      </div>
+
                       {/* Titre & Slug */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
                             Titre du projet *
@@ -1207,7 +1274,7 @@ export default function DashboardPage(): ReactElement {
                           <input
                             type="text"
                             required
-                            placeholder="ex: Portfolio v2"
+                            placeholder="ex: Portfolio SaaS v2"
                             value={projectForm.title}
                             onChange={(e) => {
                               const val = e.target.value
@@ -1229,12 +1296,12 @@ export default function DashboardPage(): ReactElement {
 
                         <div>
                           <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                            Identifiant URL (Slug) *
+                            Slug (URL unique) *
                           </label>
                           <input
                             type="text"
                             required
-                            placeholder="ex: portfolio-v2"
+                            placeholder="ex: portfolio-saas-v2"
                             value={projectForm.slug}
                             onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value })}
                             className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none font-mono"
@@ -1250,7 +1317,7 @@ export default function DashboardPage(): ReactElement {
                         <input
                           type="text"
                           required
-                          placeholder="ex: Plateforme moderne pour développeurs"
+                          placeholder="ex: Application web moderne full-stack ultra-rapide"
                           value={projectForm.tagline}
                           onChange={(e) => setProjectForm({ ...projectForm, tagline: e.target.value })}
                           className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
@@ -1258,7 +1325,7 @@ export default function DashboardPage(): ReactElement {
                       </div>
 
                       {/* Catégorie & Statut */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
                             Catégorie
@@ -1308,21 +1375,21 @@ export default function DashboardPage(): ReactElement {
                         <textarea
                           rows={2}
                           required
-                          placeholder="Court paragraphe visible dans la liste des projets..."
+                          placeholder="Court paragraphe d'aperçu visible sur le catalogue..."
                           value={projectForm.summary}
                           onChange={(e) => setProjectForm({ ...projectForm, summary: e.target.value })}
                           className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
                         />
                       </div>
 
-                      {/* Description détaillée */}
+                      {/* Description complète */}
                       <div>
                         <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
                           Description complète (Optionnel)
                         </label>
                         <textarea
                           rows={3}
-                          placeholder="Détails architecturaux, fonctionnalités majeures..."
+                          placeholder="Détails techniques, choix d'architecture, défis relevés..."
                           value={projectForm.description}
                           onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
                           className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
@@ -1330,7 +1397,7 @@ export default function DashboardPage(): ReactElement {
                       </div>
 
                       {/* URLs Démo & Code */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
                             URL Démo en ligne
@@ -1358,63 +1425,8 @@ export default function DashboardPage(): ReactElement {
                         </div>
                       </div>
 
-                      {/* Image de couverture avec Téléversement Direct ou URL */}
-                      <div>
-                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                          Image de couverture
-                        </label>
-
-                        <div className="space-y-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs font-mono transition-colors">
-                              <Icon name="sparkles" className="size-3.5 text-indigo-500" />
-                              <span>{uploadingProjectImage ? 'Téléversement...' : 'Téléverser une image'}</span>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                disabled={uploadingProjectImage}
-                                onChange={handleProjectImageUpload}
-                                className="hidden"
-                              />
-                            </label>
-
-                            {projectForm.image_url && (
-                              <button
-                                type="button"
-                                onClick={() => setProjectForm({ ...projectForm, image_url: '' })}
-                                className="px-2.5 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-rose-500/10 text-rose-600 text-xs font-mono"
-                              >
-                                Effacer
-                              </button>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-3">
-                            {projectForm.image_url ? (
-                              <div className="relative size-14 rounded-lg overflow-hidden border border-zinc-300 dark:border-zinc-700 shrink-0 bg-zinc-100 dark:bg-zinc-950">
-                                <img
-                                  src={projectForm.image_url}
-                                  alt="Aperçu"
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none'
-                                  }}
-                                />
-                              </div>
-                            ) : null}
-                            <input
-                              type="url"
-                              value={projectForm.image_url}
-                              onChange={(e) => setProjectForm({ ...projectForm, image_url: e.target.value })}
-                              placeholder="Ou collez une URL : https://..."
-                              className="flex-1 px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
                       {/* Ordre & À la une */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800/80">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3.5 rounded-xl bg-zinc-50/70 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800/80">
                         <div>
                           <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
                             Ordre d'affichage
@@ -1447,7 +1459,7 @@ export default function DashboardPage(): ReactElement {
                         </div>
                       </div>
 
-                      {/* Compétences associées */}
+                      {/* Technologies & Compétences associées */}
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300">
@@ -1487,18 +1499,18 @@ export default function DashboardPage(): ReactElement {
                     </div>
 
                     {/* Sticky Footer */}
-                    <div className="px-5 py-3.5 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-end gap-3 shrink-0 bg-zinc-50/95 dark:bg-zinc-900/95 backdrop-blur-md">
+                    <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-end gap-3 shrink-0 bg-zinc-50/95 dark:bg-zinc-900/95 backdrop-blur-md">
                       <button
                         type="button"
                         onClick={() => setProjectModalOpen(false)}
-                        className="px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-mono transition-colors"
+                        className="px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-mono transition-colors cursor-pointer"
                       >
                         Annuler
                       </button>
                       <button
                         type="submit"
                         disabled={savingProject}
-                        className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-semibold transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2 disabled:opacity-50"
+                        className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-semibold transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                       >
                         {savingProject && <span className="size-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                         <span>{editingProject ? 'Enregistrer les modifications' : 'Créer le projet'}</span>
@@ -1586,13 +1598,8 @@ export default function DashboardPage(): ReactElement {
 
             {/* Modal Compétence */}
             {skillModalOpen && (
-              <div
-                className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fade-in"
-                role="dialog"
-                aria-modal="true"
-              >
-                <div className="fixed inset-0" onClick={() => setSkillModalOpen(false)} />
-                <div className="relative glass-card max-w-md w-full p-6 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xl">
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+                <div className="glass-card max-w-md w-full p-6 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xl">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                       {editingSkill ? 'Modifier la compétence' : 'Ajouter une compétence'}
@@ -1862,7 +1869,7 @@ export default function DashboardPage(): ReactElement {
                     {profileForm.avatar_url && (
                       <button
                         type="button"
-                        onClick={handleRemoveAvatar}
+                        onClick={() => setProfileForm((prev) => ({ ...prev, avatar_url: '' }))}
                         className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-600 text-xs font-mono transition-colors"
                       >
                         Retirer
