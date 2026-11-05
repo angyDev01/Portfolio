@@ -143,19 +143,21 @@ GRANT ALL ON TABLE contact_messages TO authenticated;
 -- ==============================================================================
 -- TABLE : page_views (Analytics)
 -- ==============================================================================
--- Le public peut enregistrer des consultations de page
-DROP POLICY IF EXISTS "Allow public insert on page_views" ON page_views;
-CREATE POLICY "Allow public insert on page_views" 
-ON page_views FOR INSERT 
-TO public 
-WITH CHECK (true);
+-- Autorise les visiteurs anonymes et connectés à exécuter la fonction de visite
+GRANT EXECUTE ON FUNCTION track_unique_visit(VARCHAR, VARCHAR) TO anon, authenticated;
 
--- Seul l'administrateur connecté peut consulter les statistiques analytiques
+-- Assure les permissions de lecture pour l'administrateur et d'écriture pour tous
+ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow anon insert page_views" ON page_views;
+DROP POLICY IF EXISTS "Allow public insert on page_views" ON page_views;
+CREATE POLICY "Allow anon insert page_views" ON page_views
+FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow admin read page_views" ON page_views;
 DROP POLICY IF EXISTS "Authenticated admin can view page_views" ON page_views;
-CREATE POLICY "Authenticated admin can view page_views" 
-ON page_views FOR SELECT 
-TO authenticated 
-USING (auth.uid() IS NOT NULL);
+CREATE POLICY "Allow admin read page_views" ON page_views
+FOR SELECT USING (auth.uid() IS NOT NULL);
 
 DROP POLICY IF EXISTS "Authenticated admin can delete page_views" ON page_views;
 CREATE POLICY "Authenticated admin can delete page_views" 
@@ -163,5 +165,5 @@ ON page_views FOR DELETE
 TO authenticated 
 USING (auth.uid() IS NOT NULL);
 
--- Droit d'exécution de la fonction RPC track_unique_visit
-GRANT EXECUTE ON FUNCTION track_unique_visit(VARCHAR, VARCHAR) TO anon, authenticated;
+GRANT INSERT ON TABLE page_views TO anon, authenticated;
+GRANT ALL ON TABLE page_views TO authenticated;
