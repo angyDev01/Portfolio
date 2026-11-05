@@ -304,9 +304,16 @@ export default function DashboardPage(): ReactElement {
     const file = e.target.files?.[0]
     if (!file) return
 
+    const previousAvatarUrl = profile?.avatar_url || profileForm.avatar_url
     setUploadingAvatar(true)
     const res = await portfolioService.uploadMedia(file, 'avatars')
     setUploadingAvatar(false)
+
+    // Nettoyage immédiat de l'input de fichier pour autoriser des sélections répétées sans blocage
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = ''
+    }
+    e.target.value = ''
 
     if (res.ok && res.url) {
       const newAvatarUrl = res.url
@@ -317,11 +324,10 @@ export default function DashboardPage(): ReactElement {
       // 2. Exécute l'UPDATE immédiat de la colonne avatar_url dans la table profile
       const saveRes = await portfolioService.updateProfile({ avatar_url: newAvatarUrl })
 
-      // 3. Nettoyage de l'input de fichier pour autoriser des modifications répétées
-      if (avatarInputRef.current) {
-        avatarInputRef.current.value = ''
+      // 3. Suppression de l'ancienne photo dans le bucket Supabase pour ne pas accumuler de fichiers orphelins
+      if (previousAvatarUrl && previousAvatarUrl !== newAvatarUrl) {
+        await portfolioService.deleteMedia(previousAvatarUrl)
       }
-      e.target.value = ''
 
       if (saveRes.ok) {
         setToast({ type: 'success', text: 'Photo de profil mise à jour et enregistrée avec succès !' })
@@ -329,19 +335,19 @@ export default function DashboardPage(): ReactElement {
         setToast({ type: 'error', text: saveRes.error || 'Erreur lors de la sauvegarde de l’avatar.' })
       }
     } else {
-      if (avatarInputRef.current) {
-        avatarInputRef.current.value = ''
-      }
-      e.target.value = ''
       setToast({ type: 'error', text: res.error || 'Erreur lors du téléversement de l’avatar.' })
     }
   }
 
   const handleRemoveAvatar = async (): Promise<void> => {
+    const previousAvatarUrl = profile?.avatar_url || profileForm.avatar_url
     setProfileForm((prev) => ({ ...prev, avatar_url: '' }))
     setProfile((prev) => (prev ? { ...prev, avatar_url: '' } : null))
     if (avatarInputRef.current) {
       avatarInputRef.current.value = ''
+    }
+    if (previousAvatarUrl) {
+      await portfolioService.deleteMedia(previousAvatarUrl)
     }
     const saveRes = await portfolioService.updateProfile({ avatar_url: '' })
     if (saveRes.ok) {
@@ -686,6 +692,7 @@ export default function DashboardPage(): ReactElement {
           <div className="flex items-center gap-3">
             {profile?.avatar_url ? (
               <img
+                key={profile.avatar_url}
                 src={profile.avatar_url}
                 alt={profile.name || 'Admin'}
                 className="size-10 rounded-full object-cover border-2 border-indigo-500 shadow-xs shrink-0"
@@ -1877,6 +1884,7 @@ export default function DashboardPage(): ReactElement {
                 <div className="relative group shrink-0">
                   {profileForm.avatar_url ? (
                     <img
+                      key={profileForm.avatar_url}
                       src={profileForm.avatar_url}
                       alt="Avatar prévisualisation"
                       className="size-20 rounded-full object-cover border-2 border-indigo-500 shadow-md"

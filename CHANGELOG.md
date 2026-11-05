@@ -4,6 +4,39 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 
 ---
 
+## [2026-11-05] — Résolution Définitive du Cache Avatar & Rendu Instantané Synchrone
+
+### 1. Problème Identifié & Cause Racine
+- **Problème** : Après la sélection d'une nouvelle photo de profil, la toute première image restait obstinément affichée à l'écran dans le Dashboard et la Navbar.
+- **Causes Racines** :
+  1. **Cache HTTP Agressif** : Supabase Storage et le navigateur mettaient en cache les images avec un en-tête `cacheControl: '3600'`.
+  2. **Réutilisation du DOM HTMLImageElement par React** : La mutation de l'attribut `src` sur une balise `<img>` déjà existante ne forçait pas toujours un rafraîchissement immédiat de la surface de rendu.
+  3. **Composants non synchronisés sans rechargement** : La Navbar ne rechargeait le profil qu'au montage initial du composant (`useEffect` unique).
+  4. **Fichiers orphelins** : Les anciennes photos de profil n'étaient pas purgées du bucket de stockage.
+
+---
+
+### 2. Solutions Techniques Implémentées
+
+1. **Nom Unique, Cache-Buster & `cacheControl: '0'`** (`portfolioService.ts`) :
+   - Génération d'un nom de fichier avec horodatage strict et sel aléatoire : `avatars/avatar-${timestamp}-${rand}.${fileExt}`.
+   - Envoi de l'image avec `cacheControl: '0'` et `upsert: true` pour désactiver la mise en cache HTTP intermédiaire.
+   - Ajout d'un paramètre de Cache-Buster `?t=${timestamp}` à l'URL publique générée.
+
+2. **Événement Global de Synchronisation & Remontage Forcé (React Keys)** :
+   - Émission d'un événement global `window.dispatchEvent(new CustomEvent('portfolio:profile-updated', { detail: updates }))` dès la mise à jour du profil.
+   - Écoute active de cet événement dans `Navbar.tsx` pour refléter la nouvelle photo en direct sur toute l'interface sans aucun rafraîchissement.
+   - Ajout d'attributs `key={profile.avatar_url}` et `key={profileForm.avatar_url}` sur toutes les balises `<img>` d'avatar (Navbar, Top Bar Dashboard, Onglet Profil) pour forcer le démontage/remontage immédiat dans le Virtual DOM.
+
+3. **Nettoyage & Suppression des Anciennes Photos** (`portfolioService.deleteMedia`) :
+   - Fonction dédiée extrayant le chemin de stockage depuis l'URL Supabase pour exécuter `supabase.storage.from('portfolio').remove([path])`.
+   - Suppression automatique de l'ancienne photo lors d'un remplacement ou lors d'un retrait d'avatar pour éviter l'accumulation de fichiers orphelins.
+
+4. **Réinitialisation Complète des Inputs Fichiers** :
+   - Réinitialisation simultanée de la ref et de l'événement cible (`avatarInputRef.current.value = ''` et `e.target.value = ''`) pour autoriser des modifications répétées illimitées.
+
+---
+
 ## [2026-11-05] — Modifications Répétées Illimitées de l'Avatar & Option Upsert
 
 ### 1. Problème Identifié & Comportement Corrigé

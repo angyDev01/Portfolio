@@ -16,8 +16,18 @@ export default function Navbar(): ReactElement {
     portfolioService.getProfile().then((data) => {
       if (mounted) setProfile(data)
     })
+
+    const handleProfileUpdate = (e: Event): void => {
+      const ce = e as CustomEvent<Partial<DbProfile>>
+      if (mounted && ce.detail) {
+        setProfile((prev) => (prev ? { ...prev, ...ce.detail } : null))
+      }
+    }
+    window.addEventListener('portfolio:profile-updated', handleProfileUpdate)
+
     return () => {
       mounted = false
+      window.removeEventListener('portfolio:profile-updated', handleProfileUpdate)
     }
   }, [])
 
@@ -70,6 +80,7 @@ export default function Navbar(): ReactElement {
         >
           {profile?.avatar_url ? (
             <img
+              key={profile.avatar_url}
               src={profile.avatar_url}
               alt={name}
               className="size-8.5 rounded-full object-cover border border-zinc-200 dark:border-zinc-700 shadow-xs shrink-0"
