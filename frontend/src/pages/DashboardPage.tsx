@@ -85,6 +85,8 @@ export default function DashboardPage(): ReactElement {
     display_order: 0,
     selectedSkills: [],
   })
+  const [uploadingProjectImage, setUploadingProjectImage] = useState<boolean>(false)
+  const [savingProject, setSavingProject] = useState<boolean>(false)
 
   // Skills State
   const [skills, setSkills] = useState<DbSkill[]>([])
@@ -271,15 +273,19 @@ export default function DashboardPage(): ReactElement {
 
     const res = await portfolioService.updateProfile({
       name: profileForm.name.trim(),
+      full_name: profileForm.name.trim(),
       alias: profileForm.alias.trim() || undefined,
       role: profileForm.role.trim() || undefined,
+      title: profileForm.role.trim() || undefined,
       short_bio: profileForm.short_bio.trim(),
+      bio_short: profileForm.short_bio.trim(),
       full_bio: paragraphs,
+      bio_full: paragraphs.join('\n\n'),
       github_url: profileForm.github_url.trim() || undefined,
       linkedin_url: profileForm.linkedin_url.trim() || undefined,
       twitter_url: profileForm.twitter_url.trim() || undefined,
       facebook_url: profileForm.facebook_url.trim() || undefined,
-      avatar_url: profileForm.avatar_url.trim() || undefined,
+      avatar_url: profileForm.avatar_url.trim() || null,
       phone: profileForm.phone.trim() || undefined,
       phone_secondary: profileForm.phone_secondary.trim() || undefined,
       whatsapp_url: profileForm.whatsapp_url.trim() || undefined,
@@ -305,10 +311,46 @@ export default function DashboardPage(): ReactElement {
     setUploadingAvatar(false)
 
     if (res.ok && res.url) {
-      setProfileForm((prev) => ({ ...prev, avatar_url: res.url! }))
-      setToast({ type: 'success', text: 'Avatar téléversé dans le bucket portfolio ! Enregistrez le profil pour appliquer.' })
+      const newAvatarUrl = res.url
+      setProfileForm((prev) => ({ ...prev, avatar_url: newAvatarUrl }))
+      setProfile((prev) => (prev ? { ...prev, avatar_url: newAvatarUrl } : null))
+
+      // Enregistre immédiatement en base de données pour synchronisation persistante
+      const saveRes = await portfolioService.updateProfile({ avatar_url: newAvatarUrl })
+      if (saveRes.ok) {
+        setToast({ type: 'success', text: 'Photo de profil mise à jour et enregistrée avec succès !' })
+      } else {
+        setToast({ type: 'error', text: saveRes.error || 'Erreur lors de la synchronisation de l’avatar.' })
+      }
     } else {
       setToast({ type: 'error', text: res.error || 'Erreur lors du téléversement de l’avatar.' })
+    }
+  }
+
+  const handleRemoveAvatar = async (): Promise<void> => {
+    setProfileForm((prev) => ({ ...prev, avatar_url: '' }))
+    setProfile((prev) => (prev ? { ...prev, avatar_url: '' } : null))
+    const saveRes = await portfolioService.updateProfile({ avatar_url: '' })
+    if (saveRes.ok) {
+      setToast({ type: 'success', text: 'Photo de profil retirée avec succès.' })
+    } else {
+      setToast({ type: 'error', text: 'Erreur lors du retrait de la photo.' })
+    }
+  }
+
+  const handleProjectImageUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadingProjectImage(true)
+    const res = await portfolioService.uploadMedia(file, 'projects')
+    setUploadingProjectImage(false)
+
+    if (res.ok && res.url) {
+      setProjectForm((prev) => ({ ...prev, image_url: res.url! }))
+      setToast({ type: 'success', text: 'Image de couverture téléversée avec succès !' })
+    } else {
+      setToast({ type: 'error', text: res.error || 'Erreur lors du téléversement de l’image.' })
     }
   }
 
@@ -381,62 +423,67 @@ export default function DashboardPage(): ReactElement {
 
   const handleProjectSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault()
+    setSavingProject(true)
 
-    const images = projectForm.image_url.trim() ? [projectForm.image_url.trim()] : []
+    try {
+      const images = projectForm.image_url.trim() ? [projectForm.image_url.trim()] : []
 
-    if (editingProject) {
-      const res = await portfolioService.updateProject(
-        editingProject.id,
-        {
-          title: projectForm.title.trim(),
-          slug: projectForm.slug.trim(),
-          tagline: projectForm.tagline.trim(),
-          category: projectForm.category,
-          status: projectForm.status,
-          summary: projectForm.summary.trim(),
-          description: projectForm.description.trim(),
-          images,
-          demo_url: projectForm.demo_url.trim() || null,
-          repo_url: projectForm.repo_url.trim() || null,
-          is_featured: projectForm.is_featured,
-          display_order: Number(projectForm.display_order) || 0,
-        },
-        projectForm.selectedSkills
-      )
-      if (res.ok) {
-        setToast({ type: 'success', text: 'Projet modifié avec succès.' })
-        setProjectModalOpen(false)
-        const updated = await portfolioService.getProjects()
-        setProjects(updated)
+      if (editingProject) {
+        const res = await portfolioService.updateProject(
+          editingProject.id,
+          {
+            title: projectForm.title.trim(),
+            slug: projectForm.slug.trim(),
+            tagline: projectForm.tagline.trim(),
+            category: projectForm.category,
+            status: projectForm.status,
+            summary: projectForm.summary.trim(),
+            description: projectForm.description.trim(),
+            images,
+            demo_url: projectForm.demo_url.trim() || null,
+            repo_url: projectForm.repo_url.trim() || null,
+            is_featured: projectForm.is_featured,
+            display_order: Number(projectForm.display_order) || 0,
+          },
+          projectForm.selectedSkills
+        )
+        if (res.ok) {
+          setToast({ type: 'success', text: 'Projet modifié avec succès.' })
+          setProjectModalOpen(false)
+          const updated = await portfolioService.getProjects()
+          setProjects(updated)
+        } else {
+          setToast({ type: 'error', text: res.error || 'Erreur modification projet.' })
+        }
       } else {
-        setToast({ type: 'error', text: res.error || 'Erreur modification projet.' })
+        const res = await portfolioService.createProject(
+          {
+            title: projectForm.title.trim(),
+            slug: projectForm.slug.trim(),
+            tagline: projectForm.tagline.trim(),
+            category: projectForm.category,
+            status: projectForm.status,
+            summary: projectForm.summary.trim(),
+            description: projectForm.description.trim(),
+            images,
+            demo_url: projectForm.demo_url.trim() || null,
+            repo_url: projectForm.repo_url.trim() || null,
+            is_featured: projectForm.is_featured,
+            display_order: Number(projectForm.display_order) || 0,
+          },
+          projectForm.selectedSkills
+        )
+        if (res.ok) {
+          setToast({ type: 'success', text: 'Projet créé avec succès.' })
+          setProjectModalOpen(false)
+          const updated = await portfolioService.getProjects()
+          setProjects(updated)
+        } else {
+          setToast({ type: 'error', text: res.error || 'Erreur création projet.' })
+        }
       }
-    } else {
-      const res = await portfolioService.createProject(
-        {
-          title: projectForm.title.trim(),
-          slug: projectForm.slug.trim(),
-          tagline: projectForm.tagline.trim(),
-          category: projectForm.category,
-          status: projectForm.status,
-          summary: projectForm.summary.trim(),
-          description: projectForm.description.trim(),
-          images,
-          demo_url: projectForm.demo_url.trim() || null,
-          repo_url: projectForm.repo_url.trim() || null,
-          is_featured: projectForm.is_featured,
-          display_order: Number(projectForm.display_order) || 0,
-        },
-        projectForm.selectedSkills
-      )
-      if (res.ok) {
-        setToast({ type: 'success', text: 'Projet créé avec succès.' })
-        setProjectModalOpen(false)
-        const updated = await portfolioService.getProjects()
-        setProjects(updated)
-      } else {
-        setToast({ type: 'error', text: res.error || 'Erreur création projet.' })
-      }
+    } finally {
+      setSavingProject(false)
     }
   }
 
@@ -1113,267 +1160,348 @@ export default function DashboardPage(): ReactElement {
 
             {/* Modal de Projet */}
             {projectModalOpen && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
-                <div className="glass-card max-w-2xl w-full p-6 sm:p-8 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 my-8 shadow-2xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-                      {editingProject ? 'Modifier le Projet' : 'Ajouter un Projet'}
-                    </h3>
+              <div
+                className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-xs animate-fade-in"
+                role="dialog"
+                aria-modal="true"
+              >
+                {/* Backdrop click to dismiss */}
+                <div
+                  className="fixed inset-0"
+                  onClick={() => setProjectModalOpen(false)}
+                />
+
+                <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[88vh] overflow-hidden">
+                  {/* Sticky Header */}
+                  <div className="px-5 py-3.5 sm:py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between shrink-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="size-2 rounded-full bg-indigo-500 animate-pulse" />
+                        <h3 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                          {editingProject ? 'Modifier le projet' : 'Nouveau projet'}
+                        </h3>
+                      </div>
+                      <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
+                        {editingProject ? editingProject.title : 'Remplissez les informations ci-dessous'}
+                      </p>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setProjectModalOpen(false)}
-                      className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-lg cursor-pointer"
+                      className="size-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                      title="Fermer"
                     >
                       ✕
                     </button>
                   </div>
 
-                  <form onSubmit={handleProjectSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                          Titre *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={projectForm.title}
-                          onChange={(e) => {
-                            const val = e.target.value
-                            setProjectForm({
-                              ...projectForm,
-                              title: val,
-                              slug:
-                                !editingProject && !projectForm.slug
-                                  ? val
-                                    .toLowerCase()
-                                    .replace(/[^a-z0-9]+/g, '-')
-                                    .replace(/^-|-$/g, '')
-                                  : projectForm.slug,
-                            })
-                          }}
-                          className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                          Slug *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={projectForm.slug}
-                          onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value })}
-                          className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none font-mono"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                        Accroche (Tagline) *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={projectForm.tagline}
-                        onChange={(e) => setProjectForm({ ...projectForm, tagline: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                          Catégorie
-                        </label>
-                        <select
-                          value={projectForm.category}
-                          onChange={(e) =>
-                            setProjectForm({
-                              ...projectForm,
-                              category: e.target.value as 'Full-Stack' | 'Frontend' | 'APIs',
-                            })
-                          }
-                          className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                        >
-                          <option value="Full-Stack">Full-Stack</option>
-                          <option value="Frontend">Frontend</option>
-                          <option value="APIs">APIs & Backend</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                          Statut
-                        </label>
-                        <select
-                          value={projectForm.status}
-                          onChange={(e) =>
-                            setProjectForm({
-                              ...projectForm,
-                              status: e.target.value as ProjectStatusType,
-                            })
-                          }
-                          className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                        >
-                          <option value="completed">Terminé</option>
-                          <option value="in_progress">En cours</option>
-                          <option value="archived">Archivé</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                        Résumé (affiché en carte) *
-                      </label>
-                      <textarea
-                        rows={2}
-                        required
-                        value={projectForm.summary}
-                        onChange={(e) => setProjectForm({ ...projectForm, summary: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                        Description complète
-                      </label>
-                      <textarea
-                        rows={4}
-                        value={projectForm.description}
-                        onChange={(e) =>
-                          setProjectForm({ ...projectForm, description: e.target.value })
-                        }
-                        className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                          URL Démo
-                        </label>
-                        <input
-                          type="url"
-                          value={projectForm.demo_url}
-                          onChange={(e) =>
-                            setProjectForm({ ...projectForm, demo_url: e.target.value })
-                          }
-                          className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                          URL Code Source
-                        </label>
-                        <input
-                          type="url"
-                          value={projectForm.repo_url}
-                          onChange={(e) =>
-                            setProjectForm({ ...projectForm, repo_url: e.target.value })
-                          }
-                          className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                        URL Image de couverture
-                      </label>
-                      <input
-                        type="url"
-                        value={projectForm.image_url}
-                        onChange={(e) =>
-                          setProjectForm({ ...projectForm, image_url: e.target.value })
-                        }
-                        placeholder="https://images.unsplash.com/..."
-                        className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                          Ordre d'affichage
-                        </label>
-                        <input
-                          type="number"
-                          value={projectForm.display_order}
-                          onChange={(e) =>
-                            setProjectForm({
-                              ...projectForm,
-                              display_order: Number(e.target.value),
-                            })
-                          }
-                          className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
-                        />
-                      </div>
-
-                      <div className="flex items-center pt-5">
-                        <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-zinc-700 dark:text-zinc-300">
+                  {/* Scrollable Content Body */}
+                  <form onSubmit={handleProjectSubmit} className="flex flex-col flex-1 min-h-0">
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 overscroll-contain">
+                      {/* Titre & Slug */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                          <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                            Titre du projet *
+                          </label>
                           <input
-                            type="checkbox"
-                            checked={projectForm.is_featured}
-                            onChange={(e) =>
-                              setProjectForm({ ...projectForm, is_featured: e.target.checked })
-                            }
-                            className="size-4 rounded accent-indigo-600"
+                            type="text"
+                            required
+                            placeholder="ex: Portfolio v2"
+                            value={projectForm.title}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              setProjectForm({
+                                ...projectForm,
+                                title: val,
+                                slug:
+                                  !editingProject && !projectForm.slug
+                                    ? val
+                                      .toLowerCase()
+                                      .replace(/[^a-z0-9]+/g, '-')
+                                      .replace(/^-|-$/g, '')
+                                    : projectForm.slug,
+                              })
+                            }}
+                            className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
                           />
-                          <span>Afficher à la une</span>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                            Identifiant URL (Slug) *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="ex: portfolio-v2"
+                            value={projectForm.slug}
+                            onChange={(e) => setProjectForm({ ...projectForm, slug: e.target.value })}
+                            className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Tagline */}
+                      <div>
+                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                          Accroche concise (Tagline) *
                         </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="ex: Plateforme moderne pour développeurs"
+                          value={projectForm.tagline}
+                          onChange={(e) => setProjectForm({ ...projectForm, tagline: e.target.value })}
+                          className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+                        />
                       </div>
-                    </div>
 
-                    <div>
-                      <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                        Technologies & Compétences associées
-                      </label>
-                      <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800">
-                        {skills.map((s) => {
-                          const isSel = projectForm.selectedSkills.includes(s.name)
-                          return (
-                            <button
-                              key={s.id}
-                              type="button"
-                              onClick={() => {
-                                setProjectForm({
-                                  ...projectForm,
-                                  selectedSkills: isSel
-                                    ? projectForm.selectedSkills.filter((x) => x !== s.name)
-                                    : [...projectForm.selectedSkills, s.name],
-                                })
-                              }}
-                              className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-colors ${isSel
-                                ? 'bg-indigo-600 text-white font-medium'
-                                : 'bg-zinc-200 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                      {/* Catégorie & Statut */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                          <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                            Catégorie
+                          </label>
+                          <select
+                            value={projectForm.category}
+                            onChange={(e) =>
+                              setProjectForm({
+                                ...projectForm,
+                                category: e.target.value as 'Full-Stack' | 'Frontend' | 'APIs',
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+                          >
+                            <option value="Full-Stack">Full-Stack</option>
+                            <option value="Frontend">Frontend</option>
+                            <option value="APIs">APIs & Backend</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                            Statut du projet
+                          </label>
+                          <select
+                            value={projectForm.status}
+                            onChange={(e) =>
+                              setProjectForm({
+                                ...projectForm,
+                                status: e.target.value as ProjectStatusType,
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+                          >
+                            <option value="completed">Terminé</option>
+                            <option value="in_progress">En cours</option>
+                            <option value="archived">Archivé</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Résumé */}
+                      <div>
+                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                          Résumé de la carte *
+                        </label>
+                        <textarea
+                          rows={2}
+                          required
+                          placeholder="Court paragraphe visible dans la liste des projets..."
+                          value={projectForm.summary}
+                          onChange={(e) => setProjectForm({ ...projectForm, summary: e.target.value })}
+                          className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Description détaillée */}
+                      <div>
+                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                          Description complète (Optionnel)
+                        </label>
+                        <textarea
+                          rows={3}
+                          placeholder="Détails architecturaux, fonctionnalités majeures..."
+                          value={projectForm.description}
+                          onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
+                          className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+                        />
+                      </div>
+
+                      {/* URLs Démo & Code */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                          <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                            URL Démo en ligne
+                          </label>
+                          <input
+                            type="url"
+                            placeholder="https://..."
+                            value={projectForm.demo_url}
+                            onChange={(e) => setProjectForm({ ...projectForm, demo_url: e.target.value })}
+                            className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                            URL Dépôt GitHub
+                          </label>
+                          <input
+                            type="url"
+                            placeholder="https://github.com/..."
+                            value={projectForm.repo_url}
+                            onChange={(e) => setProjectForm({ ...projectForm, repo_url: e.target.value })}
+                            className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Image de couverture avec Téléversement Direct ou URL */}
+                      <div>
+                        <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                          Image de couverture
+                        </label>
+
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs font-mono transition-colors">
+                              <Icon name="sparkles" className="size-3.5 text-indigo-500" />
+                              <span>{uploadingProjectImage ? 'Téléversement...' : 'Téléverser une image'}</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                disabled={uploadingProjectImage}
+                                onChange={handleProjectImageUpload}
+                                className="hidden"
+                              />
+                            </label>
+
+                            {projectForm.image_url && (
+                              <button
+                                type="button"
+                                onClick={() => setProjectForm({ ...projectForm, image_url: '' })}
+                                className="px-2.5 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-rose-500/10 text-rose-600 text-xs font-mono"
+                              >
+                                Effacer
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            {projectForm.image_url ? (
+                              <div className="relative size-14 rounded-lg overflow-hidden border border-zinc-300 dark:border-zinc-700 shrink-0 bg-zinc-100 dark:bg-zinc-950">
+                                <img
+                                  src={projectForm.image_url}
+                                  alt="Aperçu"
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none'
+                                  }}
+                                />
+                              </div>
+                            ) : null}
+                            <input
+                              type="url"
+                              value={projectForm.image_url}
+                              onChange={(e) => setProjectForm({ ...projectForm, image_url: e.target.value })}
+                              placeholder="Ou collez une URL : https://..."
+                              className="flex-1 px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Ordre & À la une */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800/80">
+                        <div>
+                          <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
+                            Ordre d'affichage
+                          </label>
+                          <input
+                            type="number"
+                            value={projectForm.display_order}
+                            onChange={(e) =>
+                              setProjectForm({
+                                ...projectForm,
+                                display_order: Number(e.target.value),
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+                          />
+                        </div>
+
+                        <div className="flex items-center sm:pt-5">
+                          <label className="flex items-center gap-2.5 cursor-pointer text-xs font-mono text-zinc-700 dark:text-zinc-300 select-none">
+                            <input
+                              type="checkbox"
+                              checked={projectForm.is_featured}
+                              onChange={(e) =>
+                                setProjectForm({ ...projectForm, is_featured: e.target.checked })
+                              }
+                              className="size-4 rounded accent-indigo-600 cursor-pointer"
+                            />
+                            <span>Mettre à la une (Projet vedette)</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Compétences associées */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300">
+                            Technologies & Compétences
+                          </label>
+                          <span className="text-[11px] font-mono text-zinc-400">
+                            {projectForm.selectedSkills.length} sélectionnée(s)
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800">
+                          {skills.map((s) => {
+                            const isSel = projectForm.selectedSkills.includes(s.name)
+                            return (
+                              <button
+                                key={s.id}
+                                type="button"
+                                onClick={() => {
+                                  setProjectForm({
+                                    ...projectForm,
+                                    selectedSkills: isSel
+                                      ? projectForm.selectedSkills.filter((x) => x !== s.name)
+                                      : [...projectForm.selectedSkills, s.name],
+                                  })
+                                }}
+                                className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-colors ${
+                                  isSel
+                                    ? 'bg-indigo-600 text-white font-medium shadow-xs'
+                                    : 'bg-zinc-200 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                                 }`}
-                            >
-                              {s.name}
-                            </button>
-                          )
-                        })}
+                              >
+                                {isSel ? '✓ ' : ''}{s.name}
+                              </button>
+                            )
+                          })}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                    {/* Sticky Footer */}
+                    <div className="px-5 py-3.5 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-end gap-3 shrink-0 bg-zinc-50/95 dark:bg-zinc-900/95 backdrop-blur-md">
                       <button
                         type="button"
                         onClick={() => setProjectModalOpen(false)}
-                        className="px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-mono cursor-pointer"
+                        className="px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-mono transition-colors"
                       >
                         Annuler
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-semibold cursor-pointer shadow-md shadow-indigo-600/20"
+                        disabled={savingProject}
+                        className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-semibold transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2 disabled:opacity-50"
                       >
-                        {editingProject ? 'Enregistrer' : 'Créer'}
+                        {savingProject && <span className="size-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                        <span>{editingProject ? 'Enregistrer les modifications' : 'Créer le projet'}</span>
                       </button>
                     </div>
                   </form>
@@ -1458,8 +1586,13 @@ export default function DashboardPage(): ReactElement {
 
             {/* Modal Compétence */}
             {skillModalOpen && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-                <div className="glass-card max-w-md w-full p-6 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xl">
+              <div
+                className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fade-in"
+                role="dialog"
+                aria-modal="true"
+              >
+                <div className="fixed inset-0" onClick={() => setSkillModalOpen(false)} />
+                <div className="relative glass-card max-w-md w-full p-6 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xl">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                       {editingSkill ? 'Modifier la compétence' : 'Ajouter une compétence'}
@@ -1729,7 +1862,7 @@ export default function DashboardPage(): ReactElement {
                     {profileForm.avatar_url && (
                       <button
                         type="button"
-                        onClick={() => setProfileForm((prev) => ({ ...prev, avatar_url: '' }))}
+                        onClick={handleRemoveAvatar}
                         className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-600 text-xs font-mono transition-colors"
                       >
                         Retirer

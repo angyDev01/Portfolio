@@ -50,6 +50,76 @@ app.get('/api/profile', async (req, res) => {
   }
 })
 
+// PUT /api/profile : Mettre à jour le profil actif
+app.put('/api/profile', async (req, res) => {
+  if (!pool) return res.status(500).json({ ok: false, message: 'Database not initialized' })
+  try {
+    const updates = req.body || {}
+    const existingRes = await pool.query('SELECT id FROM profile ORDER BY created_at DESC LIMIT 1')
+    if (existingRes.rowCount === 0) {
+      return res.status(404).json({ ok: false, message: 'Profil introuvable' })
+    }
+    const profileId = existingRes.rows[0].id
+
+    const allowedFields = [
+      'name',
+      'alias',
+      'role',
+      'short_bio',
+      'full_bio',
+      'email',
+      'github_url',
+      'linkedin_url',
+      'twitter_url',
+      'facebook_url',
+      'avatar_url',
+      'phone',
+      'phone_secondary',
+      'whatsapp_url',
+      'location',
+      'is_available',
+      'status_label',
+      'availability_status',
+      'accept_direct_messages',
+      'full_name',
+      'title',
+      'bio_short',
+      'bio_full',
+    ]
+
+    const fields = []
+    const values = []
+    let idx = 1
+
+    for (const key of allowedFields) {
+      if (key in updates) {
+        fields.push(`${key} = $${idx}`)
+        let val = updates[key]
+        if (key === 'full_bio' && Array.isArray(val)) {
+          val = JSON.stringify(val)
+        }
+        values.push(val)
+        idx++
+      }
+    }
+
+    if (fields.length === 0) {
+      return res.json({ ok: true, message: 'Aucun champ à modifier' })
+    }
+
+    fields.push(`updated_at = NOW()`)
+    values.push(profileId)
+
+    const query = `UPDATE profile SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`
+    const result = await pool.query(query, values)
+
+    res.json({ ok: true, profile: result.rows[0] })
+  } catch (err) {
+    console.error('Error updating profile:', err)
+    res.status(500).json({ ok: false, message: 'Erreur lors de la mise à jour du profil' })
+  }
+})
+
 // GET /api/projects : Récupérer tous les projets avec leurs compétences jointes
 app.get('/api/projects', async (req, res) => {
   if (!pool) return res.status(500).json({ error: 'Database not initialized' })

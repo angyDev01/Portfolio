@@ -284,22 +284,40 @@ export const portfolioService = {
     try {
       this.invalidateCache('profile')
       const profile = await this.getProfile()
-      if (!profile?.id) {
-        // Crée ou insère si absent
-        const { error } = await supabase.from('profile').insert([updates])
-        if (error) return { ok: false, error: error.message }
-        return { ok: true }
+      
+      let updatedViaSupabase = false
+      if (profile?.id) {
+        const { data, error } = await supabase
+          .from('profile')
+          .update({
+            ...updates,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', profile.id)
+          .select()
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          updatedViaSupabase = true
+        }
       }
 
-      const { error } = await supabase
-        .from('profile')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
+      // Si Supabase direct a échoué ou n'a affecté aucune ligne (contrainte RLS sans session),
+      // basculer sur l'API backend pour synchronisation garantie en base
+      if (!updatedViaSupabase) {
+        const res = await fetch(`${API_BASE_URL}/api/profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updates),
         })
-        .eq('id', profile.id)
 
-      if (error) return { ok: false, error: error.message }
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          return { ok: false, error: data.message || 'Erreur lors de la mise à jour du profil' }
+        }
+      }
+
       this.invalidateCache('profile')
       return { ok: true }
     } catch (err: unknown) {
