@@ -331,19 +331,23 @@ export const portfolioService = {
    */
   async uploadMedia(file: File, folder: 'avatars' | 'projects' = 'avatars'): Promise<{ ok: boolean; url?: string; error?: string }> {
     try {
-      const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').toLowerCase()
-      const filePath = `${folder}/${Date.now()}-${cleanFileName}`
+      const fileExt = file.name.split('.').pop() || 'png'
+      const fileName = folder === 'avatars'
+        ? `avatars/avatar-${Date.now()}.${fileExt}`
+        : `projects/project-${Date.now()}.${fileExt}`
 
-      const { data, error } = await supabase.storage.from('portfolio').upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true,
-      })
+      const { data, error } = await supabase.storage
+        .from('portfolio')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true,
+        })
 
       if (error) {
         return { ok: false, error: error.message }
       }
 
-      const { data: publicData } = supabase.storage.from('portfolio').getPublicUrl(data.path)
+      const { data: publicData } = supabase.storage.from('portfolio').getPublicUrl(data?.path || fileName)
       return { ok: true, url: publicData.publicUrl }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erreur téléversement média'

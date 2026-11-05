@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, type FormEvent, type ReactElement } from 'react'
+import { useEffect, useState, useMemo, useRef, type FormEvent, type ReactElement } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ResponsiveContainer,
@@ -146,6 +146,7 @@ export default function DashboardPage(): ReactElement {
     status_label: 'Disponible',
   })
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const avatarInputRef = useRef<HTMLInputElement | null>(null)
 
   // Messages State
   const [messages, setMessages] = useState<ContactMessage[]>([])
@@ -308,10 +309,45 @@ export default function DashboardPage(): ReactElement {
     setUploadingAvatar(false)
 
     if (res.ok && res.url) {
-      setProfileForm((prev) => ({ ...prev, avatar_url: res.url! }))
-      setToast({ type: 'success', text: 'Avatar téléversé dans le bucket portfolio ! Enregistrez le profil pour appliquer.' })
+      const newAvatarUrl = res.url
+      // 1. Mise à jour immédiate de l'état local dans React pour affichage instantané
+      setProfileForm((prev) => ({ ...prev, avatar_url: newAvatarUrl }))
+      setProfile((prev) => (prev ? { ...prev, avatar_url: newAvatarUrl } : null))
+
+      // 2. Exécute l'UPDATE immédiat de la colonne avatar_url dans la table profile
+      const saveRes = await portfolioService.updateProfile({ avatar_url: newAvatarUrl })
+
+      // 3. Nettoyage de l'input de fichier pour autoriser des modifications répétées
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = ''
+      }
+      e.target.value = ''
+
+      if (saveRes.ok) {
+        setToast({ type: 'success', text: 'Photo de profil mise à jour et enregistrée avec succès !' })
+      } else {
+        setToast({ type: 'error', text: saveRes.error || 'Erreur lors de la sauvegarde de l’avatar.' })
+      }
     } else {
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = ''
+      }
+      e.target.value = ''
       setToast({ type: 'error', text: res.error || 'Erreur lors du téléversement de l’avatar.' })
+    }
+  }
+
+  const handleRemoveAvatar = async (): Promise<void> => {
+    setProfileForm((prev) => ({ ...prev, avatar_url: '' }))
+    setProfile((prev) => (prev ? { ...prev, avatar_url: '' } : null))
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = ''
+    }
+    const saveRes = await portfolioService.updateProfile({ avatar_url: '' })
+    if (saveRes.ok) {
+      setToast({ type: 'success', text: 'Photo de profil retirée avec succès.' })
+    } else {
+      setToast({ type: 'error', text: 'Erreur lors du retrait de la photo.' })
     }
   }
 
@@ -1859,6 +1895,7 @@ export default function DashboardPage(): ReactElement {
                       <Icon name="sparkles" className="size-3.5" />
                       <span>{uploadingAvatar ? 'Téléversement...' : 'Changer l’avatar (Stockage)'}</span>
                       <input
+                        ref={avatarInputRef}
                         type="file"
                         accept="image/*"
                         disabled={uploadingAvatar}
@@ -1869,8 +1906,8 @@ export default function DashboardPage(): ReactElement {
                     {profileForm.avatar_url && (
                       <button
                         type="button"
-                        onClick={() => setProfileForm((prev) => ({ ...prev, avatar_url: '' }))}
-                        className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-600 text-xs font-mono transition-colors"
+                        onClick={handleRemoveAvatar}
+                        className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-600 text-xs font-mono transition-colors cursor-pointer"
                       >
                         Retirer
                       </button>

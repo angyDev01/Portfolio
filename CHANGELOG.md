@@ -4,6 +4,17 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 
 ---
 
+## [2026-11-05] — Modifications Répétées Illimitées de l'Avatar & Option Upsert
+
+### 1. Problème Identifié & Comportement Corrigé
+- **Problème** : Après un premier téléversement d'avatar, la sélection d'une nouvelle photo pouvait être bloquée, car l'élément `<input type="file">` conservait sa valeur précédente (empêchant le déclenchement de l'événement `onChange`), et le nom de fichier ou la politique d'upload pouvait entrer en collision.
+- **Comportement Corrigé** :
+  1. **Upload Supabase Storage avec `upsert: true`** : L'option `{ cacheControl: '3600', upsert: true }` est systématiquement envoyée, combinée à une convention de nommage avec horodatage dynamique `avatars/avatar-${Date.now()}.${fileExt}` pour contourner le cache navigateur.
+  2. **Persistance & Rendu Instantané** : L'URL publique issue de `getPublicUrl(fileName)` met à jour immédiatement la table `profile` (`avatar_url`) et synchronise instantanément l'état local React (`profile` et `profileForm`), reflétant la nouvelle image à l'écran sans aucun rafraîchissement manuel.
+  3. **Nettoyage automatique de l'input de fichier** : Réinitialisation systématique (`avatarInputRef.current.value = ''` et `e.target.value = ''`) après chaque sélection, permettant d'enchaîner plusieurs changements de photo consécutifs sans restriction.
+
+---
+
 ## [2026-11-05] — Persistance Avatar, Upload Projets & Refonte Responsive Dashboard
 
 ### 1. Problèmes Identifiés & Comportements Attendus
