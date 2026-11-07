@@ -283,17 +283,32 @@ export const portfolioService = {
   async updateProfile(updates: Partial<DbProfile>): Promise<{ ok: boolean; error?: string }> {
     try {
       this.invalidateCache('profile')
-      const profile = await this.getProfile()
+      let profile = await this.getProfile()
       
+      let targetId = profile?.id
+      if (!targetId) {
+        try {
+          const { data: row } = await supabase
+            .from('profile')
+            .select('id')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+          targetId = row?.id
+        } catch {
+          /* ignore */
+        }
+      }
+
       let updatedViaSupabase = false
-      if (profile?.id) {
+      if (targetId) {
         const { data, error } = await supabase
           .from('profile')
           .update({
             ...updates,
             updated_at: new Date().toISOString(),
           })
-          .eq('id', profile.id)
+          .eq('id', targetId)
           .select()
 
         if (!error && Array.isArray(data) && data.length > 0) {

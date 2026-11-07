@@ -21,6 +21,7 @@ import type {
   ProjectStatusType,
 } from '../types/database'
 import Icon from '../components/Icon'
+import AvatarImage from '../components/AvatarImage'
 import { useTheme } from '../context/ThemeContext'
 import { CountUp } from '../hooks/useCountUp'
 import { sanitizeUrl } from '../utils/security'
@@ -306,54 +307,64 @@ export default function DashboardPage(): ReactElement {
 
     const previousAvatarUrl = profile?.avatar_url || profileForm.avatar_url
     setUploadingAvatar(true)
-    const res = await portfolioService.uploadMedia(file, 'avatars')
-    setUploadingAvatar(false)
 
-    // Nettoyage immédiat de l'input de fichier pour autoriser des sélections répétées sans blocage
-    if (avatarInputRef.current) {
-      avatarInputRef.current.value = ''
-    }
-    e.target.value = ''
+    try {
+      // 1. Upload du fichier sur Supabase Storage avec un nom horodaté unique (Date.now())
+      // 2. Récupération IMMÉDIATE de l'URL publique générée
+      const res = await portfolioService.uploadMedia(file, 'avatars')
+      if (!res.ok || !res.url) {
+        setToast({ type: 'error', text: res.error || 'Erreur lors du téléversement de l’avatar.' })
+        return
+      }
 
-    if (res.ok && res.url) {
-      const newAvatarUrl = res.url
-      // 1. Mise à jour immédiate de l'état local dans React pour affichage instantané
-      setProfileForm((prev) => ({ ...prev, avatar_url: newAvatarUrl }))
-      setProfile((prev) => (prev ? { ...prev, avatar_url: newAvatarUrl } : null))
+      const publicUrl = res.url
 
-      // 2. Exécute l'UPDATE immédiat de la colonne avatar_url dans la table profile
-      const saveRes = await portfolioService.updateProfile({ avatar_url: newAvatarUrl })
+      // 3. Mise à jour de la base de données avec confirmation (await)
+      const saveRes = await portfolioService.updateProfile({ avatar_url: publicUrl })
+      if (!saveRes.ok) {
+        setToast({ type: 'error', text: saveRes.error || 'Erreur lors de la sauvegarde de l’avatar.' })
+        return
+      }
 
-      // 3. Suppression de l'ancienne photo dans le bucket Supabase pour ne pas accumuler de fichiers orphelins
-      if (previousAvatarUrl && previousAvatarUrl !== newAvatarUrl) {
+      // 4. ATTENDRE la confirmation DB, puis mettre à jour directement le state React avec cette nouvelle URL
+      setProfile((prev) => (prev ? { ...prev, avatar_url: publicUrl } : ({ avatar_url: publicUrl } as DbProfile)))
+      setProfileForm((prev) => ({ ...prev, avatar_url: publicUrl }))
+
+      // 5. Suppression de l'ancienne photo du stockage si elle existait et était différente
+      if (previousAvatarUrl && previousAvatarUrl !== publicUrl) {
         await portfolioService.deleteMedia(previousAvatarUrl)
       }
 
-      if (saveRes.ok) {
-        setToast({ type: 'success', text: 'Photo de profil mise à jour et enregistrée avec succès !' })
-      } else {
-        setToast({ type: 'error', text: saveRes.error || 'Erreur lors de la sauvegarde de l’avatar.' })
+      setToast({ type: 'success', text: 'Photo de profil mise à jour et enregistrée avec succès !' })
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur inattendue lors de l’upload.'
+      setToast({ type: 'error', text: msg })
+    } finally {
+      setUploadingAvatar(false)
+      // Nettoyage immédiat de l'input de fichier pour autoriser des sélections répétées sans blocage
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = ''
       }
-    } else {
-      setToast({ type: 'error', text: res.error || 'Erreur lors du téléversement de l’avatar.' })
+      e.target.value = ''
     }
   }
 
   const handleRemoveAvatar = async (): Promise<void> => {
     const previousAvatarUrl = profile?.avatar_url || profileForm.avatar_url
-    setProfileForm((prev) => ({ ...prev, avatar_url: '' }))
-    setProfile((prev) => (prev ? { ...prev, avatar_url: '' } : null))
     if (avatarInputRef.current) {
       avatarInputRef.current.value = ''
     }
-    if (previousAvatarUrl) {
-      await portfolioService.deleteMedia(previousAvatarUrl)
-    }
+
     const saveRes = await portfolioService.updateProfile({ avatar_url: '' })
     if (saveRes.ok) {
+      setProfile((prev) => (prev ? { ...prev, avatar_url: '' } : null))
+      setProfileForm((prev) => ({ ...prev, avatar_url: '' }))
+      if (previousAvatarUrl) {
+        await portfolioService.deleteMedia(previousAvatarUrl)
+      }
       setToast({ type: 'success', text: 'Photo de profil retirée avec succès.' })
     } else {
-      setToast({ type: 'error', text: 'Erreur lors du retrait de la photo.' })
+      setToast({ type: 'error', text: saveRes.error || 'Erreur lors du retrait de la photo.' })
     }
   }
 
@@ -690,18 +701,11 @@ export default function DashboardPage(): ReactElement {
         <header className="flex items-center justify-between gap-4 pb-5 border-b border-zinc-200 dark:border-zinc-800/80 mb-6">
           {/* Titre discret à gauche avec indicateur en direct du statut actuel */}
           <div className="flex items-center gap-3">
-            {profile?.avatar_url ? (
-              <img
-                key={profile.avatar_url}
-                src={profile.avatar_url}
-                alt={profile.name || 'Admin'}
-                className="size-10 rounded-full object-cover border-2 border-indigo-500 shadow-xs shrink-0"
-              />
-            ) : (
-              <div className="size-10 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 shadow-xs">
-                <Icon name="user" className="size-5" />
-              </div>
-            )}
+            <AvatarImage
+              src={profile?.avatar_url}
+              alt={profile?.name || 'Admin'}
+              className="size-10 border-2 border-indigo-500 shadow-xs"
+            />
             <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-0.5">
                 <span
@@ -1882,18 +1886,11 @@ export default function DashboardPage(): ReactElement {
               {/* Photo de Profil / Avatar & Bucket Supabase */}
               <div className="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800">
                 <div className="relative group shrink-0">
-                  {profileForm.avatar_url ? (
-                    <img
-                      key={profileForm.avatar_url}
-                      src={profileForm.avatar_url}
-                      alt="Avatar prévisualisation"
-                      className="size-20 rounded-full object-cover border-2 border-indigo-500 shadow-md"
-                    />
-                  ) : (
-                    <div className="size-20 rounded-full bg-indigo-500/10 border-2 border-dashed border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold font-mono text-xl">
-                      {profileForm.alias?.charAt(0) || "A"}
-                    </div>
-                  )}
+                  <AvatarImage
+                    src={profileForm.avatar_url}
+                    alt="Avatar prévisualisation"
+                    className="size-20 border-2 border-indigo-500 shadow-md"
+                  />
                 </div>
 
                 <div className="flex-1 space-y-2 text-center sm:text-left">

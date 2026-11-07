@@ -4,6 +4,7 @@ import { portfolioService } from '../services/portfolioService'
 import { useTheme } from '../context/ThemeContext'
 import type { DbProfile } from '../types/database'
 import Icon from './Icon'
+import AvatarImage from './AvatarImage'
 
 export default function Navbar(): ReactElement {
   const [profile, setProfile] = useState<DbProfile | null>(null)
@@ -20,7 +21,7 @@ export default function Navbar(): ReactElement {
     const handleProfileUpdate = (e: Event): void => {
       const ce = e as CustomEvent<Partial<DbProfile>>
       if (mounted && ce.detail) {
-        setProfile((prev) => (prev ? { ...prev, ...ce.detail } : null))
+        setProfile((prev) => (prev ? { ...prev, ...ce.detail } : (ce.detail as DbProfile)))
       }
     }
     window.addEventListener('portfolio:profile-updated', handleProfileUpdate)
@@ -78,21 +79,11 @@ export default function Navbar(): ReactElement {
           className="group flex items-center gap-2.5 rounded-lg text-zinc-900 dark:text-zinc-100 hover:text-indigo-600 dark:hover:text-white transition-colors"
           aria-label={`${name} — retour à l'accueil`}
         >
-          {profile?.avatar_url ? (
-            <img
-              key={profile.avatar_url}
-              src={profile.avatar_url}
-              alt={name}
-              className="size-8.5 rounded-full object-cover border border-zinc-200 dark:border-zinc-700 shadow-xs shrink-0"
-            />
-          ) : (
-            <span
-              className="flex size-8.5 items-center justify-center rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 dark:text-indigo-400 group-hover:border-indigo-400 group-hover:bg-indigo-500/20 transition-all shadow-xs shrink-0"
-              aria-hidden="true"
-            >
-              <Icon name="user" className="size-4.5" />
-            </span>
-          )}
+          <AvatarImage
+            src={profile?.avatar_url}
+            alt={name}
+            className="size-9 border border-zinc-200 dark:border-zinc-700 shadow-xs"
+          />
           <span className="flex flex-col" aria-hidden="true">
             <span className="font-semibold text-sm tracking-tight">{name}</span>
             <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300">
