@@ -7,9 +7,10 @@ import { sanitizeUrl, isSafeUrl } from '../utils/security'
 interface ProjectCardProps {
   project: DbProject
   className?: string
+  onClick?: (project: DbProject) => void
 }
 
-export default function ProjectCard({ project, className = '' }: ProjectCardProps): ReactElement {
+export default function ProjectCard({ project, className = '', onClick }: ProjectCardProps): ReactElement {
   const { title, tagline, description, summary, skills = [], demo_url, repo_url, is_featured, cover_image_url, images = [] } = project
   const cover = cover_image_url || images[0]
 
@@ -26,12 +27,31 @@ export default function ProjectCard({ project, className = '' }: ProjectCardProp
     }
     : {}
 
+  const handleCardClick = (): void => {
+    if (onClick) {
+      onClick(project)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
+    if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault()
+      onClick(project)
+    }
+  }
+
   return (
     <article
       style={featuredCardStyle}
-      className={`glass-card group relative flex flex-col justify-between p-5 sm:p-6 motion-safe:hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 overflow-hidden ${is_featured
-        ? 'border-amber-400/40 dark:border-amber-400/25 ring-1 ring-amber-400/15'
-        : 'hover:shadow-indigo-500/5'
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `Voir les détails du projet ${title}` : undefined}
+      className={`glass-card group relative flex flex-col justify-between p-5 sm:p-6 motion-safe:hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 overflow-hidden ${onClick ? 'cursor-pointer' : ''
+        } ${is_featured
+          ? 'border-amber-400/40 dark:border-amber-400/25 ring-1 ring-amber-400/15'
+          : 'hover:shadow-indigo-500/5'
         } ${className}`}
     >
       {/* Mise en valeur visuelle Projet à la une : Lueur & Filigrane discret du logo de la technologie principale */}
@@ -87,12 +107,13 @@ export default function ProjectCard({ project, className = '' }: ProjectCardProp
             </h3>
           </div>
 
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
             {repo_url && isSafeUrl(repo_url) && (
               <a
                 href={sanitizeUrl(repo_url)}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
                 className="flex size-8 items-center justify-center rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
                 aria-label={`Code source de ${title} (nouvel onglet)`}
               >
@@ -104,6 +125,7 @@ export default function ProjectCard({ project, className = '' }: ProjectCardProp
                 href={sanitizeUrl(demo_url)}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
                 className="flex size-8 items-center justify-center rounded-md text-zinc-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
                 aria-label={`Démo en ligne de ${title} (nouvel onglet)`}
               >

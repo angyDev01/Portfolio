@@ -290,7 +290,7 @@ export default function ContactPage(): ReactElement {
                   Laisser un message direct sur le site
                 </h2>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                  Ce message est enregistré directement dans la base du portfolio et s'affichera immédiatement dans mon Dashboard d'administration.
+                  Ce formulaire permet de m'envoyer un message directement,sans passer par mon client mail.
                 </p>
               </div>
 
@@ -410,10 +410,31 @@ export default function ContactPage(): ReactElement {
           )}
 
           {/* ============================================================== */}
-          {/* CANAL 1 : M'ENVOYER UN EMAIL (Nom, Email, Objet, Message)      */}
+          {/* CANAL 1 : M'ENVOYER UN EMAIL (En maintenance temporaire)       */}
           {/* ============================================================== */}
           {activeChannel === 'email' && (
             <div className="glass-card p-6 sm:p-8 flex flex-col gap-5 text-left">
+              {/* Bandeau informatif élégant de maintenance */}
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs sm:text-sm font-mono flex items-start gap-3 shadow-xs">
+                <span className="text-base shrink-0 select-none" aria-hidden="true">⚙️</span>
+                <div className="flex-1 leading-relaxed">
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100 mb-0.5">
+                    Canal email temporairement en maintenance.
+                  </p>
+                  <p className="text-zinc-600 dark:text-zinc-400">
+                    Merci d'utiliser l'onglet{' '}
+                    <button
+                      type="button"
+                      onClick={() => setActiveChannel('direct')}
+                      className="underline font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 cursor-pointer"
+                    >
+                      « Laisser un message direct »
+                    </button>{' '}
+                    juste à côté.
+                  </p>
+                </div>
+              </div>
+
               <div>
                 <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-xs font-mono uppercase tracking-wider mb-1">
                   <Icon name="mail" className="size-3.5" />
@@ -427,98 +448,92 @@ export default function ContactPage(): ReactElement {
                 </p>
               </div>
 
-              <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
-                {/* 1. Nom */}
-                <div>
-                  <label htmlFor="email-name" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Nom complet <span className="text-indigo-500 dark:text-indigo-400">*</span>
-                  </label>
-                  <input
-                    id="email-name"
-                    type="text"
-                    required
-                    value={emailForm.name}
-                    onChange={(e) => setEmailForm({ ...emailForm, name: e.target.value })}
-                    placeholder="Votre nom"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
-                  />
-                </div>
-
-                {/* 2. Email */}
-                <div>
-                  <label htmlFor="email-address" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Adresse email <span className="text-indigo-500 dark:text-indigo-400">*</span>
-                  </label>
-                  <input
-                    id="email-address"
-                    type="email"
-                    required
-                    value={emailForm.email}
-                    onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
-                    placeholder="votre.email@exemple.com"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
-                  />
-                </div>
-
-                {/* 3. Objet */}
-                <div>
-                  <label htmlFor="email-subject" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Objet <span className="text-indigo-500 dark:text-indigo-400">*</span>
-                  </label>
-                  <input
-                    id="email-subject"
-                    type="text"
-                    required
-                    value={emailForm.subject}
-                    onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
-                    placeholder="Ex: Proposition de mission / Recrutement"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
-                  />
-                </div>
-
-                {/* 4. Message */}
-                <div>
-                  <label htmlFor="email-body" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Message <span className="text-indigo-500 dark:text-indigo-400">*</span>
-                  </label>
-                  <textarea
-                    id="email-body"
-                    rows={4}
-                    required
-                    value={emailForm.message}
-                    onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
-                    placeholder="Votre message complet..."
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans resize-y"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submittingEmail}
-                  className="mt-1 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 font-semibold text-sm transition-all cursor-pointer disabled:opacity-50 shadow-md"
-                >
-                  <span>{submittingEmail ? 'Préparation de l’envoi...' : 'Envoyer l’email'}</span>
-                  <Icon name="mail" className="size-4" />
-                </button>
-
-                {emailFeedback && (
-                  <div
-                    role="status"
-                    className={`text-xs p-3.5 rounded-lg border leading-relaxed flex items-start gap-2.5 ${emailFeedback.type === 'success'
-                      ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
-                      : 'text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/30'
-                      }`}
-                  >
-                    <span className="shrink-0 mt-0.5">
-                      <Icon
-                        name={emailFeedback.type === 'success' ? 'checkCircle' : 'close'}
-                        className="size-4"
-                      />
-                    </span>
-                    <span>{emailFeedback.text}</span>
+              {/* Structure visuelle conservée mais grisée et désactivée */}
+              <div className="opacity-60 pointer-events-none select-none" aria-disabled="true">
+                <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
+                  {/* 1. Nom */}
+                  <div>
+                    <label htmlFor="email-name" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      Nom complet <span className="text-indigo-500 dark:text-indigo-400">*</span>
+                    </label>
+                    <input
+                      id="email-name"
+                      type="text"
+                      disabled
+                      value={emailForm.name}
+                      onChange={(e) => setEmailForm({ ...emailForm, name: e.target.value })}
+                      placeholder="Votre nom"
+                      className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
+                    />
                   </div>
-                )}
-              </form>
+
+                  {/* 2. Email */}
+                  <div>
+                    <label htmlFor="email-address" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      Adresse email <span className="text-indigo-500 dark:text-indigo-400">*</span>
+                    </label>
+                    <input
+                      id="email-address"
+                      type="email"
+                      disabled
+                      value={emailForm.email}
+                      onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
+                      placeholder="votre.email@exemple.com"
+                      className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
+                    />
+                  </div>
+
+                  {/* 3. Objet */}
+                  <div>
+                    <label htmlFor="email-subject" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      Objet <span className="text-indigo-500 dark:text-indigo-400">*</span>
+                    </label>
+                    <input
+                      id="email-subject"
+                      type="text"
+                      disabled
+                      value={emailForm.subject}
+                      onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                      placeholder="Ex: Proposition de mission / Recrutement"
+                      className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans"
+                    />
+                  </div>
+
+                  {/* 4. Message */}
+                  <div>
+                    <label htmlFor="email-body" className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1.5">
+                      Message <span className="text-indigo-500 dark:text-indigo-400">*</span>
+                    </label>
+                    <textarea
+                      id="email-body"
+                      rows={4}
+                      disabled
+                      value={emailForm.message}
+                      onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
+                      placeholder="Votre message complet..."
+                      className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm focus:border-indigo-500 focus:outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans resize-y"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled
+                    className="mt-1 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-semibold text-sm shadow-md cursor-not-allowed"
+                  >
+                    <span>{submittingEmail ? 'Préparation de l’envoi...' : 'Envoyer l’email'}</span>
+                    <Icon name="mail" className="size-4" />
+                  </button>
+
+                  {emailFeedback && (
+                    <div
+                      role="status"
+                      className="text-xs p-3.5 rounded-lg border leading-relaxed flex items-start gap-2.5 text-zinc-400 bg-zinc-800/20 border-zinc-700/30"
+                    >
+                      <span>{emailFeedback.text}</span>
+                    </div>
+                  )}
+                </form>
+              </div>
             </div>
           )}
 

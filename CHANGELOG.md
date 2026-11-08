@@ -4,6 +4,44 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 
 ---
 
+## [2026-11-08] — Modale de Détails Projets, Maintenance Canal Email & Nouvelles Icônes Officielles PWA
+
+### 1. Modale de Détails Complète pour les Projets (`/projets` et Vitrine Accueil)
+- **Composant dédié `ProjectDetailModal.tsx`** :
+  - Overlay plein écran avec flou d'arrière-plan moderne (`backdrop-blur-md bg-zinc-950/80`).
+  - Boîte modale centrée stylisée (`bg-zinc-900 border border-zinc-800 rounded-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8`).
+  - Fermeture interactive : bouton croix dédié en haut à droite, clic sur l'arrière-plan extérieur et touche `Échap`. Verrouillage automatique du défilement d'arrière-plan (`document.body.style.overflow`).
+- **Contenu riche et détaillé** :
+  - Grande capture d'écran / couverture haute résolution du projet en tête de modale.
+  - Badges d'état dynamiques : Statut ("En cours" / "Terminé"), Catégorie et badge doré "★ À la une".
+  - Titre, accroche (`tagline`) et résumé court en sous-titre.
+  - Section "À propos du projet" présentant la description exhaustive complète (`description`) enregistrée en base de données.
+  - Grille des technologies associées avec leurs logos officiels et badges interactifs.
+  - Boutons d'action directs : "Démo en direct" (icône lien externe) et "Code source" (icône GitHub).
+- **Intégration sur `ProjectCard`** : Clic fluide sur l'ensemble de la carte avec gestion propre de la propagation d'événements pour les boutons d'actions directs.
+
+---
+
+### 2. Désactivation Temporaire du Formulaire d'Email (Maintenance)
+- **Conservation de la structure visuelle** : L'ensemble du formulaire Canal 1 ("M'envoyer un email direct") est conservé visuellement pour préserver l'ergonomie, mais grisé et désactivé (`opacity-60 pointer-events-none select-none`).
+- **Bandeau informatif de maintenance** : Ajout d'un encadré élégant ambre/zinc invitant clairement les visiteurs à utiliser le canal direct :
+  > "⚙️ Canal email temporairement en maintenance. Merci d'utiliser l'onglet 'Laisser un message direct' juste à côté."
+- **Canal 2 (Message direct) 100% opérationnel** : Le canal de messagerie instantanée directe (Nom, Email, Téléphone, Message) reste entièrement fonctionnel et connecté à la base de données PostgreSQL.
+
+---
+
+### 3. Nouvelles Icônes Officielles PWA (Application Web Installable)
+- **Génération des assets officiels** : Intégration et génération haute définition du logo officiel de l'application (cercle néon avec `</> Angy's`) :
+  - `pwa-192x192.png` (192x192, format PNG, purpose "any maskable").
+  - `pwa-512x512.png` (512x512, format PNG, purpose "any maskable").
+  - `apple-touch-icon.png` (180x180, format PNG pour iOS).
+  - `favicon.png` & `favicon.ico` (32x32 multi-résolution).
+- **Configuration Manifest & HTML** :
+  - Création du fichier statique `public/manifest.webmanifest` et mise à jour de la configuration `VitePWA` dans `vite.config.ts`.
+  - Intégration des balises `<link rel="icon">`, `<link rel="apple-touch-icon">` et `<link rel="manifest">` dans le `<head>` de `index.html`.
+
+---
+
 ## [2026-11-05] — Logos Officiels des Technologies, Discrétion Backend & Mise en Valeur des Projets Phares
 
 ### 1. Affichage des Vrais Logos Officiels des Technologies (`react-icons/si`)

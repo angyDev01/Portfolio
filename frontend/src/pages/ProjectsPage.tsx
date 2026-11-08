@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, type ReactElement } from 'react'
 import { portfolioService } from '../services/portfolioService'
 import type { DbProject, ProjectCategoryType } from '../types/database'
 import ProjectCard from '../components/ProjectCard'
+import ProjectDetailModal from '../components/ProjectDetailModal'
 import EmptyState from '../components/EmptyState'
 import { ProjectCardSkeleton } from '../components/Skeletons'
 
@@ -11,6 +12,7 @@ export default function ProjectsPage(): ReactElement {
   const [projects, setProjects] = useState<DbProject[]>([])
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState<'Tous' | ProjectCategoryType>('Tous')
+  const [selectedProject, setSelectedProject] = useState<DbProject | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -79,7 +81,11 @@ export default function ProjectsPage(): ReactElement {
         ) : filteredProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onClick={(p) => setSelectedProject(p)}
+              />
             ))}
           </div>
         ) : (
@@ -88,6 +94,13 @@ export default function ProjectsPage(): ReactElement {
             description="La base de données a été initialisée. Les projets ajoutés s'afficheront instantanément ici."
           />
         )}
+
+        {/* Modale de détails complète du projet sélectionné */}
+        <ProjectDetailModal
+          project={selectedProject}
+          isOpen={Boolean(selectedProject)}
+          onClose={() => setSelectedProject(null)}
+        />
       </div>
     </div>
   )

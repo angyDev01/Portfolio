@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom'
 import { portfolioService } from '../services/portfolioService'
 import type { DbProject } from '../types/database'
 import ProjectCard from './ProjectCard'
+import ProjectDetailModal from './ProjectDetailModal'
 import EmptyState from './EmptyState'
 import Icon from './Icon'
 
 export default function HomeProjectsMarquee(): ReactElement {
   const [projects, setProjects] = useState<DbProject[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedProject, setSelectedProject] = useState<DbProject | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -66,12 +68,23 @@ export default function HomeProjectsMarquee(): ReactElement {
           <div className="marquee-track flex gap-6 w-max animate-[marquee_28s_linear_infinite] will-change-transform">
             {displayItems.concat(displayItems).map((project, index) => (
               <div key={`${project.id}-${index}`} className="w-[310px] sm:w-[380px] shrink-0">
-                <ProjectCard project={project} className="h-full" />
+                <ProjectCard
+                  project={project}
+                  className="h-full"
+                  onClick={(p) => setSelectedProject(p)}
+                />
               </div>
             ))}
           </div>
         </div>
       )}
+
+      {/* Modale de détails pour la vitrine */}
+      <ProjectDetailModal
+        project={selectedProject}
+        isOpen={Boolean(selectedProject)}
+        onClose={() => setSelectedProject(null)}
+      />
 
       <div className="container-custom mt-10 text-center">
         <Link
