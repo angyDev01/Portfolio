@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react'
 import { portfolioService } from '../services/portfolioService'
 import type { DbProfile } from '../types/database'
+import AboutVideoPlayer from './AboutVideoPlayer'
 
 export default function About(): ReactElement {
   const [profile, setProfile] = useState<DbProfile | null>(null)
@@ -68,6 +69,9 @@ export default function About(): ReactElement {
             </dl>
           </aside>
         </div>
+
+        {/* Bloc vidéo de présentation personnelle (Lazy Loading preload="none") */}
+        <AboutVideoPlayer posterUrl={profile?.avatar_url || '/videos/poster.jpg'} />
       </div>
     </section>
   )

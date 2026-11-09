@@ -67,6 +67,7 @@ function MainLayout(): ReactElement {
         <Routes>
           {/* Routes Publiques */}
           <Route path="/" element={<HomePage />} />
+          <Route path="/a-propos" element={<HomePage />} />
           <Route path="/projets" element={<ProjectsPage />} />
           <Route path="/competences" element={<SkillsPage />} />
           <Route path="/contact" element={<ContactPage />} />

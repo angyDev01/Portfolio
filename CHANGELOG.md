@@ -42,6 +42,20 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 
 ---
 
+### 4. Lecteur Vidéo de Présentation Personnelle (`/a-propos` et Section À Propos)
+- **Composant dédié `AboutVideoPlayer.tsx`** :
+  - Intégration soignée immédiatement sous le texte de présentation et la carte de résumé de la section À Propos.
+  - Style Glassmorphism Dark Mode : conteneur aux coins arrondis `rounded-2xl`, bordure fine `border border-zinc-200 dark:border-zinc-800` et lueur indigo d'ambiance.
+  - Format 16/9 fluide et entièrement responsive sur mobile et desktop.
+  - Image de couverture par défaut (`poster="/videos/poster.jpg"` ou avatar de profil) avec un overlay sombre transparent.
+  - Bouton de lecture central élégant : icône Play indigo brillante au centre avec halo lumineux et animation douce au survol (`hover:scale-105 transition-all`).
+- **Performance & Zéro ralentissement (Lazy Loading)** :
+  - `preload="none"` pour ne consommer aucune bande passante au chargement initial de la page.
+  - Activation instantanée des contrôles natifs (`controls`) et lecture fluide au clic sur le bouton Play.
+  - Fichier vidéo autonome servi localement depuis `/videos/presentation.mp4`.
+
+---
+
 ## [2026-11-05] — Logos Officiels des Technologies, Discrétion Backend & Mise en Valeur des Projets Phares
 
 ### 1. Affichage des Vrais Logos Officiels des Technologies (`react-icons/si`)
