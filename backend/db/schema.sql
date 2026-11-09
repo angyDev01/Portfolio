@@ -87,7 +87,7 @@ FOR EACH ROW EXECUTE FUNCTION sync_profile_fields();
 CREATE TABLE IF NOT EXISTS skills (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(100) NOT NULL UNIQUE,
-  category VARCHAR(50) NOT NULL CHECK (category IN ('frontend', 'backend', 'tools')),
+  category VARCHAR(50) NOT NULL CONSTRAINT skills_category_check CHECK (LOWER(category) IN ('frontend', 'backend', 'tools', 'database', 'devops', 'mobile', 'other')),
   icon VARCHAR(50) NOT NULL DEFAULT 'code',
   description TEXT,
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,

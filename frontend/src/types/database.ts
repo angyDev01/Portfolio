@@ -33,7 +33,7 @@ export interface DbProfile {
   updated_at?: string
 }
 
-export type SkillCategoryType = 'frontend' | 'backend' | 'tools' | 'database'
+export type SkillCategoryType = 'frontend' | 'backend' | 'tools' | 'database' | 'devops' | 'mobile' | 'other'
 
 export interface DbSkill {
   id: string

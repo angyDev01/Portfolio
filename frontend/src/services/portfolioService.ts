@@ -6,6 +6,7 @@ import type {
   DbProfile,
   DbProject,
   DbSkill,
+  SkillCategoryType,
   ContactMessagePayload,
   DirectMessagePayload,
   EmailContactPayload,
@@ -284,7 +285,7 @@ export const portfolioService = {
     try {
       this.invalidateCache('profile')
       let profile = await this.getProfile()
-      
+
       let targetId = profile?.id
       if (!targetId) {
         try {
@@ -628,8 +629,18 @@ export const portfolioService = {
   async createSkill(skill: Omit<DbSkill, 'id' | 'created_at'>): Promise<{ ok: boolean; error?: string }> {
     try {
       this.invalidateCache('skills')
-      const { error } = await supabase.from('skills').insert([skill])
-      if (error) return { ok: false, error: error.message }
+      const normalizedSkill = {
+        ...skill,
+        category: (skill.category ? skill.category.toLowerCase().trim() : 'frontend') as SkillCategoryType,
+      }
+      const { error } = await supabase.from('skills').insert([normalizedSkill])
+      if (error) {
+        let errorMsg = error.message
+        if (error.message.includes('skills_category_check') || error.message.includes('check constraint')) {
+          errorMsg = 'Catégorie non reconnue. Veuillez sélectionner une catégorie valide (Frontend, Backend, Outils & Méthodes, Base de données, DevOps / Cloud, Autre).'
+        }
+        return { ok: false, error: errorMsg }
+      }
       this.invalidateCache('skills')
       return { ok: true }
     } catch (err: unknown) {
@@ -641,8 +652,18 @@ export const portfolioService = {
   async updateSkill(id: string, skill: Partial<DbSkill>): Promise<{ ok: boolean; error?: string }> {
     try {
       this.invalidateCache('skills')
-      const { error } = await supabase.from('skills').update(skill).eq('id', id)
-      if (error) return { ok: false, error: error.message }
+      const normalizedSkill = {
+        ...skill,
+        ...(skill.category ? { category: skill.category.toLowerCase().trim() as SkillCategoryType } : {}),
+      }
+      const { error } = await supabase.from('skills').update(normalizedSkill).eq('id', id)
+      if (error) {
+        let errorMsg = error.message
+        if (error.message.includes('skills_category_check') || error.message.includes('check constraint')) {
+          errorMsg = 'Catégorie non reconnue. Veuillez sélectionner une catégorie valide (Frontend, Backend, Outils & Méthodes, Base de données, DevOps / Cloud, Autre).'
+        }
+        return { ok: false, error: errorMsg }
+      }
       this.invalidateCache('skills')
       return { ok: true }
     } catch (err: unknown) {

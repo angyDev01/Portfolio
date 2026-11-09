@@ -6,11 +6,17 @@ import EmptyState from '../components/EmptyState'
 import TechCard from '../components/TechCard'
 import { SkillCategorySkeleton } from '../components/Skeletons'
 
-const CATEGORY_META: Record<SkillCategoryType, { title: string; icon: 'frontend' | 'backend' | 'tools' | 'database' }> = {
+const CATEGORY_META: Record<
+  SkillCategoryType,
+  { title: string; icon: 'frontend' | 'backend' | 'tools' | 'database' }
+> = {
   frontend: { title: 'Frontend Moderne', icon: 'frontend' },
   backend: { title: 'Backend & APIs', icon: 'backend' },
-  database: { title: 'Bases de données & Cloud', icon: 'database' },
-  tools: { title: 'Outils & Pratiques', icon: 'tools' },
+  database: { title: 'Bases de données', icon: 'database' },
+  tools: { title: 'Outils & Méthodes', icon: 'tools' },
+  devops: { title: 'DevOps & Cloud', icon: 'tools' },
+  mobile: { title: 'Mobile', icon: 'frontend' },
+  other: { title: 'Autres Technologies', icon: 'tools' },
 }
 
 export default function SkillsPage(): ReactElement {
@@ -30,7 +36,10 @@ export default function SkillsPage(): ReactElement {
     }
   }, [])
 
-  const categories: SkillCategoryType[] = ['frontend', 'backend', 'database', 'tools']
+  const allKnownCategories: SkillCategoryType[] = ['frontend', 'backend', 'database', 'tools', 'devops', 'mobile', 'other']
+  const displayCategories = allKnownCategories.filter(
+    (cat) => ['frontend', 'backend', 'database', 'tools'].includes(cat) || skills.some((s) => s.category?.toLowerCase() === cat)
+  )
 
   return (
     <div className="pt-28 pb-24 md:pt-36">
@@ -63,8 +72,8 @@ export default function SkillsPage(): ReactElement {
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.map((catKey) => {
-              const catSkills = skills.filter((s) => s.category === catKey)
+            {displayCategories.map((catKey) => {
+              const catSkills = skills.filter((s) => s.category?.toLowerCase() === catKey)
               const meta = CATEGORY_META[catKey]
 
               return (

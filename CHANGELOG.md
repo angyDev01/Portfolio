@@ -4,6 +4,33 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 
 ---
 
+## [2026-11-09] — Assouplissement de la Contrainte des Catégories de Compétences & Normalisation Formulaire
+
+### 1. Migration Base de Données (PostgreSQL / Supabase)
+- **Suppression de l'ancienne contrainte restrictive** : `ALTER TABLE skills DROP CONSTRAINT IF EXISTS skills_category_check;`.
+- **Création de la nouvelle contrainte insensible à la casse** :
+  ```sql
+  ALTER TABLE skills ADD CONSTRAINT skills_category_check 
+  CHECK (LOWER(category) IN ('frontend', 'backend', 'tools', 'database', 'devops', 'mobile', 'other'));
+  ```
+- **Validation directe** : Exécution et validation sans erreur de l'ensemble des 7 catégories autorisées.
+
+---
+
+### 2. Formulaire & Service des Compétences (Dashboard & API)
+- **Normalisation automatique** : Conversion systématique du champ `category` en minuscules sans espaces (`category.toLowerCase().trim()`) avant chaque insertion ou mise à jour.
+- **Sélecteur déroulant harmonisé** : Mise à jour des options du `<select>` dans le formulaire d'administration :
+  - *Frontend* (`frontend`)
+  - *Backend* (`backend`)
+  - *Outils & Méthodes* (`tools`)
+  - *Base de données* (`database`)
+  - *DevOps / Cloud* (`devops`)
+  - *Autre* (`other`)
+- **Feedback d'erreur clair** : Remplacement des erreurs SQL brutes par des messages d'aide explicites et compréhensibles en cas de tentative d'insertion non conforme.
+- **Harmonisation de la page publique** (`SkillsPage.tsx`) : Prise en charge des nouvelles catégories avec affichage modulaire.
+
+---
+
 ## [2026-11-08] — Modale de Détails Projets, Maintenance Canal Email & Nouvelles Icônes Officielles PWA
 
 ### 1. Modale de Détails Complète pour les Projets (`/projets` et Vitrine Accueil)

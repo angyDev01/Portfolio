@@ -582,39 +582,48 @@ export default function DashboardPage(): ReactElement {
   const handleSkillSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault()
 
+    // 1. Normalisation stricte de la catégorie (minuscules, sans espaces)
+    const normalizedCategory = (skillForm.category ? skillForm.category.toLowerCase().trim() : 'frontend') as SkillCategoryType
+
     if (editingSkill) {
       const res = await portfolioService.updateSkill(editingSkill.id, {
         name: skillForm.name.trim(),
-        category: skillForm.category,
+        category: normalizedCategory,
         icon: skillForm.icon.trim() || 'code',
         description: skillForm.description.trim() || undefined,
         display_order: Number(skillForm.display_order) || 0,
         is_featured: skillForm.is_featured,
       })
       if (res.ok) {
-        setToast({ type: 'success', text: 'Compétence mise à jour.' })
+        setToast({ type: 'success', text: 'Compétence mise à jour avec succès.' })
         setSkillModalOpen(false)
         const updated = await portfolioService.getSkills()
         setSkills(updated)
       } else {
-        setToast({ type: 'error', text: res.error || 'Erreur modification compétence.' })
+        const friendlyError = res.error?.includes('skills_category_check') || res.error?.includes('check constraint')
+          ? 'Catégorie non reconnue. Veuillez sélectionner une catégorie valide parmi la liste.'
+          : res.error || 'Erreur lors de la modification de la compétence.'
+        setToast({ type: 'error', text: friendlyError })
       }
     } else {
       const res = await portfolioService.createSkill({
         name: skillForm.name.trim(),
-        category: skillForm.category,
+        category: normalizedCategory,
         icon: skillForm.icon.trim() || 'code',
         description: skillForm.description.trim() || undefined,
         display_order: Number(skillForm.display_order) || 0,
         is_featured: skillForm.is_featured,
       })
       if (res.ok) {
-        setToast({ type: 'success', text: 'Compétence ajoutée.' })
+        setToast({ type: 'success', text: 'Compétence ajoutée avec succès.' })
         setSkillModalOpen(false)
         const updated = await portfolioService.getSkills()
         setSkills(updated)
       } else {
-        setToast({ type: 'error', text: res.error || 'Erreur création compétence.' })
+        const friendlyError = res.error?.includes('skills_category_check') || res.error?.includes('check constraint')
+          ? 'Catégorie non reconnue. Veuillez sélectionner une catégorie valide parmi la liste.'
+          : res.error || 'Erreur lors de la création de la compétence.'
+        setToast({ type: 'error', text: friendlyError })
       }
     }
   }
@@ -1532,8 +1541,8 @@ export default function DashboardPage(): ReactElement {
                                   })
                                 }}
                                 className={`px-2.5 py-1 rounded-md text-[11px] font-mono cursor-pointer transition-colors ${isSel
-                                    ? 'bg-indigo-600 text-white font-medium shadow-xs'
-                                    : 'bg-zinc-200 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                                  ? 'bg-indigo-600 text-white font-medium shadow-xs'
+                                  : 'bg-zinc-200 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                                   }`}
                               >
                                 {isSel ? '✓ ' : ''}{s.name}
@@ -1683,15 +1692,17 @@ export default function DashboardPage(): ReactElement {
                           onChange={(e) =>
                             setSkillForm({
                               ...skillForm,
-                              category: e.target.value as SkillCategoryType,
+                              category: e.target.value.toLowerCase().trim() as SkillCategoryType,
                             })
                           }
                           className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
                         >
                           <option value="frontend">Frontend</option>
                           <option value="backend">Backend</option>
-                          <option value="database">Database & Cloud</option>
-                          <option value="tools">Outils & DevOps</option>
+                          <option value="tools">Outils & Méthodes</option>
+                          <option value="database">Base de données</option>
+                          <option value="devops">DevOps / Cloud</option>
+                          <option value="other">Autre</option>
                         </select>
                       </div>
 
