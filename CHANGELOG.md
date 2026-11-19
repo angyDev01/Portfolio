@@ -4,7 +4,69 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 
 ---
 
-## [2026-11-09] — Assouplissement de la Contrainte des Catégories de Compétences & Normalisation Formulaire
+## [2026-11-19] — Refonte Visuelle « Indigo & Lagune »
+
+### 1. Identité Visuelle, Palette & Typographie
+- **Système de tokens CSS & Tailwind v4** (`index.css`, `index.html`) : Adoption d'une palette inspirée de l'indigo et de la lagune (`paper`, `surface`, `ink`, `muted`, `line`, `indigo`, `mango`), déclinée en modes clair et sombre avec contrastes WCAG AA vérifiés.
+- **Typographie expressive** : Remplacement d'Inter par **Bricolage Grotesque** (variable `opsz 12..96`) pour l'ensemble de l'interface ; **JetBrains Mono** réservée uniquement à la vue données.
+- **Mise en page asymétrique** : Conteneur élargi à `1200px` et introduction de la grille `.section-rail` (colonne de titre sticky 3/12 + contenu 9/12) via `SectionHeader.tsx`.
+
+### 2. Accueil, Hero & Variantes de Composants
+- **Hero avec bascule `Interface ⇄ Données`** (`Hero.tsx`) : Titre typographique grand format, suppression des liens redondants « Aller à » (corrigeant le décalage d'ordre) et de la grille des 3 piliers, ajout d'un interrupteur accessible affichant les champs publics réels du profil Supabase en JSON.
+- **Nouvel ordre des sections** (`HomePage.tsx`) : `Hero → Projets → Compétences → À propos → Contact`.
+- **Hiérarchie des projets** (`ProjectCard.tsx`, `HomeProjectsMarquee.tsx`) : 3 variantes (`feature` pour le projet vedette, `row` en lignes éditoriales pour les suivants, `tile` en grille 2 colonnes aérée sur `/projets`).
+- **Compétences groupées & À propos** (`HomeSkillsPreview.tsx`, `TechCard.tsx`, `About.tsx`, `AboutVideoPlayer.tsx`) : Stack regroupée par catégorie en jetons fins ; bio en colonne de lecture `65ch` sans boîte ; bandeau de contact pleine largeur `indigo` + bouton `mango` (`HomeContactBanner.tsx`).
+
+### 3. Navigation, Pages Secondaires & Préservation Admin
+- **Navbar & Footer épurés** (`Navbar.tsx`, `Footer.tsx`) : Logo typographique « Angy. », liens soulignés `indigo`, menu mobile plein écran, conservation intégrale du déclencheur secret admin (triple-clic / appui long).
+- **Pages Projets, Compétences, Contact & Modale** (`ProjectsPage.tsx`, `SkillsPage.tsx`, `ContactPage.tsx`, `ProjectDetailModal.tsx`) : Harmonisation complète avec les nouveaux tokens sans modification de la logique métier ni du dashboard administrateur.
+
+### 4. Optimisation Mobile & PWA (360px–767px)
+- **Correctif menu mobile** (`Navbar.tsx`) : Extraction du panneau mobile hors du `<header>` pour éviter la contrainte de hauteur du `backdrop-blur-md`, cibles tactiles 44×44px, CTA direct et `env(safe-area-inset-bottom)`.
+- **Hero & Contact mobile-first** (`Hero.tsx`, `ContactPage.tsx`) : Bandeau de statut visible d'emblée au-dessus du titre sur mobile, vue JSON adaptée à 360px, formulaire affiché avant les coordonnées sur `/contact` avec raccourcis WhatsApp/Email et champs en `16px` (`text-base sm:text-sm`) pour éviter le zoom automatique iOS.
+- **Modale en bottom sheet & filtres scrollables** (`ProjectDetailModal.tsx`, `ProjectsPage.tsx`, `index.html`, `index.css`) : Tiroir ancré en bas avec en-tête collant sur mobile, onglets de catégories scrollables horizontalement, `viewport-fit=cover` et marges safe-area PWA.
+
+---
+
+## [2026-11-19] — Audit des Textes, Copywriting Humain & Refonte SEO
+
+### 1. Copywriting Humain & Élimination du Jargon Artificiel
+- **Profil & Identité** : Remplacement des formulations froides ou impersonnelles par une tonalité sincère, humble et passionnée (*"Développeur Full-Stack Web. Je transforme des idées en applications fluides, fiables et pensées pour les utilisateurs"*).
+- **Récit Personnel (Section À Propos)** : Refonte en trois paragraphes vivants décrivant le parcours autodidacte, l'amour du code soigné et la collaboration fluide depuis Abidjan.
+- **Restauration de l'Ergonomie de la Vidéo** : Conversion du bloc vidéo 16:9 imposant en carte compacte chic avec modale à la demande, pour libérer la lecture naturelle du parcours.
+- **Suppression des "AI Slop" & Clichés Visuels** : Suppression des faux numérotages robotiques (`01 / Profil`, `02 / Réalisations`, `03 / Technologies`) et des labels de boutons impersonnels.
+- **Micro-copies & États Vides Bienveillants** :
+  - Modalité de détail : *"Tester la démo en direct"*, *"Explorer le code source"*.
+  - Filtres & recherche sans résultat : Remplacement des fuites techniques de base de données par des messages d'aide constructifs et encourageants.
+  - Page de contact : Ton accessible et ouvert (*"Pas besoin d'un cahier des charges figé pour faire connaissance !"*).
+- **Données de Démonstration (Seed DB)** : Modernisation des descriptions pour `OmniPulse`, `ArtisanHub` et `DevConnect` articulées autour de cas d'usage réels et du problème/solution.
+
+### 2. Référencement Naturel & SEO Dynamique
+- **Fichiers de Découverte** : Création de `frontend/public/robots.txt` et `frontend/public/sitemap.xml`.
+- **Balisage Sémantique & Rich Snippets** : Intégration de données structurées Schema.org JSON-LD (`Person` & `WebSite`), meta tags OpenGraph et Twitter Cards.
+- **Synchronisation Dynamique SPA (`PageWatcher`)** : Mise à jour automatique des balises `<title>`, `<meta name="description">` et `<link rel="canonical">` à chaque changement de page.
+
+---
+
+## [2026-11-19] — Audit Approfondi, Durcissement de Sécurité & Optimisation Base de Données
+
+### 1. Durcissement RLS & Protection Anti-BOLA / IDOR
+- **Identification & Isolation de l'Administrateur** : Création de la fonction `public.is_admin()` restreignant les droits d'écriture et de suppression à l'adresse administrateur vérifiée (`yaojeanangoa@gmail.com`) et son UID unique.
+- **Remplacement de la condition vulnérable** : Suppression de `auth.uid() IS NOT NULL` qui accordait les privilèges administrateur à tout compte authentifié.
+- **Ajout de la clause `WITH CHECK` obligatoire** : Intégration systématique de `WITH CHECK (public.is_admin())` sur toutes les politiques `INSERT` et `UPDATE` (`profile`, `projects`, `skills`, `contact_messages`, `storage.objects`).
+- **Suppression des Politiques Dupliquées** : Dédoublonnage des politiques `SELECT` sur l'ensemble des tables publiques.
+
+### 2. Sécurisation des Fonctions RPC (`SECURITY DEFINER`)
+- **Correction de Vulnérabilité `search_path`** : Configuration explicite de `SET search_path = public, pg_temp` sur la fonction `track_unique_visit` pour immuniser la base contre les attaques par injection de schéma.
+- **Validation Anti-Payload DoS** : Restriction de la taille des messages de contact (`length <= 5000`, `name <= 120`, `email <= 150`) directement dans la politique RLS.
+
+### 3. Optimisation des Performances & Indexation
+- **Index Partiels Supabase Best Practices** :
+  - Remplacement de l'index complet `skills(is_featured)` par l'index partiel `idx_skills_featured_partial` (`WHERE is_featured = TRUE`).
+  - Remplacement de l'index complet `projects(is_featured, display_order)` par `idx_projects_featured_partial` (`WHERE is_featured = TRUE`).
+- **Suppression d'Index Redondant** : Suppression de `idx_projects_slug`, le champ `slug` bénéficiant déjà de l'index unique de sa contrainte `UNIQUE`.
+
+---
 
 ### 1. Migration Base de Données (PostgreSQL / Supabase)
 - **Suppression de l'ancienne contrainte restrictive** : `ALTER TABLE skills DROP CONSTRAINT IF EXISTS skills_category_check;`.

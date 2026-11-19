@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect, type ReactElement } from 'react'
-import { portfolioService } from '../services/portfolioService'
+import { useState, useMemo, type ReactElement } from 'react'
 import type { DbProject, ProjectCategoryType } from '../types/database'
+import { useProjects } from '../hooks/usePortfolioData'
 import ProjectCard from '../components/ProjectCard'
 import ProjectDetailModal from '../components/ProjectDetailModal'
 import EmptyState from '../components/EmptyState'
@@ -9,23 +9,9 @@ import { ProjectCardSkeleton } from '../components/Skeletons'
 const CATEGORIES: Array<'Tous' | ProjectCategoryType> = ['Tous', 'Full-Stack', 'Frontend', 'APIs']
 
 export default function ProjectsPage(): ReactElement {
-  const [projects, setProjects] = useState<DbProject[]>([])
-  const [loading, setLoading] = useState(true)
+  const { projects, loading } = useProjects()
   const [activeCategory, setActiveCategory] = useState<'Tous' | ProjectCategoryType>('Tous')
   const [selectedProject, setSelectedProject] = useState<DbProject | null>(null)
-
-  useEffect(() => {
-    let mounted = true
-    portfolioService.getProjects().then((data) => {
-      if (mounted) {
-        setProjects(data)
-        setLoading(false)
-      }
-    })
-    return () => {
-      mounted = false
-    }
-  }, [])
 
   const filteredProjects = useMemo(() => {
     if (activeCategory === 'Tous') return projects
@@ -33,23 +19,27 @@ export default function ProjectsPage(): ReactElement {
   }, [activeCategory, projects])
 
   return (
-    <div className="pt-28 pb-24 md:pt-36">
+    <div className="pt-24 pb-16 md:pt-36 md:pb-28">
       <div className="container-custom">
-        {/* Header de la page */}
-        <div className="max-w-2xl mb-10">
-          <p className="text-xs font-mono font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">
-            Travaux & Réalisations
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 mb-4">
-            Catalogue des Projets
+        {/* En-tête de la page */}
+        <header className="max-w-[60ch] mb-10 md:mb-12">
+          <h1
+            style={{ fontVariationSettings: "'opsz' 72" }}
+            className="text-[38px] sm:text-[57px] font-bold leading-[1.04] tracking-[-0.03em] text-ink mb-3.5 sm:mb-4"
+          >
+            Projets
           </h1>
-          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            Une sélection de projets complets, des interfaces dynamiques aux architectures d’APIs modulaires.
+          <p className="text-base sm:text-lg text-muted leading-[1.6]">
+            Une sélection d&apos;applications conçues pour répondre à de vrais besoins, du schéma de base de données jusqu&apos;aux démonstrations en ligne.
           </p>
-        </div>
+        </header>
 
-        {/* Système de filtres par tags */}
-        <div className="flex flex-wrap items-center gap-2 mb-10 border-b border-zinc-200 dark:border-zinc-900 pb-5">
+        {/* Filtres en onglets texte (scroll horizontal sur mobile) */}
+        <div
+          role="tablist"
+          aria-label="Filtrer les projets par catégorie"
+          className="flex flex-nowrap overflow-x-auto no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 items-center gap-6 sm:gap-8 mb-10 md:mb-14 border-b border-line"
+        >
           {CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat
             const count = cat === 'Tous' ? projects.length : projects.filter((p) => p.category === cat).length
@@ -57,45 +47,48 @@ export default function ProjectsPage(): ReactElement {
               <button
                 key={cat}
                 type="button"
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-lg text-xs font-mono transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-bold shadow-md'
-                    : 'bg-white dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/60'
-                }`}
+                className={`relative shrink-0 min-h-[44px] pb-3.5 pt-2 text-sm font-medium transition-colors cursor-pointer ${isActive
+                    ? 'text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-indigo'
+                    : 'text-muted hover:text-ink'
+                  }`}
               >
-                {cat}
-                <span className="ml-2 opacity-60 text-[10px]">{count}</span>
+                <span>{cat}</span>
+                <sup className={`ml-1 text-[11px] font-normal ${isActive ? 'text-indigo' : 'text-muted'}`}>
+                  {count}
+                </sup>
               </button>
             )
           })}
         </div>
 
-        {/* Grille complète de projets ou Skeleton Loader */}
+        {/* Grille 2 colonnes aérée */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 md:gap-y-14">
+            {[1, 2, 3, 4].map((i) => (
               <ProjectCardSkeleton key={i} />
             ))}
           </div>
         ) : filteredProjects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 md:gap-y-14">
             {filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}
                 project={project}
+                variant="tile"
                 onClick={(p) => setSelectedProject(p)}
               />
             ))}
           </div>
         ) : (
           <EmptyState
-            title="Aucun projet pour le moment"
-            description="La base de données a été initialisée. Les projets ajoutés s'afficheront instantanément ici."
+            title="Aucun projet dans cette catégorie"
+            description="Les réalisations de cette catégorie seront ajoutées prochainement."
           />
         )}
 
-        {/* Modale de détails complète du projet sélectionné */}
         <ProjectDetailModal
           project={selectedProject}
           isOpen={Boolean(selectedProject)}

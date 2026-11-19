@@ -1,36 +1,36 @@
 import type { ReactElement } from 'react'
 import type { DbProject } from '../types/database'
-import Icon from './Icon'
-import TechLogo, { getTechDetails } from './TechLogo'
+import TechLogo from './TechLogo'
 import { sanitizeUrl, isSafeUrl } from '../utils/security'
 
 interface ProjectCardProps {
   project: DbProject
+  variant?: 'feature' | 'row' | 'tile'
   className?: string
   onClick?: (project: DbProject) => void
 }
 
-export default function ProjectCard({ project, className = '', onClick }: ProjectCardProps): ReactElement {
-  const { title, tagline, description, summary, skills = [], demo_url, repo_url, is_featured, cover_image_url, images = [] } = project
+export default function ProjectCard({
+  project,
+  variant = 'tile',
+  className = '',
+  onClick,
+}: ProjectCardProps): ReactElement {
+  const {
+    title,
+    tagline,
+    description,
+    summary,
+    skills = [],
+    demo_url,
+    repo_url,
+    cover_image_url,
+    images = [],
+  } = project
   const cover = cover_image_url || images[0]
 
-  // Détails de la technologie principale pour la lueur et le filigrane
-  const primaryTech = skills[0] || ''
-  const techDetails = getTechDetails(primaryTech)
-  const PrimaryTechIcon = techDetails.icon
-  const techColor = techDetails.color
-
-  const featuredCardStyle: React.CSSProperties = is_featured
-    ? {
-      borderColor: `${techColor}35`,
-      boxShadow: `0 10px 25px -5px ${techColor}15`,
-    }
-    : {}
-
   const handleCardClick = (): void => {
-    if (onClick) {
-      onClick(project)
-    }
+    if (onClick) onClick(project)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent): void => {
@@ -40,115 +40,187 @@ export default function ProjectCard({ project, className = '', onClick }: Projec
     }
   }
 
-  return (
-    <article
-      style={featuredCardStyle}
-      onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      aria-label={onClick ? `Voir les détails du projet ${title}` : undefined}
-      className={`glass-card group relative flex flex-col justify-between p-5 sm:p-6 motion-safe:hover:-translate-y-0.5 hover:shadow-xl transition-all duration-300 overflow-hidden ${onClick ? 'cursor-pointer' : ''
-        } ${is_featured
-          ? 'border-amber-400/40 dark:border-amber-400/25 ring-1 ring-amber-400/15'
-          : 'hover:shadow-indigo-500/5'
-        } ${className}`}
-    >
-      {/* Mise en valeur visuelle Projet à la une : Lueur & Filigrane discret du logo de la technologie principale */}
-      {is_featured && (
-        <>
-          {/* Lueur subtile en arrière-plan */}
-          <div
-            className="pointer-events-none absolute -top-10 -right-10 size-36 rounded-full blur-3xl opacity-20 dark:opacity-30 group-hover:opacity-40 transition-opacity duration-500"
-            style={{ background: techColor }}
-            aria-hidden="true"
-          />
+  const renderLinks = (compact = false): ReactElement | null => {
+    const hasDemo = Boolean(demo_url && isSafeUrl(demo_url))
+    const hasRepo = Boolean(repo_url && isSafeUrl(repo_url))
+    if (!hasDemo && !hasRepo) return null
 
-          {/* Filigrane discret du logo en bas à droite */}
-          <div
-            className="pointer-events-none absolute -bottom-6 -right-6 opacity-[0.04] dark:opacity-[0.07] text-zinc-900 dark:text-zinc-100 group-hover:opacity-[0.09] dark:group-hover:opacity-[0.13] transition-all duration-500 group-hover:scale-105"
-            style={{ color: techColor }}
-            aria-hidden="true"
+    return (
+      <div
+        className={`flex items-center gap-4 text-sm font-medium shrink-0 ${compact ? 'text-xs' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {hasDemo && (
+          <a
+            href={sanitizeUrl(demo_url!)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="py-1.5 text-indigo hover:underline underline-offset-4"
+            aria-label={`Démo en ligne de ${title}`}
           >
-            <PrimaryTechIcon size={160} />
-          </div>
-        </>
-      )}
-
-      <div className="relative z-10">
-        {/* Badge distinctif chic pour tout projet marqué "À la une" */}
-        {is_featured && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-medium tracking-wide bg-gradient-to-r from-amber-500/15 via-indigo-500/10 to-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 dark:border-amber-400/30 shadow-xs mb-3.5 backdrop-blur-xs">
-            <span className="text-amber-500 dark:text-amber-400 text-xs" aria-hidden="true">★</span>
-            <span>Projet à la une</span>
-          </div>
+            Démo
+          </a>
         )}
+        {hasRepo && (
+          <a
+            href={sanitizeUrl(repo_url!)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="py-1.5 text-muted hover:text-ink hover:underline underline-offset-4 transition-colors"
+            aria-label={`Code source de ${title}`}
+          >
+            Code
+          </a>
+        )}
+      </div>
+    )
+  }
 
-        {/* Image de couverture du projet si disponible */}
+  // Variante 1 : Projet vedette (accueil, 1er projet)
+  if (variant === 'feature') {
+    return (
+      <article
+        onClick={handleCardClick}
+        onKeyDown={handleKeyDown}
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
+        aria-label={onClick ? `Voir les détails du projet ${title}` : undefined}
+        className={`group grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-10 ${onClick ? 'cursor-pointer' : ''
+          } ${className}`}
+      >
         {cover && (
-          <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-4 border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950">
+          <div className="lg:col-span-7 relative aspect-[16/10] w-full rounded-lg overflow-hidden bg-surface border border-line">
             <img
               src={cover}
               alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover transition-all duration-300 group-hover:brightness-95"
               loading="lazy"
               onError={(e) => {
-                (e.target as HTMLImageElement).parentElement!.style.display = 'none'
+                ; (e.target as HTMLImageElement).parentElement!.style.display = 'none'
               }}
             />
           </div>
         )}
 
-        {/* En-tête : titre + liens */}
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <div className="flex items-center gap-2">
-            <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+        <div className={`${cover ? 'lg:col-span-5' : 'lg:col-span-12'} flex flex-col gap-4`}>
+          <div>
+            <h3 className="text-[28px] sm:text-[32px] font-semibold leading-[1.15] tracking-[-0.025em] text-ink group-hover:text-indigo transition-colors">
               {title}
             </h3>
+            {tagline && (
+              <p className="text-sm text-muted mt-1.5">{tagline}</p>
+            )}
           </div>
 
-          <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-            {repo_url && isSafeUrl(repo_url) && (
-              <a
-                href={sanitizeUrl(repo_url)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex size-8 items-center justify-center rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
-                aria-label={`Code source de ${title} (nouvel onglet)`}
-              >
-                <Icon name="code" className="size-4" />
-              </a>
-            )}
-            {demo_url && isSafeUrl(demo_url) && (
-              <a
-                href={sanitizeUrl(demo_url)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex size-8 items-center justify-center rounded-md text-zinc-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
-                aria-label={`Démo en ligne de ${title} (nouvel onglet)`}
-              >
-                <Icon name="external" className="size-4" />
-              </a>
+          <p className="text-base text-muted leading-[1.6] max-w-[55ch]">
+            {summary || description}
+          </p>
+
+          {skills.length > 0 && (
+            <ul className="flex flex-wrap gap-2 pt-1" aria-label="Technologies du projet">
+              {skills.slice(0, 5).map((tech) => (
+                <li
+                  key={tech}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface border border-line text-xs font-medium text-ink"
+                >
+                  <TechLogo name={tech} size={13} />
+                  <span>{tech}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="pt-2 flex items-center justify-between gap-4">
+            {renderLinks()}
+            {onClick && (
+              <span className="text-xs font-medium text-muted group-hover:text-ink transition-colors">
+                Détails
+              </span>
             )}
           </div>
         </div>
+      </article>
+    )
+  }
 
-        <p className="text-xs font-mono text-indigo-600 dark:text-indigo-400 mb-3">{tagline}</p>
-        <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-5 line-clamp-3">
+  // Variante 2 : Ligne éditoriale (accueil, projets suivants)
+  if (variant === 'row') {
+    return (
+      <article
+        onClick={handleCardClick}
+        onKeyDown={handleKeyDown}
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
+        aria-label={onClick ? `Voir les détails du projet ${title}` : undefined}
+        className={`group border-t border-line py-5 sm:py-6 grid grid-cols-1 md:grid-cols-12 gap-2.5 md:gap-6 items-baseline transition-transform duration-150 md:hover:translate-x-1 ${onClick ? 'cursor-pointer' : ''
+          } ${className}`}
+      >
+        <div className="md:col-span-4 min-w-0">
+          <h3 className="text-lg font-semibold text-ink group-hover:text-indigo transition-colors line-clamp-2 md:truncate">
+            {title}
+          </h3>
+        </div>
+
+        <p className="md:col-span-4 text-sm text-muted line-clamp-1">
+          {tagline || summary || description}
+        </p>
+
+        <div className="md:col-span-4 flex items-center justify-between md:justify-end gap-4">
+          {skills.length > 0 && (
+            <span className="text-xs text-muted truncate">
+              {skills.slice(0, 3).join(', ')}
+            </span>
+          )}
+          {renderLinks(true)}
+        </div>
+      </article>
+    )
+  }
+
+  // Variante 3 : Tuile épurée (page Projets)
+  return (
+    <article
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `Voir les détails du projet ${title}` : undefined}
+      className={`group flex flex-col justify-between gap-4 ${onClick ? 'cursor-pointer' : ''
+        } ${className}`}
+    >
+      <div>
+        {cover && (
+          <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden bg-surface border border-line mb-5">
+            <img
+              src={cover}
+              alt={title}
+              className="w-full h-full object-cover transition-all duration-300 group-hover:brightness-95"
+              loading="lazy"
+              onError={(e) => {
+                ; (e.target as HTMLImageElement).parentElement!.style.display = 'none'
+              }}
+            />
+          </div>
+        )}
+
+        <div className="flex items-baseline justify-between gap-4 mb-2">
+          <h3 className="text-xl font-semibold text-ink group-hover:text-indigo transition-colors">
+            {title}
+          </h3>
+          {renderLinks(true)}
+        </div>
+
+        <p className="text-sm text-muted leading-[1.6] line-clamp-3 mb-4 max-w-[55ch]">
           {summary || description}
         </p>
       </div>
 
-      {/* Technologies avec logos officiels */}
       {skills.length > 0 && (
-        <ul className="pt-3 border-t border-zinc-200 dark:border-zinc-800/60 flex flex-wrap gap-1.5 relative z-10" aria-label="Technologies du projet">
-          {skills.map((tech) => (
-            <li
-              key={tech}
-              className="tag-mono px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 flex items-center gap-1.5 text-[11px]"
-            >
+        <ul className="pt-3 border-t border-line flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted" aria-label="Technologies du projet">
+          {skills.slice(0, 5).map((tech) => (
+            <li key={tech} className="inline-flex items-center gap-1.5">
               <TechLogo name={tech} size={12} />
               <span>{tech}</span>
             </li>

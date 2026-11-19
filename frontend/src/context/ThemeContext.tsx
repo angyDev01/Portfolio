@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode, type ReactElement } from 'react'
 
-export type Theme = 'dark' | 'light'
+export type Theme = 'light' | 'dark'
 
 interface ThemeContextType {
   theme: Theme
@@ -10,22 +10,22 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-const THEME_STORAGE_KEY = 'theme'
-
 export function ThemeProvider({ children }: { children: ReactNode }): ReactElement {
   const [theme, setThemeState] = useState<Theme>(() => {
-    // 1. Sauvegarde dans localStorage
-    const saved = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null
-    if (saved === 'dark' || saved === 'light') {
-      return saved
+    try {
+      const stored = localStorage.getItem('theme') as Theme | null
+      if (stored === 'light' || stored === 'dark') return stored
+      if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+      }
+    } catch {
+      /* ignore */
     }
-    // 2. Par défaut : mode sombre
     return 'dark'
   })
 
   useEffect(() => {
     const root = document.documentElement
-
     if (theme === 'dark') {
       root.classList.add('dark')
       root.classList.remove('light')
@@ -37,7 +37,7 @@ export function ThemeProvider({ children }: { children: ReactNode }): ReactEleme
     }
 
     try {
-      localStorage.setItem(THEME_STORAGE_KEY, theme)
+      localStorage.setItem('theme', theme)
     } catch {
       /* ignore */
     }
@@ -65,4 +65,3 @@ export function useTheme(): ThemeContextType {
   }
   return context
 }
-

@@ -1,77 +1,87 @@
-import { useEffect, useState, type ReactElement } from 'react'
-import { portfolioService } from '../services/portfolioService'
-import type { DbProfile } from '../types/database'
+import type { ReactElement } from 'react'
+import { useProfile } from '../hooks/usePortfolioData'
+import SectionHeader from './SectionHeader'
 import AboutVideoPlayer from './AboutVideoPlayer'
 
 export default function About(): ReactElement {
-  const [profile, setProfile] = useState<DbProfile | null>(null)
+  const { profile } = useProfile()
 
-  useEffect(() => {
-    let mounted = true
-    portfolioService.getProfile().then((data) => {
-      if (mounted) setProfile(data)
-    })
-    return () => {
-      mounted = false
-    }
-  }, [])
+  const fullBio =
+    profile?.full_bio && Array.isArray(profile.full_bio) && profile.full_bio.length > 0
+      ? profile.full_bio
+      : [
+        "Mon histoire avec le code a commencé par une curiosité insatiable : comprendre ce qui se cache sous le capot des applications que nous utilisons tous les jours. Au fil des projets, cette curiosité s'est transformée en une véritable passion pour l'ingénierie web, avec une exigence constante d'apprendre et de construire en autonomie.",
+        "Au quotidien, j'aime relier la rigueur d'un backend robuste (Node.js, bases relationnelles PostgreSQL, architectures sécurisées) à la finesse d'un frontend fluide et intuitif (React, TypeScript, Tailwind). Pour moi, un produit réussi ne doit pas seulement être performant : il doit être lisible pour l'équipe qui le maintient et agréable pour les personnes qui l'utilisent.",
+        "Basé à Abidjan et ouvert aux collaborations en télétravail à l'international, je privilégie la simplicité, la transparence et une communication limpide. Je suis toujours motivé par de nouveaux défis où rigueur technique et créativité se rencontrent.",
+      ]
 
-  const fullBio = profile?.full_bio && Array.isArray(profile.full_bio) && profile.full_bio.length > 0
-    ? profile.full_bio
-    : [
-      'Développeur autodidacte passionné par l’ingénierie logicielle web moderne. Je conçois des interfaces nettes, accessibles et des architectures serveur robustes.',
-      'Spécialisé dans l’écosystème React, Vite, Node.js et TypeScript, j’accorde une attention méticuleuse à l’ergonomie, aux performances et à la qualité du code.',
-      'Constamment en veille technologique, j’aime transformer des exigences complexes en composants réutilisables et faciles à maintenir.',
-    ]
+  const statusText =
+    profile?.availability_status === 'employed'
+      ? 'En poste'
+      : profile?.availability_status === 'unavailable'
+        ? 'Non disponible'
+        : 'Disponible'
 
   return (
-    <section id="about" aria-labelledby="about-title" className="py-20 border-t border-zinc-200 dark:border-zinc-900">
+    <section
+      id="about"
+      aria-labelledby="about-title"
+      className="py-12 md:py-24 transition-colors"
+    >
       <div className="container-custom">
-        <div className="max-w-2xl mb-8">
-          <p className="text-xs font-mono font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">Présentation</p>
-          <h2 id="about-title" className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 mb-3">
-            À propos de moi
-          </h2>
-        </div>
+        <div className="section-rail">
+          <SectionHeader
+            id="about-title"
+            title="À propos"
+            context="Parcours, façon de travailler et présentation vidéo."
+          />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-          <div className="md:col-span-2 glass-card p-6 sm:p-8 space-y-4 text-zinc-600 dark:text-zinc-400 text-sm sm:text-base leading-relaxed">
-            {fullBio.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
+          <div className="min-w-0">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+              {/* Bio en colonne de lecture, sans carte */}
+              <div className="lg:col-span-8 space-y-5 text-base sm:text-[18px] leading-[1.65] text-muted max-w-[65ch]">
+                {fullBio.map((paragraph, index) => (
+                  <p key={index} className={index === 0 ? 'text-ink' : undefined}>
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+
+              {/* Liste de définitions sobre */}
+              <aside aria-label="Repères clés" className="lg:col-span-4">
+                <dl className="divide-y divide-line border-t border-b border-line text-sm">
+                  <div className="py-3.5 flex justify-between gap-4">
+                    <dt className="text-muted">Rôle</dt>
+                    <dd className="text-right font-medium text-ink">
+                      {profile?.role || 'Full-Stack Web'}
+                    </dd>
+                  </div>
+                  <div className="py-3.5 flex justify-between gap-4">
+                    <dt className="text-muted">Stack</dt>
+                    <dd className="text-right font-medium text-ink">
+                      React, TS, Node, Postgres
+                    </dd>
+                  </div>
+                  <div className="py-3.5 flex justify-between gap-4">
+                    <dt className="text-muted">Lieu</dt>
+                    <dd className="text-right font-medium text-ink">
+                      Abidjan (Remote)
+                    </dd>
+                  </div>
+                  <div className="py-3.5 flex justify-between gap-4">
+                    <dt className="text-muted">Statut</dt>
+                    <dd className="text-right font-medium text-ink">
+                      {statusText}
+                    </dd>
+                  </div>
+                </dl>
+              </aside>
+            </div>
+
+            {/* Présentation Vidéo */}
+            <AboutVideoPlayer posterUrl={profile?.avatar_url || '/videos/poster.jpg'} />
           </div>
-
-          <aside aria-labelledby="about-summary-title" className="glass-card p-6 flex flex-col gap-4">
-            <h3 id="about-summary-title" className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider font-mono">
-              En résumé
-            </h3>
-            <dl className="space-y-3 text-xs font-mono">
-              <div className="flex justify-between gap-4 py-1.5 border-b border-zinc-200 dark:border-zinc-800">
-                <dt className="text-zinc-500 dark:text-zinc-400">Rôle</dt>
-                <dd className="text-right text-zinc-800 dark:text-zinc-200">{profile?.role || 'Full-Stack Web'}</dd>
-              </div>
-              <div className="flex justify-between gap-4 py-1.5 border-b border-zinc-200 dark:border-zinc-800">
-                <dt className="text-zinc-500 dark:text-zinc-400">Stack</dt>
-                <dd className="text-right text-zinc-800 dark:text-zinc-200">React, Node, TS</dd>
-              </div>
-              <div className="flex justify-between gap-4 py-1.5 border-b border-zinc-200 dark:border-zinc-800">
-                <dt className="text-zinc-500 dark:text-zinc-400">Statut</dt>
-                <dd className="text-right">
-                  {profile?.availability_status === 'employed' ? (
-                    <span className="text-indigo-600 dark:text-indigo-400 font-medium">En poste</span>
-                  ) : profile?.availability_status === 'unavailable' ? (
-                    <span className="text-amber-600 dark:text-amber-400 font-medium">Non disponible</span>
-                  ) : (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">Disponible</span>
-                  )}
-                </dd>
-              </div>
-            </dl>
-          </aside>
         </div>
-
-        {/* Bloc vidéo de présentation personnelle (Lazy Loading preload="none") */}
-        <AboutVideoPlayer posterUrl={profile?.avatar_url || '/videos/poster.jpg'} />
       </div>
     </section>
   )

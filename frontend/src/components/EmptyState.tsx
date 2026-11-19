@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import Icon from './Icon'
 import { sanitizeUrl, isSafeUrl } from '../utils/security'
 
 interface EmptyStateProps {
@@ -11,30 +10,25 @@ interface EmptyStateProps {
 }
 
 export default function EmptyState({
-  title = 'Aucune donnée disponible',
-  description = 'Les informations sont en cours de mise à jour sur la base de données.',
+  title = 'Bientôt disponible',
+  description = 'De nouvelles réalisations sont en cours de préparation.',
   actionLabel,
   actionHref,
 }: EmptyStateProps): ReactElement {
   return (
-    <div className="glass-card p-10 sm:p-14 text-center max-w-lg mx-auto flex flex-col items-center">
-      <div className="size-12 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-4">
-        <Icon name="sparkles" className="size-5 text-indigo-500 dark:text-indigo-400/60" />
-      </div>
-      <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-200 mb-2">{title}</h3>
-      <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-sm mb-6">{description}</p>
+    <div className="border-t border-b border-line py-10 flex flex-col items-start gap-2">
+      <h3 className="text-base font-semibold text-ink">{title}</h3>
+      <p className="text-sm text-muted leading-relaxed max-w-[55ch]">{description}</p>
       {actionLabel && actionHref && isSafeUrl(actionHref) && (
         <a
           href={sanitizeUrl(actionHref)}
           target={actionHref.startsWith('http') ? '_blank' : undefined}
           rel={actionHref.startsWith('http') ? 'noopener noreferrer' : undefined}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xs font-mono dark:text-zinc-200 transition-colors"
+          className="mt-2 inline-flex items-center text-sm font-medium text-indigo hover:underline underline-offset-4"
         >
-          <span>{actionLabel}</span>
-          <Icon name="arrowRight" className="size-3" />
+          {actionLabel}
         </a>
       )}
     </div>
   )
 }
-

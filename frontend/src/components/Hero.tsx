@@ -1,170 +1,197 @@
-import { useEffect, useState, type ReactElement } from 'react'
+import { useState, type ReactElement } from 'react'
 import { Link } from 'react-router-dom'
+import { DEFAULT_PROFILE_CONTACT } from '../config/defaults'
+import { useProfile } from '../hooks/usePortfolioData'
 import { portfolioService } from '../services/portfolioService'
-import type { DbProfile } from '../types/database'
-import Icon from './Icon'
-import AvatarImage from './AvatarImage'
+
+const PUBLIC_STACK = ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Tailwind CSS']
 
 export default function Hero(): ReactElement {
-  const [profile, setProfile] = useState<DbProfile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { profile, loading } = useProfile()
+  const [showData, setShowData] = useState(false)
 
-  useEffect(() => {
-    let mounted = true
-    portfolioService.getProfile().then((data) => {
-      if (mounted) {
-        setProfile(data)
-        setLoading(false)
-      }
-    })
+  const status = profile?.availability_status || (profile?.is_available ? 'available' : 'employed')
+  const statusLabel =
+    profile?.status_label ||
+    (status === 'employed'
+      ? 'En poste / En mission'
+      : status === 'unavailable'
+        ? 'Non disponible'
+        : 'Disponible')
 
-    const handleProfileUpdate = (e: Event): void => {
-      const ce = e as CustomEvent<Partial<DbProfile>>
-      if (mounted && ce.detail) {
-        setProfile((prev) => (prev ? { ...prev, ...ce.detail } : (ce.detail as DbProfile)))
-      }
-    }
-    window.addEventListener('portfolio:profile-updated', handleProfileUpdate)
+  const locationLabel = profile?.location || DEFAULT_PROFILE_CONTACT.location
 
-    return () => {
-      mounted = false
-      window.removeEventListener('portfolio:profile-updated', handleProfileUpdate)
-    }
-  }, [])
+  const publicRecord = {
+    name: profile?.name || 'Angoa Yao Jean',
+    alias: profile?.alias || "Angy's",
+    role: profile?.role || 'Développeur Full-Stack Web',
+    location: locationLabel,
+    availability_status: status,
+    stack: PUBLIC_STACK,
+  }
+
+  const statusDot = (
+    <span className="relative flex size-2.5 shrink-0" aria-hidden="true">
+      {status === 'available' && (
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mango opacity-75" />
+      )}
+      <span
+        className={`relative inline-flex rounded-full size-2.5 ${status === 'available'
+            ? 'bg-mango'
+            : status === 'employed'
+              ? 'bg-indigo'
+              : 'bg-muted'
+          }`}
+      />
+    </span>
+  )
 
   return (
-    <section id="home" aria-labelledby="hero-title" className="relative isolate pt-32 pb-20 md:pt-40 md:pb-24 overflow-hidden">
-      {/* Halos décoratifs Vercel */}
-      <div
-        className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-140 h-88 max-w-full bg-indigo-600/15 rounded-full blur-[120px] -z-10"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute top-1/3 left-1/3 -translate-x-1/2 w-80 h-60 bg-violet-600/10 rounded-full blur-[100px] -z-10"
-        aria-hidden="true"
-      />
-
+    <section
+      id="home"
+      aria-labelledby="hero-title"
+      className="pt-24 pb-12 md:pt-36 md:pb-24 border-b border-line transition-colors"
+    >
       <div className="container-custom">
-        <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
-          {/* Avatar avec composant robuste AvatarImage */}
-          <div className="relative mb-5 group">
-            <div className="absolute -inset-1 bg-linear-to-r from-indigo-500 to-violet-600 rounded-full blur-xs opacity-50 group-hover:opacity-80 transition duration-300" />
-            <AvatarImage
-              src={profile?.avatar_url}
-              alt={profile?.name || "Angy's"}
-              className="relative size-20 sm:size-24 border-2 border-white dark:border-zinc-900 shadow-xl"
-            />
-          </div>
+        {/* Bandeau de statut compact visible d'emblée sur mobile */}
+        <div className="lg:hidden hero-reveal-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm mb-6 pb-4 border-b border-line">
+          <span className="inline-flex items-center gap-2 font-medium text-ink">
+            {statusDot}
+            <span>{statusLabel}</span>
+          </span>
+          <span className="text-muted">{locationLabel}</span>
+        </div>
 
-          {/* Badge de disponibilité dynamique à 3 états */}
-          {(() => {
-            const status = profile?.availability_status || (profile?.is_available ? 'available' : 'employed')
-            if (status === 'employed') {
-              return (
-                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-xs font-mono text-indigo-300 shadow-sm mb-6 backdrop-blur-md">
-                  <span className="relative flex size-2" aria-hidden="true">
-                    <span className="absolute inline-flex size-full motion-safe:animate-ping rounded-full bg-indigo-400 opacity-75" />
-                    <span className="relative inline-flex size-2 rounded-full bg-indigo-500" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
+          {/* Colonne principale : identité ou vue Données */}
+          <div className="lg:col-span-9 min-w-0">
+            {!showData ? (
+              <div key="ui-view" className="hero-view-enter">
+                <h1
+                  id="hero-title"
+                  style={{ fontVariationSettings: "'opsz' 96" }}
+                  className="hero-reveal-1 text-[clamp(2.75rem,11vw,6.75rem)] font-bold leading-[0.94] tracking-[-0.04em] text-ink mb-6 sm:mb-8"
+                >
+                  <span className="block">Yao Jean</span>
+                  <span className="block">
+                    Angoa<span className="text-indigo">.</span>
                   </span>
-                  <span>{profile?.status_label || 'En poste / Actuellement en mission'}</span>
+                </h1>
+
+                <div className="hero-reveal-2 max-w-[60ch]">
+                  <p className="text-lg sm:text-2xl font-medium text-ink leading-[1.35] tracking-[-0.015em] mb-3.5 sm:mb-4">
+                    {profile?.role || 'Développeur Full-Stack Web'}. Je relie des bases PostgreSQL solides à des interfaces React agréables à utiliser.
+                  </p>
+
+                  {loading ? (
+                    <div className="w-full max-w-lg space-y-2.5 mb-8 sm:mb-9">
+                      <div className="h-4 bg-line/70 rounded w-full animate-pulse" />
+                      <div className="h-4 bg-line/60 rounded w-4/5 animate-pulse" />
+                    </div>
+                  ) : (
+                    <p className="text-sm sm:text-base text-muted leading-[1.65] mb-8 sm:mb-9">
+                      {profile?.short_bio ||
+                        "J'accompagne les équipes et porteurs de projets de la modélisation des données jusqu'aux finitions d'interface avec React, TypeScript, Node.js et PostgreSQL."}
+                    </p>
+                  )}
                 </div>
-              )
-            }
-            if (status === 'unavailable') {
-              return (
-                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-xs font-mono text-amber-300 shadow-sm mb-6 backdrop-blur-md">
-                  <span className="size-2 rounded-full bg-amber-500" aria-hidden="true" />
-                  <span>{profile?.status_label || 'Non disponible pour le moment'}</span>
-                </div>
-              )
-            }
-            // Par défaut : 'available'
-            return (
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono text-emerald-700 dark:text-emerald-300 shadow-sm mb-6 backdrop-blur-md">
-                <span className="relative flex size-2" aria-hidden="true">
-                  <span className="absolute inline-flex size-full motion-safe:animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-                </span>
-                <span>{profile?.status_label || 'Disponible'}</span>
               </div>
-            )
-          })()}
+            ) : (
+              <div
+                key="data-view"
+                className="hero-view-enter rounded-lg bg-surface border border-line p-4 sm:p-8 mb-8 sm:mb-9"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-4 border-b border-line font-mono text-[11px] sm:text-xs text-muted">
+                  <span className="truncate max-w-full">
+                    supabase.from(&apos;profile&apos;).select(&apos;public_fields&apos;).single()
+                  </span>
+                  <span className="text-indigo shrink-0">200 OK</span>
+                </div>
 
-          {/* Salutation, Rôle & Nom */}
-          <div className="flex flex-col items-center gap-1.5 mb-3">
-            <p className="text-sm font-mono text-indigo-600 dark:text-indigo-400 font-medium tracking-wide uppercase">
-              Bonjour, je suis{' '}
-              <span className="text-zinc-900 dark:text-zinc-100 font-bold">{profile?.name || 'Angoa Yao Jean'}</span>
-              {profile?.alias ? ` (${profile.alias})` : " (Angy's)"}
+                <pre className="font-mono text-[11px] sm:text-sm leading-6 sm:leading-7 overflow-x-auto whitespace-pre-wrap break-words sm:whitespace-pre text-ink">
+                  <code>
+                    <span className="text-muted">{'{'}</span>
+                    {'\n'}
+                    {Object.entries(publicRecord).map(([key, value], idx, arr) => {
+                      const isLast = idx === arr.length - 1
+                      const formattedValue = Array.isArray(value)
+                        ? `[${value.map((v) => `"${v}"`).join(', ')}]`
+                        : `"${String(value)}"`
+                      return (
+                        <span key={key} className="block pl-3 sm:pl-4">
+                          <span className="text-indigo">&quot;{key}&quot;</span>
+                          <span className="text-muted">: </span>
+                          <span className={key === 'availability_status' ? 'text-mango font-medium' : 'text-ink'}>
+                            {formattedValue}
+                          </span>
+                          {!isLast && <span className="text-muted">,</span>}
+                        </span>
+                      )
+                    })}
+                    <span className="text-muted">{'}'}</span>
+                  </code>
+                </pre>
+              </div>
+            )}
+
+            {/* Actions & Bascule Interface ⇄ Données */}
+            <div className="hero-reveal-2 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-5 sm:gap-6 pt-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+                <Link
+                  to="/projets"
+                  onMouseEnter={() => portfolioService.prefetch('projects')}
+                  className="btn-tactile w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center px-5 py-2.5 rounded-md bg-indigo hover:bg-indigo-hover text-indigo-fg text-sm font-medium transition-colors"
+                >
+                  Voir les projets
+                </Link>
+
+                <Link
+                  to="/contact"
+                  className="min-h-[44px] inline-flex items-center justify-center sm:justify-start text-sm font-medium text-ink hover:text-indigo underline underline-offset-4 decoration-line hover:decoration-indigo transition-colors"
+                >
+                  Me contacter
+                </Link>
+              </div>
+
+              {/* Bascule Interface ⇄ Données */}
+              <div className="flex items-center justify-between sm:justify-start gap-3 text-xs font-medium pt-4 sm:pt-0 border-t sm:border-t-0 border-line">
+                <span className={!showData ? 'text-ink' : 'text-muted'}>Interface</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={showData}
+                  aria-label="Basculer entre la vue interface et la vue données Supabase"
+                  onClick={() => setShowData((prev) => !prev)}
+                  className={`relative inline-flex h-7 w-12 sm:h-6 sm:w-11 shrink-0 items-center rounded-full border transition-colors cursor-pointer ${showData
+                      ? 'bg-indigo border-indigo'
+                      : 'bg-surface border-line'
+                    }`}
+                >
+                  <span
+                    className={`inline-block size-5 sm:size-4 rounded-full transition-transform duration-200 ${showData
+                        ? 'translate-x-6 sm:translate-x-5.5 bg-indigo-fg'
+                        : 'translate-x-1 bg-ink'
+                      }`}
+                  />
+                </button>
+                <span className={showData ? 'text-indigo font-mono' : 'text-muted font-mono'}>
+                  Données
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Encadré de statut & localisation à droite (desktop uniquement) */}
+          <aside className="hidden lg:flex lg:col-span-3 lg:border-l lg:border-line lg:pl-6 flex-col gap-3 pb-1">
+            <div className="inline-flex items-center gap-2.5 text-sm font-medium text-ink">
+              {statusDot}
+              <span>{statusLabel}</span>
+            </div>
+
+            <p className="text-sm text-muted leading-snug">
+              {locationLabel}
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400">
-              <span className="px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-semibold">
-                {profile?.role || 'Développeur Full-Stack Junior'}
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Icon name="sparkles" className="size-3 text-indigo-500" />
-                {profile?.location || "Abidjan, Côte d'Ivoire (Ouvert au télétravail / remote)"}
-              </span>
-            </div>
-          </div>
-
-          <h1 id="hero-title" className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 leading-[1.12] mb-6">
-            Concevoir des architectures web{' '}
-            <span className="bg-linear-to-r from-indigo-500 via-indigo-400 to-violet-500 dark:from-indigo-400 dark:via-indigo-300 dark:to-violet-400 bg-clip-text text-transparent">
-              performantes & fluides.
-            </span>
-          </h1>
-
-          {/* Bio dynamique */}
-          {loading ? (
-            <div className="w-full max-w-xl mx-auto space-y-2 mb-9 animate-pulse">
-              <div className="h-4 bg-zinc-200 dark:bg-zinc-800/80 rounded w-full" />
-              <div className="h-4 bg-zinc-200 dark:bg-zinc-800/50 rounded w-4/5 mx-auto" />
-            </div>
-          ) : (
-            <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed mb-9">
-              {profile?.short_bio ||
-                "Développeur Full-Stack autodidacte passionné par la conception d'applications web modernes, réactives et performantes sous React, Vite et Node.js."}
-            </p>
-          )}
-
-          {/* Boutons CTA */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-            <Link
-              to="/projets"
-              onMouseEnter={() => portfolioService.prefetch('projects')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-950 font-semibold text-sm dark:hover:bg-white hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-200 group cursor-pointer"
-            >
-              <span>Voir mes projets</span>
-              <Icon
-                name="arrowRight"
-                className="size-4 group-hover:translate-x-0.5 transition-transform duration-200"
-              />
-            </Link>
-            <Link
-              to="/contact"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 font-medium text-sm hover:text-zinc-900 dark:hover:text-white hover:border-zinc-400 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-all duration-200 cursor-pointer"
-            >
-              <span>Me contacter</span>
-            </Link>
-          </div>
-
-          {/* Métriques / Badges en monospace */}
-          <div className="mt-14 pt-8 border-t border-zinc-200 dark:border-zinc-900/80 grid grid-cols-3 gap-6 sm:gap-12 w-full max-w-lg">
-            <div className="flex flex-col items-center">
-              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 tracking-tight">PostgreSQL</span>
-              <span className="text-[11px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-0.5">Database</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 tracking-tight">100%</span>
-              <span className="text-[11px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-0.5">TypeScript</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-lg sm:text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 tracking-tight">Fast</span>
-              <span className="text-[11px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-0.5">Vite & Tailwind</span>
-            </div>
-          </div>
+          </aside>
         </div>
       </div>
     </section>

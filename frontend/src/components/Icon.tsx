@@ -1,6 +1,7 @@
 import type { ReactElement, SVGProps } from 'react'
 import {
   ArrowRight,
+  ArrowUp,
   Check,
   Code,
   Copy,
@@ -49,6 +50,7 @@ export type IconName =
   | 'external'
   | 'code'
   | 'arrowRight'
+  | 'arrowUp'
   | 'copy'
   | 'check'
   | 'menu'
@@ -154,6 +156,7 @@ const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   external: ExternalLink,
   code: Code,
   arrowRight: ArrowRight,
+  arrowUp: ArrowUp,
   copy: Copy,
   check: Check,
   menu: Menu,

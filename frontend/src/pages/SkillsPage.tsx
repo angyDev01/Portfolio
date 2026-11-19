@@ -1,112 +1,86 @@
-import { useEffect, useState, type ReactElement } from 'react'
-import { portfolioService } from '../services/portfolioService'
-import type { DbSkill, SkillCategoryType } from '../types/database'
-import Icon from '../components/Icon'
+import type { ReactElement } from 'react'
+import {
+  ALL_SKILL_CATEGORIES,
+  PRIMARY_SKILL_CATEGORIES,
+  SKILL_CATEGORY_META,
+} from '../config/defaults'
+import { useSkills } from '../hooks/usePortfolioData'
 import EmptyState from '../components/EmptyState'
 import TechCard from '../components/TechCard'
 import { SkillCategorySkeleton } from '../components/Skeletons'
 
-const CATEGORY_META: Record<
-  SkillCategoryType,
-  { title: string; icon: 'frontend' | 'backend' | 'tools' | 'database' }
-> = {
-  frontend: { title: 'Frontend Moderne', icon: 'frontend' },
-  backend: { title: 'Backend & APIs', icon: 'backend' },
-  database: { title: 'Bases de données', icon: 'database' },
-  tools: { title: 'Outils & Méthodes', icon: 'tools' },
-  devops: { title: 'DevOps & Cloud', icon: 'tools' },
-  mobile: { title: 'Mobile', icon: 'frontend' },
-  other: { title: 'Autres Technologies', icon: 'tools' },
-}
-
 export default function SkillsPage(): ReactElement {
-  const [skills, setSkills] = useState<DbSkill[]>([])
-  const [loading, setLoading] = useState(true)
+  const { skills, loading } = useSkills()
 
-  useEffect(() => {
-    let mounted = true
-    portfolioService.getSkills().then((data) => {
-      if (mounted) {
-        setSkills(data)
-        setLoading(false)
-      }
-    })
-    return () => {
-      mounted = false
-    }
-  }, [])
-
-  const allKnownCategories: SkillCategoryType[] = ['frontend', 'backend', 'database', 'tools', 'devops', 'mobile', 'other']
-  const displayCategories = allKnownCategories.filter(
-    (cat) => ['frontend', 'backend', 'database', 'tools'].includes(cat) || skills.some((s) => s.category?.toLowerCase() === cat)
+  const displayCategories = ALL_SKILL_CATEGORIES.filter(
+    (cat) =>
+      PRIMARY_SKILL_CATEGORIES.includes(cat) ||
+      skills.some((s) => s.category?.toLowerCase() === cat)
   )
 
   return (
-    <div className="pt-28 pb-24 md:pt-36">
+    <div className="pt-24 pb-16 md:pt-36 md:pb-28">
       <div className="container-custom">
-        {/* Header de la page */}
-        <div className="max-w-2xl mb-12">
-          <p className="text-xs font-mono font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">
-            Stack Technique
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 mb-4">
-            Compétences & Écosystème
+        <header className="max-w-[60ch] mb-10 md:mb-14">
+          <h1
+            style={{ fontVariationSettings: "'opsz' 72" }}
+            className="text-[38px] sm:text-[57px] font-bold leading-[1.04] tracking-[-0.03em] text-ink mb-3.5 sm:mb-4"
+          >
+            Compétences
           </h1>
-          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            Une architecture technique moderne structurée autour de standards de qualité éprouvés du frontend au backend.
+          <p className="text-base sm:text-lg text-muted leading-[1.6]">
+            Les langages, frameworks et outils utilisés au quotidien pour concevoir des applications fiables et faciles à faire évoluer.
           </p>
-        </div>
+        </header>
 
-        {/* Vue modulaire détaillant chaque pilier */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <SkillCategorySkeleton />
+          <div>
             <SkillCategorySkeleton />
             <SkillCategorySkeleton />
             <SkillCategorySkeleton />
           </div>
         ) : skills.length === 0 ? (
           <EmptyState
-            title="Aucune compétence pour le moment"
-            description="La base de données des compétences est prête. Vos compétences ajoutées s'afficheront ici automatiquement."
+            title="Technologies en cours d'actualisation"
+            description="Les compétences et outils de cette section sont en cours de mise à jour."
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="divide-y divide-line border-t border-b border-line">
             {displayCategories.map((catKey) => {
               const catSkills = skills.filter((s) => s.category?.toLowerCase() === catKey)
-              const meta = CATEGORY_META[catKey]
+              const meta = SKILL_CATEGORY_META[catKey]
 
               return (
-                <div key={catKey} className="glass-card p-5 sm:p-6 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-200 dark:border-zinc-800">
-                      <span className="flex size-10 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
-                        <Icon name={meta.icon} className="size-5" />
-                      </span>
-                      <div>
-                        <h2 className="font-bold text-zinc-900 dark:text-zinc-100 text-base sm:text-lg">{meta.title}</h2>
-                        <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
-                          {catSkills.length} compétence{catSkills.length > 1 ? 's' : ''}
-                        </span>
+                <section
+                  key={catKey}
+                  aria-labelledby={`skills-cat-${catKey}`}
+                  className="py-8 md:py-12 section-rail"
+                >
+                  <div className="rail-title flex flex-col gap-1.5">
+                    <h2
+                      id={`skills-cat-${catKey}`}
+                      className="text-2xl font-semibold tracking-[-0.02em] text-ink"
+                    >
+                      {meta.title}
+                    </h2>
+                    <p className="text-sm text-muted">{meta.subtitle}</p>
+                    <span className="text-xs text-muted mt-1">
+                      {catSkills.length} technologie{catSkills.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  <div className="min-w-0">
+                    {catSkills.length === 0 ? (
+                      <p className="text-sm text-muted py-4">Aucune entrée pour le moment.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10">
+                        {catSkills.map((skill) => (
+                          <TechCard key={skill.id} skill={skill} variant="detail" showDescription />
+                        ))}
                       </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      {catSkills.length === 0 ? (
-                        <p className="text-xs font-mono text-zinc-400 italic">Aucune entrée</p>
-                      ) : (
-                        catSkills.map((skill) => (
-                          <TechCard key={skill.id} skill={skill} showDescription />
-                        ))
-                      )}
-                    </div>
+                    )}
                   </div>
-
-                  <div className="mt-8 pt-4 border-t border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400">
-                    <span>Synchronisé en direct</span>
-                    <span className="text-indigo-600 dark:text-indigo-400">Temps réel</span>
-                  </div>
-                </div>
+                </section>
               )
             })}
           </div>

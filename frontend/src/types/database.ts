@@ -7,14 +7,10 @@ export type AvailabilityStatusType = 'available' | 'employed' | 'unavailable'
 export interface DbProfile {
   id: string
   name: string
-  full_name?: string
   alias: string
   role: string
-  title?: string
   short_bio: string
-  bio_short?: string
   full_bio: string[]
-  bio_full?: string
   email: string
   avatar_url?: string | null
   phone?: string
@@ -113,6 +109,19 @@ export interface PageView {
   created_at: string
 }
 
+export type AnalyticsRange = 7 | 14 | 30 | 90
+
+export interface PagePathStat {
+  path: string
+  count: number
+}
+
+export interface CategoryStat {
+  name: string
+  count: number
+  color?: string
+}
+
 export interface AnalyticsStats {
   totalViews: number
   views7d: number
@@ -122,6 +131,9 @@ export interface AnalyticsStats {
   featuredProjects: number
   inProgressProjects: number
   completedProjects: number
+  conversionRate: number
+  topPages: PagePathStat[]
+  skillCategoryStats: CategoryStat[]
   chartData: Array<{
     date: string
     visites: number

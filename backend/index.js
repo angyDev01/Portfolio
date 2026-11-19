@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import pg from 'pg'
 import dotenv from 'dotenv'
 import express from 'express'
@@ -10,7 +11,7 @@ const PORT = process.env.PORT || 4000
 
 const { Pool } = pg
 const DATABASE_URL = process.env.DATABASE_URL
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ''
 
 let pool = null
 if (DATABASE_URL) {
@@ -20,14 +21,32 @@ if (DATABASE_URL) {
   })
 }
 
-app.use(cors())
-app.use(express.json())
+const corsOrigin = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
+  : true
+
+app.use(cors({ origin: corsOrigin }))
+app.use(express.json({ limit: '100kb' }))
+
+function isValidAdminToken(candidate) {
+  if (!ADMIN_PASSWORD || typeof candidate !== 'string' || !candidate) return false
+  const expectedBuf = Buffer.from(ADMIN_PASSWORD, 'utf8')
+  const candidateBuf = Buffer.from(candidate, 'utf8')
+  if (expectedBuf.length !== candidateBuf.length) return false
+  return crypto.timingSafeEqual(expectedBuf, candidateBuf)
+}
 
 // Middleware de vérification d'authentification administrateur
 function requireAdmin(req, res, next) {
+  if (!ADMIN_PASSWORD) {
+    return res.status(503).json({
+      ok: false,
+      message: 'Authentification administrateur non configurée sur ce serveur.',
+    })
+  }
   const authHeader = req.headers.authorization
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : req.headers['x-admin-password']
-  if (!token || token !== ADMIN_PASSWORD) {
+  if (!isValidAdminToken(token)) {
     return res.status(401).json({ ok: false, message: 'Non autorisé. Accès administrateur requis.' })
   }
   next()
@@ -50,8 +69,8 @@ app.get('/api/profile', async (req, res) => {
   }
 })
 
-// PUT /api/profile : Mettre à jour le profil actif
-app.put('/api/profile', async (req, res) => {
+// PUT /api/profile : Mettre à jour le profil actif (protégé administrateur)
+app.put('/api/profile', requireAdmin, async (req, res) => {
   if (!pool) return res.status(500).json({ ok: false, message: 'Database not initialized' })
   try {
     const updates = req.body || {}
@@ -81,10 +100,6 @@ app.put('/api/profile', async (req, res) => {
       'status_label',
       'availability_status',
       'accept_direct_messages',
-      'full_name',
-      'title',
-      'bio_short',
-      'bio_full',
     ]
 
     const fields = []
@@ -246,11 +261,17 @@ app.post('/api/contact', async (req, res) => {
 
 // POST /api/admin/login : Authentification par mot de passe
 app.post('/api/admin/login', (req, res) => {
-  const { password } = req.body
-  if (!password || password !== ADMIN_PASSWORD) {
+  if (!ADMIN_PASSWORD) {
+    return res.status(503).json({
+      ok: false,
+      message: 'Authentification administrateur non configurée sur ce serveur.',
+    })
+  }
+  const { password } = req.body || {}
+  if (!isValidAdminToken(password)) {
     return res.status(401).json({ ok: false, message: 'Mot de passe administrateur incorrect.' })
   }
-  return res.json({ ok: true, token: ADMIN_PASSWORD, message: 'Authentification réussie' })
+  return res.json({ ok: true, message: 'Authentification réussie' })
 })
 
 // GET /api/admin/messages : Récupérer tous les messages avec le badge dynamique de non lus
