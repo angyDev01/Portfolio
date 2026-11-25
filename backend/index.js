@@ -92,6 +92,7 @@ app.put('/api/profile', requireAdmin, async (req, res) => {
       'twitter_url',
       'facebook_url',
       'avatar_url',
+      'banner_url',
       'phone',
       'phone_secondary',
       'whatsapp_url',

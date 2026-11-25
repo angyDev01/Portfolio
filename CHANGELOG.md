@@ -25,6 +25,7 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 - **Correctif menu mobile** (`Navbar.tsx`) : Extraction du panneau mobile hors du `<header>` pour éviter la contrainte de hauteur du `backdrop-blur-md`, cibles tactiles 44×44px, CTA direct et `env(safe-area-inset-bottom)`.
 - **Hero & Contact mobile-first** (`Hero.tsx`, `ContactPage.tsx`) : Bandeau de statut visible d'emblée au-dessus du titre sur mobile, vue JSON adaptée à 360px, formulaire affiché avant les coordonnées sur `/contact` avec raccourcis WhatsApp/Email et champs en `16px` (`text-base sm:text-sm`) pour éviter le zoom automatique iOS.
 - **Modale en bottom sheet & filtres scrollables** (`ProjectDetailModal.tsx`, `ProjectsPage.tsx`, `index.html`, `index.css`) : Tiroir ancré en bas avec en-tête collant sur mobile, onglets de catégories scrollables horizontalement, `viewport-fit=cover` et marges safe-area PWA.
+- **Barre de progression de lecture** (`ScrollProgressBar.tsx`, `Navbar.tsx`) : Barre `indigo` de `2px` sur la bordure inférieure du `<header>` fixe, pilotée par `scaleX` + `requestAnimationFrame` + `ResizeObserver` sans re-render, masquée dans le menu mobile et sur `/admin/*`.
 
 ---
 

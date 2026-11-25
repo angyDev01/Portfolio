@@ -241,3 +241,9 @@ DROP POLICY IF EXISTS "Admin Delete" ON storage.objects;
 CREATE POLICY "Admin Delete" ON storage.objects
 FOR DELETE TO authenticated
 USING (bucket_id = 'portfolio' AND public.is_admin());
+
+-- ==============================================================================
+-- TABLES : announcements, announcement_comments, polls, poll_options, poll_votes
+-- ==============================================================================
+-- Voir migration_community_and_banner.sql pour les définitions complètes des
+-- politiques RLS et fonctions RPC (cast_poll_vote, get_polls_with_results).

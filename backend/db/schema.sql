@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS profile (
   full_bio JSONB DEFAULT '[]'::jsonb,
   email VARCHAR(150),
   avatar_url TEXT,
+  banner_url TEXT,
   phone VARCHAR(50),
   phone_secondary VARCHAR(50),
   whatsapp_url VARCHAR(255),
@@ -157,4 +158,67 @@ BEGIN
   );
 END;
 $$;
+
+-- 7. Tables COMMUNITY : Annonces, Commentaires & Sondages
+CREATE TABLE IF NOT EXISTS announcements (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title VARCHAR(180) NOT NULL,
+  kind VARCHAR(30) NOT NULL DEFAULT 'project_wip'
+    CHECK (kind IN ('project_wip', 'event', 'news')),
+  content TEXT NOT NULL,
+  cover_image_url TEXT,
+  event_date TIMESTAMP WITH TIME ZONE,
+  action_url VARCHAR(255),
+  action_label VARCHAR(80),
+  allow_comments BOOLEAN NOT NULL DEFAULT TRUE,
+  is_pinned BOOLEAN NOT NULL DEFAULT FALSE,
+  is_published BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_announcements_published_order
+  ON announcements(is_pinned DESC, created_at DESC)
+  WHERE is_published = TRUE;
+
+CREATE TABLE IF NOT EXISTS announcement_comments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  announcement_id UUID NOT NULL REFERENCES announcements(id) ON DELETE CASCADE,
+  author_name VARCHAR(80) NOT NULL,
+  content TEXT NOT NULL,
+  is_approved BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_announcement_comments_ann_created
+  ON announcement_comments(announcement_id, created_at ASC);
+
+CREATE TABLE IF NOT EXISTS polls (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  question VARCHAR(220) NOT NULL,
+  description TEXT,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  closes_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS poll_options (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  poll_id UUID NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
+  label VARCHAR(140) NOT NULL,
+  display_order INT NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_poll_options_poll ON poll_options(poll_id, display_order);
+
+CREATE TABLE IF NOT EXISTS poll_votes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  poll_id UUID NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
+  option_id UUID NOT NULL REFERENCES poll_options(id) ON DELETE CASCADE,
+  visitor_id VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT unique_poll_visitor UNIQUE (poll_id, visitor_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_poll_votes_option ON poll_votes(option_id);
 

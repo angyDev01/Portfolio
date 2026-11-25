@@ -1,229 +1,197 @@
-# Portfolio — Angoa Yao Jean (Angy.Dev)
+# Portfolio — Yao Jean Angoa (Angy)
 
-Ce projet contient :
+Développeur **Full-Stack Web Junior** basé à Abidjan (Côte d'Ivoire), ouvert aux opportunités et collaborations en télétravail (remote).
 
-- `frontend/` : une application React créée avec Vite.
-- `backend/` : une API Express minimale exposant `POST /api/contact`.
-- `backend/messages.json` : fichier local pour conserver les messages du formulaire de contact.
+🌐 **Site en ligne :** [angydev.me](https://angydev.me) · 📋 **Historique des évolutions :** [CHANGELOG.md](./CHANGELOG.md)
 
-## Objectif de ce README
-
-Ce document explique comment préparer et mettre en production le frontend et le backend, ainsi que les bonnes pratiques pour un déploiement en production.
-
----
-
-## 1. Structure du projet
-
-- `frontend/`
-  - `src/` : code React.
-  - `public/` : fichiers statiques et assets.
-  - `package.json` : scripts frontend.
-- `backend/`
-  - `index.js` : serveur Express.
-  - `package.json` : scripts backend.
-  - `messages.json` : stockage local des messages (utilisé en développement ou pour une preuve de concept).
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?style=flat-square&logo=supabase&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-Tests_Unitaires-6E9F18?style=flat-square&logo=vitest&logoColor=white)
 
 ---
 
-## 2. Pré-requis
+## 1. Pourquoi ce projet ?
 
-Avant de déployer, assurez-vous d'avoir installé :
+### Ma passion pour le code
+Mon envie de coder est née d'une curiosité simple : comprendre comment fonctionnent les applications que nous utilisons chaque jour. En creusant sous le capot, j'ai découvert le plaisir concret de partir d'une idée, de structurer des données proprement côté serveur et de construire une interface fluide, claire et agréable à utiliser.
 
-- Node.js 18+ ou version recommandée par votre hébergeur.
-- npm.
-- Un hébergement capable d'exécuter un serveur Node.js (optionnel si le frontend est déployé séparément).
+### Apprendre constamment par des projets concrets
+En tant que développeur junior, je suis convaincu que l'on progresse vraiment en se confrontant à des problèmes réels. Plutôt que de partir d'un simple modèle statique pour présenter mon profil, j'ai choisi de concevoir ce portfolio comme **une application Full-Stack complète de bout en bout** : base de données relationnelle PostgreSQL, sécurité par lignes (RLS), espace d'administration, suivi de visites, actualités, sondages interactifs et tests automatisés. Chaque nouvelle fonctionnalité a été l'occasion d'expérimenter, de corriger mes erreurs et d'ancrer de bonnes pratiques.
 
----
-
-## 3. Installation locale
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### Backend
-
-```bash
-cd backend
-npm install
-npm run dev
-```
+### Mon ambition
+Mon objectif est clair : continuer à apprendre chaque jour, écrire un code de plus en plus lisible, testé et maintenable, et contribuer à des produits utiles et durables. Je souhaite rejoindre une équipe ou participer à des projets stimulants où je pourrai apporter mon énergie, ma rigueur et ma capacité d'adaptation tout en progressant au contact de développeurs expérimentés.
 
 ---
 
-## 4. Configuration des variables d'environnement
+## 2. Fonctionnalités principales
 
-### Backend
+### Côté visiteur
+- **Accueil éditorial (`/`)** : présentation, bannière de couverture administrable et **bascule *Interface ⇄ Données Supabase*** pour montrer en direct les données servies par la base PostgreSQL.
+- **Catalogue de projets (`/projets`)** : filtrage par catégorie et modale détaillée (contexte, description complète, technologies utilisées, liens vers la démo et le code source).
+- **Compétences (`/competences`)** : vue structurée par domaines (`Frontend`, `Backend`, `Bases de données`, `Outils & méthodes`, `DevOps & Cloud`, etc.).
+- **Actualités & Sondages (`/actualites`)** : suivi des chantiers en cours et événements à venir, commentaires publics modérables et sondages interactifs avec vote anti-doublon via RPC PostgreSQL, accompagnés d'un aperçu conditionnel et d'un bouton CTA sur l'accueil.
+- **À propos & Contact (`/contact`)** : parcours personnel, lecteur vidéo en modale à la demande, mode clair/sombre, double canal de contact (message direct enregistré en base + formulaire email / WhatsApp), application installable (**PWA**) et **SEO dynamique** par route (JSON-LD Schema.org, OpenGraph, `robots.txt`, `sitemap.xml`).
 
-Créez un fichier `backend/.env` contenant par exemple :
-
-```env
-PORT=4000
-```
-
-### Frontend
-
-Créez un fichier `frontend/.env` contenant :
-
-```env
-VITE_API_URL=http://localhost:4000
-```
-
-> En production, `VITE_API_URL` doit pointer vers l'URL publique de votre backend.
-
-Ne commitez jamais ces fichiers dans Git.
+### Côté administration (`/admin`)
+- **Accès protégé** via Supabase Auth (`ProtectedRoute`), raccourci clavier discret `Ctrl + Shift + A` (ou `Cmd + Shift + A` sur macOS) et redirection automatique de `/dashboard` vers `/admin`.
+- **Gestion du profil** : modification de la bio, du statut de disponibilité, de la photo de profil et de la bannière de couverture via **Supabase Storage**.
+- **Administration complète (CRUD)** : projets, compétences, actualités, sondages et modération des commentaires visiteurs.
+- **Messagerie & Analytics** : tiroir latéral pour consulter, marquer comme lus ou supprimer les messages directs (avec actions rapides email / appel / WhatsApp), et tableau de bord de suivi des visites sur 30 jours avec **Recharts** (excluant l'administrateur).
 
 ---
 
-## 5. Build pour la production
+## 3. Ce que j'ai appris en construisant ce projet
 
-### Frontend
+Ce dépôt reflète concrètement ma progression sur plusieurs aspects essentiels du développement web :
 
-Dans le dossier `frontend` :
-
-```bash
-npm run build
-```
-
-Le build de production est généré dans `frontend/dist`.
+- **Structurer une application React + TypeScript strict** : découpage propre par couche de services (`projectService`, `skillService`, `announcementService`, `pollService`, `analyticsService`, `profileService`, `contactService`, `authService`), hooks personnalisés et cache client léger, tout en gardant `tsc --noEmit` à 0 erreur.
+- **Modéliser et sécuriser une base PostgreSQL / Supabase** : conception relationnelle (`project_skills` en relation N:N, index partiels), mise en place de politiques **Row Level Security (RLS)** avec fonction `public.is_admin()`, écriture de fonctions RPC `SECURITY DEFINER` durcies (`SET search_path`), validation stricte des entrées avec **Zod** et assainissement anti-XSS (`sanitizeUrl`, `sanitizePlainText`).
+- **Tester et préparer la production** : rédaction de tests unitaires avec **Vitest** (protection anti-XSS, validation d'URLs et schémas Zod, services et logique des sondages), chargement paresseux des pages (`React.lazy`), découpage du bundle via Vite/Rolldown et mise en cache PWA (`vite-plugin-pwa`).
+- **Soigner l'UX, l'accessibilité et le SEO** : navigation clavier, respect de `prefers-reduced-motion`, gestion des états vides sans fuite d'erreur technique et synchronisation dynamique des balises `<title>`, `<meta name="description">` et `<link rel="canonical">`.
 
 ---
 
-## 6. Mettre en production
+## 4. Stack technique
 
-### Option 1 : héberger frontend et backend ensemble (même domaine)
+| Couche | Technologies utilisées |
+| :--- | :--- |
+| **Frontend** | React 18, TypeScript, Vite 8, Tailwind CSS v4, React Router v7 |
+| **Validation, UI & Graphes** | Zod, Recharts, Lucide React, React Icons, `vite-plugin-pwa` |
+| **Données, Auth & Storage** | Supabase (PostgreSQL, Auth, Storage, Row Level Security, RPC PL/pgSQL) |
+| **Backend & Outils DB** | Node.js, Express, `pg` (API complémentaire, migrations et bilan de santé PostgreSQL) |
+| **Qualité & Tests** | TypeScript (`tsc --noEmit`), Vitest |
 
-1. Construisez le frontend avec `npm run build`.
-2. Copiez le dossier `frontend/dist` dans le serveur du backend.
-3. Modifiez `backend/index.js` pour servir le contenu statique de `dist` :
+---
 
-```js
-import express from 'express'
-import cors from 'cors'
-import path from 'path'
+## 5. Architecture du dépôt
 
-const app = express()
-
-app.use(cors())
-app.use(express.json())
-app.use(express.static(path.resolve('../frontend/dist')))
-
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve('../frontend/dist/index.html'))
-})
-```
-
-4. Déployez le backend sur un hébergeur Node.js.
-5. Dans `frontend/.env`, utilisez l'URL de production du backend :
-
-```env
-VITE_API_URL=https://votre-domaine.com
-```
-
-Cette option est idéale si vous voulez un seul domaine et un seul serveur.
-
-### Option 2 : déployer le frontend séparément
-
-- Frontend : Netlify, Vercel, Cloudflare Pages, ou autre hébergeur de statique.
-- Backend : Render, Railway, Heroku, Fly.io, DigitalOcean App Platform, AWS Elastic Beanstalk, etc.
-
-Avantages :
-
-- le frontend est servi très rapidement depuis un CDN.
-- le backend reste indépendant.
-
-Dans ce cas, configurez `VITE_API_URL` avec l'URL du backend public.
-
-### Option 3 : serveur Linux + Nginx
-
-1. Construisez le frontend.
-2. Placez `frontend/dist` dans le dossier de votre site.
-3. Configurez Nginx pour servir le build statique.
-4. Déployez `backend/` sur Node.js et utilisez Nginx comme reverse proxy vers le backend.
-
-Exemple de configuration Nginx :
-
-```nginx
-server {
-  listen 80;
-  server_name portfolio.example.com;
-
-  root /var/www/portfolio/dist;
-  index index.html;
-
-  location /api/ {
-    proxy_pass http://127.0.0.1:4000;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection 'upgrade';
-    proxy_set_header Host $host;
-    proxy_cache_bypass $http_upgrade;
-  }
-
-  location / {
-    try_files $uri /index.html;
-  }
-}
+```text
+portfolio2/
+├── frontend/
+│   ├── public/                  # Fichiers statiques (robots.txt, sitemap.xml, icônes PWA)
+│   ├── src/
+│   │   ├── components/          # Composants UI, modales, communauté, contact & dashboard
+│   │   ├── config/              # Valeurs de repli centralisées et métadonnées de catégories
+│   │   ├── context/             # ThemeContext (mode clair / sombre)
+│   │   ├── hooks/               # Hooks de données publiques et d'administration
+│   │   ├── lib/                 # Client Supabase configuré
+│   │   ├── pages/               # Pages routées (Accueil, Projets, Compétences, Actualités, Contact, Admin)
+│   │   ├── services/            # Couche d'accès aux données, cache et gestion d'erreurs
+│   │   ├── types/               # Interfaces TypeScript du schéma de base de données
+│   │   ├── utils/               # Sécurité (Zod / anti-XSS), tracking visiteurs, validation médias
+│   │   ├── App.tsx              # Routage principal et SEO dynamique par route
+│   │   └── index.css            # Configuration Tailwind CSS v4 et styles globaux
+│   ├── .env.example             # Modèle de variables d'environnement frontend
+│   └── package.json
+├── backend/
+│   ├── db/
+│   │   ├── schema.sql           # Schéma SQL complet des tables et fonctions
+│   │   ├── policies.sql         # Politiques de sécurité RLS
+│   │   ├── migrateAndSeed.js    # Script de migration et de peuplement initial
+│   │   └── health_check.js      # Diagnostic de santé et latence PostgreSQL / Supabase
+│   ├── index.js                 # Serveur Express complémentaire
+│   ├── .env.example             # Modèle de variables d'environnement backend
+│   └── package.json
+├── CHANGELOG.md                 # Journal détaillé des évolutions techniques
+└── package.json                 # Scripts monorepo
 ```
 
 ---
 
-## 7. Commandes utiles en production
+## 6. Lancer le projet en local
 
-### Backend
+### Prérequis
+- **Node.js 18+** et **npm**
+- Un projet **Supabase** (ou une instance PostgreSQL)
 
-```bash
-cd backend
-npm install
-npm start
-```
+### Installation et configuration
 
-### Frontend
+1. **Cloner le dépôt :**
+   ```bash
+   git clone https://github.com/angyDev01/Portfolio.git
+   cd Portfolio
+   ```
 
-```bash
-cd frontend
-npm install
-npm run build
-```
+2. **Installer les dépendances :**
+   ```bash
+   cd frontend && npm install
+   cd ../backend && npm install
+   cd ..
+   ```
+
+3. **Configurer le frontend :**
+   Créez un fichier `frontend/.env` à partir de `frontend/.env.example` :
+   ```env
+   VITE_SUPABASE_URL=https://votre-projet.supabase.co
+   VITE_SUPABASE_PUBLISHABLE_KEY=votre_cle_publique_supabase
+   VITE_SUPABASE_ANON_KEY=votre_cle_publique_supabase
+
+   # Optionnel : uniquement si vous utilisez aussi le serveur Express local
+   VITE_API_URL=http://localhost:4000
+   ```
+
+4. **Configurer le backend (optionnel — scripts DB & API Express) :**
+   Créez un fichier `backend/.env` à partir de `backend/.env.example` :
+   ```env
+   PORT=4000
+   NODE_ENV=development
+   DATABASE_URL=postgresql://user:password@host:5432/dbname?sslmode=require
+   ADMIN_PASSWORD=votre_mot_de_passe_admin
+   CORS_ORIGIN=http://localhost:5173
+   ```
+
+5. **Démarrer le serveur de développement :**
+   ```bash
+   npm run dev:frontend
+   ```
+
+### Commandes disponibles
+
+| Commande | Description |
+| :--- | :--- |
+| `npm run dev:frontend` | Lance l'application React avec Vite en mode développement |
+| `npm run dev:backend` | Lance le serveur Express avec Nodemon (optionnel) |
+| `npm run typecheck` | Vérifie le typage TypeScript strict (`tsc --noEmit`) |
+| `npm test` | Exécute l'ensemble des tests unitaires Vitest |
+| `npm run build` | Contrôle le typage et génère le build de production dans `frontend/dist` |
+| `npm run db:deploy` | Exécute la migration et l'amorçage initial (`backend/db/migrateAndSeed.js`) |
+| `npm run db:health --prefix backend` | Lance le diagnostic de santé et de performances PostgreSQL |
 
 ---
 
-## 8. Points importants pour la production
+## 7. Déploiement
 
-- `backend/messages.json` est pratique en développement, mais n'est pas adapté à un vrai site en production.
-- En production, privilégiez une base de données ou un service de stockage (MongoDB, PostgreSQL, Firebase, Airtable, etc.).
-- Si l'hébergeur rend le système de fichiers en lecture seule, `messages.json` ne pourra pas être modifié.
-- Activez `NODE_ENV=production` sur le backend pour de meilleures performances.
-- Protégez les données sensibles et limitez l'accès aux fichiers de configuration.
+Le portfolio suit une architecture **Jamstack** légère et simple à héberger :
+- **Frontend** : déployable directement sur **Vercel**, **Netlify** ou **Cloudflare Pages** (dossier racine ou build `npm run build`, sortie `frontend/dist`, avec les variables `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` / `VITE_SUPABASE_PUBLISHABLE_KEY`).
+- **Base de données & Authentification** : gérées par **Supabase** en production.
+- **Backend Express (`backend/`)** : facultatif en production dès lors que le frontend communique directement avec Supabase via les politiques RLS.
 
----
-
-## 9. Vérification après déploiement
-
-- Visitez l'URL du frontend pour vérifier que l'application charge bien.
-- Testez le formulaire de contact.
-- Vérifiez que le backend répond sur `https://votre-domaine.com/api/contact`.
-- Contrôlez les logs du backend en cas d'erreur.
+> [!IMPORTANT]
+> **Rappel sécurité (Supabase Auth) :** avant toute mise en production, pensez à désactiver les inscriptions publiques (*Allow new users to sign up*) dans le tableau de bord Supabase (**Authentication → Providers → Email**), afin que seul le compte administrateur autorisé puisse accéder au panneau `/admin`.
 
 ---
 
-## 10. Conseils supplémentaires
+## 8. Ce que je continue d'améliorer
 
-- Pour un déploiement rapide, utilisez Vercel ou Netlify pour le frontend et Railway/Render pour le backend.
-- Si vous voulez conserver tout sur un seul serveur, servez le build React depuis Express.
-- Si vous utilisez un domaine personnalisé, configurez le HTTPS avec Let's Encrypt.
+Dans la continuité de ma démarche d'apprentissage, voici les prochains chantiers que je souhaite ajouter ou approfondir sur ce projet :
+- Mettre en place une pipeline **CI GitHub Actions** (`typecheck` + tests Vitest + build automatique à chaque push).
+- Ajouter des tests end-to-end avec **Playwright** pour sécuriser les parcours critiques (navigation, contact, administration).
+- Proposer une version bilingue **FR / EN**.
+- Continuer à approfondir **PostgreSQL** (plans d'exécution, indexation) et la conteneurisation avec **Docker**.
 
 ---
 
-## 11. Exemple de déploiement minimal
+## 9. Journal des évolutions & Me contacter
 
-1. Construisez le frontend.
-2. Déployez le backend Node.js sur votre hébergeur.
-3. Montez `frontend/dist` en tant que site statique ou servez-le depuis Express.
-4. Mettez `VITE_API_URL` à l'URL publique du backend.
+- L'historique complet des correctifs, audits de sécurité et améliorations est consultable dans [CHANGELOG.md](./CHANGELOG.md).
 
-Bonne mise en production ! Si vous souhaitez, je peux aussi te fournir un script `deploy.sh` ou une configuration Nginx complète pour ce projet.
+Si mon profil ou ce projet vous intéresse, n'hésitez pas à me contacter ou à échanger sur le code :
+
+- **Portfolio :** [angydev.me](https://angydev.me)
+- **GitHub :** [@angyDev01](https://github.com/angyDev01)
+- **LinkedIn :** [Yao Jean Angoa (Angy)](https://www.linkedin.com/in/angy-dev-532293357)
+- **X (Twitter) :** [@Angy656261](https://x.com/Angy656261)
+- **Email :** [angynewdev@gmail.com](mailto:angynewdev@gmail.com)
