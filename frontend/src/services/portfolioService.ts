@@ -6,6 +6,8 @@ import { profileService } from './profileService'
 import { projectService } from './projectService'
 import { skillService } from './skillService'
 import { contactService } from './contactService'
+import { announcementService } from './announcementService'
+import { pollService } from './pollService'
 
 export { supabase }
 
@@ -19,11 +21,14 @@ export const portfolioService = {
   ...projectService,
   ...skillService,
   ...contactService,
+  ...announcementService,
+  ...pollService,
   invalidateCache,
 
-  prefetch(target: 'profile' | 'projects' | 'skills' | 'all' = 'all'): void {
+  prefetch(target: 'profile' | 'projects' | 'skills' | 'announcements' | 'all' = 'all'): void {
     if (target === 'profile' || target === 'all') void profileService.getProfile()
     if (target === 'projects' || target === 'all') void projectService.getProjects()
     if (target === 'skills' || target === 'all') void skillService.getSkills()
+    if (target === 'announcements' || target === 'all') void announcementService.getAnnouncements()
   },
 }

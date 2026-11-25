@@ -53,6 +53,20 @@ export default function Hero(): ReactElement {
       className="pt-24 pb-12 md:pt-36 md:pb-24 border-b border-line transition-colors"
     >
       <div className="container-custom">
+        {/* Bannière / photo de couverture optionnelle (administrable depuis le Dashboard) */}
+        {profile?.banner_url && (
+          <div className="mb-7 sm:mb-9 overflow-hidden rounded-xl border border-line bg-surface aspect-[16/5] min-h-[140px] max-h-[280px]">
+            <img
+              key={profile.banner_url}
+              src={profile.banner_url}
+              alt={`Bannière de couverture de ${profile.name || 'Yao Jean Angoa'}`}
+              loading="eager"
+              decoding="async"
+              className="w-full h-full object-cover object-center block"
+            />
+          </div>
+        )}
+
         {/* Bandeau de statut compact visible d'emblée sur mobile */}
         <div className="lg:hidden hero-reveal-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm mb-6 pb-4 border-b border-line">
           <span className="inline-flex items-center gap-2 font-medium text-ink">

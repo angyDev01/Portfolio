@@ -4,23 +4,43 @@ const VISITOR_ID_KEY = 'portfolio_visitor_id'
 const LAST_VISIT_KEY = 'portfolio_last_visit_timestamp'
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000
 
+/** Identifiant de repli conservé en mémoire quand aucun stockage n'est disponible. */
+let memoryVisitorId: string | null = null
+
+function generateVisitorId(): string {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : 'v_' + Math.random().toString(36).substring(2) + Date.now().toString(36)
+}
+
+function readOrCreateIn(storage: Storage): string {
+  let visitorId = storage.getItem(VISITOR_ID_KEY)
+  if (!visitorId) {
+    visitorId = generateVisitorId()
+    storage.setItem(VISITOR_ID_KEY, visitorId)
+  }
+  return visitorId
+}
+
 /**
- * Récupère ou génère un visitor_id anonyme et persistant
+ * Récupère ou génère un visitor_id anonyme.
+ * Ordre de repli : localStorage (persistant) → sessionStorage → mémoire.
+ * Jamais de valeur constante partagée entre visiteurs (sinon un seul visiteur
+ * en navigation privée pourrait voter ou serait comptabilisé pour tous).
  */
 export function getOrCreateVisitorId(): string {
   try {
-    let visitorId = localStorage.getItem(VISITOR_ID_KEY)
-    if (!visitorId) {
-      visitorId =
-        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-          ? crypto.randomUUID()
-          : 'v_' + Math.random().toString(36).substring(2) + Date.now().toString(36)
-      localStorage.setItem(VISITOR_ID_KEY, visitorId)
-    }
-    return visitorId
+    return readOrCreateIn(localStorage)
   } catch {
-    return 'anon_guest'
+    /* localStorage indisponible : repli suivant */
   }
+  try {
+    return readOrCreateIn(sessionStorage)
+  } catch {
+    /* sessionStorage indisponible : repli en mémoire */
+  }
+  if (!memoryVisitorId) memoryVisitorId = generateVisitorId()
+  return memoryVisitorId
 }
 
 /**

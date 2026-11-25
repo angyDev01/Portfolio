@@ -8,10 +8,7 @@ import {
   ExternalLink,
   Mail,
   Menu,
-  MonitorSmartphone,
-  Server,
   Sparkles,
-  Wrench,
   X as CloseIcon,
   Send,
   Phone,
@@ -19,10 +16,7 @@ import {
   Trash2,
   Eye,
   EyeOff,
-  CheckCircle2,
-  Lock,
   RotateCw,
-  Inbox,
   User,
   Plus,
   Pencil,
@@ -31,21 +25,20 @@ import {
   Award,
   TrendingUp,
   LogOut,
-  Settings,
   ShieldCheck,
   AlertCircle,
-  Database,
   Sun,
   Moon,
   Bell,
+  Calendar,
+  Megaphone,
+  Image as ImageIcon,
+  CheckCircle2,
   type LucideIcon,
 } from 'lucide-react'
 
 export type IconName =
   | 'github'
-  | 'linkedin'
-  | 'x'
-  | 'facebook'
   | 'mail'
   | 'external'
   | 'code'
@@ -56,20 +49,13 @@ export type IconName =
   | 'menu'
   | 'close'
   | 'sparkles'
-  | 'frontend'
-  | 'backend'
-  | 'tools'
-  | 'database'
   | 'send'
   | 'phone'
   | 'messageSquare'
   | 'trash'
   | 'eye'
   | 'eyeOff'
-  | 'checkCircle'
-  | 'lock'
   | 'refresh'
-  | 'inbox'
   | 'user'
   | 'plus'
   | 'pencil'
@@ -78,12 +64,15 @@ export type IconName =
   | 'skills'
   | 'trending'
   | 'logout'
-  | 'settings'
   | 'shield'
   | 'alert'
   | 'sun'
   | 'moon'
   | 'bell'
+  | 'calendar'
+  | 'megaphone'
+  | 'image'
+  | 'checkCircle'
 
 type CustomIcon = (props: SVGProps<SVGSVGElement>) => ReactElement
 
@@ -102,56 +91,8 @@ const GithubIcon: CustomIcon = (props) => (
   </svg>
 )
 
-const LinkedinIcon: CustomIcon = (props) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
-    <rect width="4" height="12" x="2" y="9" />
-    <circle cx="4" cy="4" r="2" />
-  </svg>
-)
-
-const TwitterXIcon: CustomIcon = (props) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
-    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
-  </svg>
-)
-
-const FacebookIcon: CustomIcon = (props) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-)
-
 const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   github: GithubIcon,
-  linkedin: LinkedinIcon,
-  x: TwitterXIcon,
-  facebook: FacebookIcon,
   mail: Mail,
   external: ExternalLink,
   code: Code,
@@ -162,20 +103,13 @@ const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   menu: Menu,
   close: CloseIcon,
   sparkles: Sparkles,
-  frontend: MonitorSmartphone,
-  backend: Server,
-  tools: Wrench,
-  database: Database,
   send: Send,
   phone: Phone,
   messageSquare: MessageSquare,
   trash: Trash2,
   eye: Eye,
   eyeOff: EyeOff,
-  checkCircle: CheckCircle2,
-  lock: Lock,
   refresh: RotateCw,
-  inbox: Inbox,
   user: User,
   plus: Plus,
   pencil: Pencil,
@@ -184,12 +118,15 @@ const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   skills: Award,
   trending: TrendingUp,
   logout: LogOut,
-  settings: Settings,
   shield: ShieldCheck,
   alert: AlertCircle,
   sun: Sun,
   moon: Moon,
   bell: Bell,
+  calendar: Calendar,
+  megaphone: Megaphone,
+  image: ImageIcon,
+  checkCircle: CheckCircle2,
 }
 
 interface IconProps {

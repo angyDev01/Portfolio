@@ -13,6 +13,7 @@ export interface DbProfile {
   full_bio: string[]
   email: string
   avatar_url?: string | null
+  banner_url?: string | null
   phone?: string
   phone_secondary?: string
   whatsapp_url?: string
@@ -65,14 +66,6 @@ export interface DbProject {
   updated_at?: string
 }
 
-export interface ContactMessagePayload {
-  name: string
-  email: string
-  avatar_url?: string | null
-  phone?: string
-  message: string
-}
-
 export interface DirectMessagePayload {
   name: string
   email: string
@@ -97,16 +90,6 @@ export interface ContactMessage {
   created_at: string
   ip_address?: string | null
   user_agent?: string | null
-}
-
-export interface PageView {
-  id: string
-  visitor_id: string
-  page_path: string
-  view_date?: string
-  referrer?: string | null
-  user_agent?: string | null
-  created_at: string
 }
 
 export type AnalyticsRange = 7 | 14 | 30 | 90
@@ -139,4 +122,62 @@ export interface AnalyticsStats {
     visites: number
     messages: number
   }>
+}
+
+export type AnnouncementKind = 'project_wip' | 'event' | 'news'
+
+export interface DbAnnouncement {
+  id: string
+  title: string
+  kind: AnnouncementKind
+  content: string
+  cover_image_url?: string | null
+  event_date?: string | null
+  action_url?: string | null
+  action_label?: string | null
+  allow_comments: boolean
+  comments_moderated?: boolean
+  is_pinned: boolean
+  is_published: boolean
+  created_at: string
+  updated_at?: string
+}
+
+export interface DbAnnouncementComment {
+  id: string
+  announcement_id: string
+  author_name: string
+  content: string
+  is_approved: boolean
+  created_at: string
+}
+
+/** Annonce publique avec le nombre de commentaires approuvés (commentaires chargés à la demande). */
+export interface AnnouncementListItem extends DbAnnouncement {
+  comments_count: number
+}
+
+/** Annonce côté administration, avec ses commentaires (approuvés ou non). */
+export interface AnnouncementWithComments extends DbAnnouncement {
+  comments: DbAnnouncementComment[]
+}
+
+export interface PollOptionResult {
+  id: string
+  poll_id: string
+  label: string
+  display_order: number
+  votes_count: number
+}
+
+export interface PollWithResults {
+  id: string
+  question: string
+  description?: string | null
+  is_active: boolean
+  closes_at?: string | null
+  created_at: string
+  total_votes: number
+  voted_option_id?: string | null
+  options: PollOptionResult[]
 }

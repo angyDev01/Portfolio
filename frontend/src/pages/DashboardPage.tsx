@@ -10,6 +10,7 @@ import DashboardMobileNav from '../components/dashboard/DashboardMobileNav'
 import AnalyticsTab from '../components/dashboard/AnalyticsTab'
 import ProjectsTab from '../components/dashboard/ProjectsTab'
 import SkillsTab from '../components/dashboard/SkillsTab'
+import CommunityTab from '../components/dashboard/CommunityTab'
 import ProfileTab from '../components/dashboard/ProfileTab'
 import MessagesDrawer from '../components/dashboard/MessagesDrawer'
 
@@ -25,16 +26,21 @@ export default function DashboardPage(): ReactElement {
     projects,
     skills,
     messages,
+    announcements,
+    polls,
     analytics,
     analyticsRange,
     setAnalyticsRange,
     savingProject,
     uploadingAvatar,
+    uploadingBanner,
     loadAllData,
     updateAvailability,
     updateProfile,
     uploadAvatar,
     removeAvatar,
+    uploadBanner,
+    removeBanner,
     toggleAcceptMessages,
     saveProject,
     deleteProject,
@@ -42,6 +48,13 @@ export default function DashboardPage(): ReactElement {
     deleteSkill,
     toggleMessageRead,
     deleteMessage,
+    saveAnnouncement,
+    deleteAnnouncement,
+    toggleCommentApproval,
+    deleteAnnouncementComment,
+    createPoll,
+    togglePollActive,
+    deletePoll,
   } = useDashboardData()
 
   // Calcul des messages non lus
@@ -92,6 +105,7 @@ export default function DashboardPage(): ReactElement {
           setActiveTab={setActiveTab}
           projectsCount={projects.length}
           skillsCount={skills.length}
+          communityCount={announcements.length + polls.length}
           unreadMessagesCount={unreadMessagesCount}
           onOpenMessages={() => setIsDrawerOpen(true)}
         />
@@ -129,14 +143,31 @@ export default function DashboardPage(): ReactElement {
           />
         )}
 
+        {activeTab === 'community' && (
+          <CommunityTab
+            announcements={announcements}
+            polls={polls}
+            onSaveAnnouncement={saveAnnouncement}
+            onDeleteAnnouncement={deleteAnnouncement}
+            onToggleCommentApproval={toggleCommentApproval}
+            onDeleteComment={deleteAnnouncementComment}
+            onCreatePoll={createPoll}
+            onTogglePollActive={togglePollActive}
+            onDeletePoll={deletePoll}
+          />
+        )}
+
         {activeTab === 'profile' && (
           <ProfileTab
             profile={profile}
             uploadingAvatar={uploadingAvatar}
+            uploadingBanner={uploadingBanner}
             onUpdateAvailability={updateAvailability}
             onUpdateProfile={updateProfile}
             onUploadAvatar={uploadAvatar}
             onRemoveAvatar={removeAvatar}
+            onUploadBanner={uploadBanner}
+            onRemoveBanner={removeBanner}
           />
         )}
       </div>

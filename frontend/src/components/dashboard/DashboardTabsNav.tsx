@@ -1,13 +1,14 @@
 import type { ReactElement } from 'react'
 import Icon from '../Icon'
 
-export type AdminTab = 'analytics' | 'projects' | 'skills' | 'profile'
+export type AdminTab = 'analytics' | 'projects' | 'skills' | 'community' | 'profile'
 
 interface DashboardTabsNavProps {
   activeTab: AdminTab
   setActiveTab: (tab: AdminTab) => void
   projectsCount: number
   skillsCount: number
+  communityCount: number
   unreadMessagesCount: number
   onOpenMessages: () => void
 }
@@ -17,6 +18,7 @@ export default function DashboardTabsNav({
   setActiveTab,
   projectsCount,
   skillsCount,
+  communityCount,
   unreadMessagesCount,
   onOpenMessages,
 }: DashboardTabsNavProps): ReactElement {
@@ -65,6 +67,20 @@ export default function DashboardTabsNav({
       >
         <Icon name="skills" className="size-3.5 text-indigo-500" />
         <span>Compétences ({skillsCount})</span>
+      </button>
+
+      {/* 3b. Annonces & Sondages */}
+      <button
+        type="button"
+        onClick={() => setActiveTab('community')}
+        className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
+          activeTab === 'community'
+            ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+            : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+        }`}
+      >
+        <Icon name="megaphone" className="size-3.5 text-indigo-500" />
+        <span>Annonces ({communityCount})</span>
       </button>
 
       {/* 4. Profil & Statut */}

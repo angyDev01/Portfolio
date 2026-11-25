@@ -116,25 +116,6 @@ html.dark {
     }
   }
 
-  /* Compatibilité dashboard admin */
-  .editorial-card {
-    background-color: #ffffff;
-    border: 1px solid #e4e4e7;
-    border-radius: 0.5rem;
-    transition: border-color 0.15s ease, background-color 0.2s ease;
-  }
-
-  html.dark .editorial-card {
-    background-color: #18181b;
-    border-color: #27272a;
-  }
-
-  .tag-mono {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: -0.01em;
-  }
-
   /* Feedback tactile discret */
   .btn-tactile {
     transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1),

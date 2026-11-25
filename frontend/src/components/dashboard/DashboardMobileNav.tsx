@@ -62,6 +62,20 @@ export default function DashboardMobileNav({
         <span>Skills</span>
       </button>
 
+      {/* 3b. Annonces */}
+      <button
+        type="button"
+        onClick={() => setActiveTab('community')}
+        className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-lg text-[10px] font-mono transition-colors cursor-pointer ${
+          activeTab === 'community'
+            ? 'text-indigo-600 dark:text-indigo-400 font-bold'
+            : 'text-zinc-500 dark:text-zinc-400'
+        }`}
+      >
+        <Icon name="megaphone" className="size-4.5" />
+        <span>Annonces</span>
+      </button>
+
       {/* 4. Messages (Drawer) */}
       <button
         type="button"

@@ -272,14 +272,11 @@ export default function MessagesDrawer({
                   <div className="grid grid-cols-3 gap-1.5">
                     {/* WhatsApp */}
                     <a
-                      href={msg.phone ? sanitizeUrl(whatsappUrl) : '#'}
+                      href={msg.phone ? sanitizeUrl(whatsappUrl) : undefined}
                       target={msg.phone ? '_blank' : undefined}
                       rel={msg.phone ? 'noopener noreferrer' : undefined}
                       onClick={(e) => {
-                        if (!msg.phone) {
-                          e.preventDefault()
-                          alert('Aucun numéro de téléphone renseigné.')
-                        }
+                        if (!msg.phone) e.preventDefault()
                       }}
                       className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${
                         msg.phone
@@ -294,12 +291,9 @@ export default function MessagesDrawer({
 
                     {/* Appeler */}
                     <a
-                      href={msg.phone ? sanitizeUrl(`tel:${msg.phone}`) : '#'}
+                      href={msg.phone ? sanitizeUrl(`tel:${msg.phone}`) : undefined}
                       onClick={(e) => {
-                        if (!msg.phone) {
-                          e.preventDefault()
-                          alert('Aucun numéro de téléphone renseigné.')
-                        }
+                        if (!msg.phone) e.preventDefault()
                       }}
                       className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${
                         msg.phone

@@ -6,21 +6,28 @@ import type { DbProfile, AvailabilityStatusType } from '../../types/database'
 interface ProfileTabProps {
   profile: DbProfile | null
   uploadingAvatar: boolean
+  uploadingBanner: boolean
   onUpdateAvailability: (status: AvailabilityStatusType) => Promise<boolean>
   onUpdateProfile: (payload: Partial<DbProfile>) => Promise<boolean>
   onUploadAvatar: (file: File) => Promise<boolean>
   onRemoveAvatar: () => Promise<boolean>
+  onUploadBanner: (file: File) => Promise<boolean>
+  onRemoveBanner: () => Promise<boolean>
 }
 
 export default function ProfileTab({
   profile,
   uploadingAvatar,
+  uploadingBanner,
   onUpdateAvailability,
   onUpdateProfile,
   onUploadAvatar,
   onRemoveAvatar,
+  onUploadBanner,
+  onRemoveBanner,
 }: ProfileTabProps): ReactElement {
   const avatarInputRef = useRef<HTMLInputElement | null>(null)
+  const bannerInputRef = useRef<HTMLInputElement | null>(null)
 
   const [form, setForm] = useState({
     name: 'Angoa Yao Jean',
@@ -76,6 +83,16 @@ export default function ProfileTab({
     await onUploadAvatar(file)
     if (avatarInputRef.current) {
       avatarInputRef.current.value = ''
+    }
+    e.target.value = ''
+  }
+
+  const handleBannerFileSelect = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    await onUploadBanner(file)
+    if (bannerInputRef.current) {
+      bannerInputRef.current.value = ''
     }
     e.target.value = ''
   }
@@ -235,7 +252,7 @@ export default function ProfileTab({
                 <input
                   ref={avatarInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/avif"
                   disabled={uploadingAvatar}
                   onChange={handleAvatarFileSelect}
                   className="hidden"
@@ -252,9 +269,67 @@ export default function ProfileTab({
               )}
             </div>
             <p className="text-[11px] text-zinc-500 font-mono">
-              Hébergé sur le bucket public <strong>portfolio</strong> (JPG, PNG, WebP).
+              Formats acceptés : JPG, PNG, WebP, AVIF (max 5 Mo).
             </p>
           </div>
+        </div>
+
+        {/* Photo de couverture / Bannière Hero */}
+        <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-200 uppercase">
+                Bannière / Photo de couverture (Accueil)
+              </h3>
+              <p className="text-[11px] text-zinc-500 font-mono">
+                Format panoramique recommandé (ex. 1600×500 px). Affichée en tête du Hero.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-medium transition-colors shadow-xs">
+                <Icon name="image" className="size-3.5" />
+                <span>
+                  {uploadingBanner
+                    ? 'Téléversement...'
+                    : profile?.banner_url
+                      ? 'Changer la bannière'
+                      : 'Importer une bannière'}
+                </span>
+                <input
+                  ref={bannerInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  disabled={uploadingBanner}
+                  onChange={handleBannerFileSelect}
+                  className="hidden"
+                />
+              </label>
+              {profile?.banner_url && (
+                <button
+                  type="button"
+                  onClick={() => void onRemoveBanner()}
+                  className="px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-600 text-xs font-mono transition-colors cursor-pointer"
+                >
+                  Retirer
+                </button>
+              )}
+            </div>
+          </div>
+
+          {profile?.banner_url ? (
+            <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
+              <img
+                key={profile.banner_url}
+                src={profile.banner_url}
+                alt="Aperçu bannière"
+                className="w-full h-32 sm:h-40 object-cover block"
+              />
+            </div>
+          ) : (
+            <div className="h-20 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-800 flex items-center justify-center text-xs font-mono text-zinc-400">
+              Aucune bannière configurée
+            </div>
+          )}
         </div>
 
         {/* Noms & Rôles */}

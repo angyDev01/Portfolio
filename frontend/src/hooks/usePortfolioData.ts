@@ -1,6 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { portfolioService } from '../services/portfolioService'
-import type { DbProfile, DbProject, DbSkill } from '../types/database'
+import type {
+  AnnouncementListItem,
+  DbProfile,
+  DbProject,
+  DbSkill,
+  PollWithResults,
+} from '../types/database'
 
 /**
  * Charge le profil actif et se synchronise automatiquement sur `portfolio:profile-updated`.
@@ -77,4 +83,64 @@ export function useSkills(): { skills: DbSkill[]; loading: boolean } {
   }, [])
 
   return { skills, loading }
+}
+
+export function useAnnouncements(): {
+  announcements: AnnouncementListItem[]
+  loading: boolean
+  refresh: () => Promise<void>
+} {
+  const [announcements, setAnnouncements] = useState<AnnouncementListItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const refresh = useCallback(async () => {
+    const data = await portfolioService.getAnnouncements()
+    setAnnouncements(data)
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+    portfolioService.getAnnouncements().then((data) => {
+      if (mounted) {
+        setAnnouncements(data)
+        setLoading(false)
+      }
+    })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  return { announcements, loading, refresh }
+}
+
+export function usePolls(): {
+  polls: PollWithResults[]
+  loading: boolean
+  refresh: () => Promise<void>
+} {
+  const [polls, setPolls] = useState<PollWithResults[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const refresh = useCallback(async () => {
+    const data = await portfolioService.getPollsWithResults()
+    setPolls(data)
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+    portfolioService.getPollsWithResults().then((data) => {
+      if (mounted) {
+        setPolls(data)
+        setLoading(false)
+      }
+    })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  return { polls, loading, refresh }
 }

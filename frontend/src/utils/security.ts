@@ -170,3 +170,61 @@ export const emailContactSchema = z.object({
 })
 
 export type ValidatedEmailContact = z.infer<typeof emailContactSchema>
+
+/**
+ * Nettoyage léger du texte saisi par les visiteurs (commentaires).
+ * Retire uniquement les caractères de contrôle et normalise les espaces :
+ * les chevrons sont conservés ("a < b", "<3") car React échappe déjà le rendu
+ * (aucun dangerouslySetInnerHTML n'est utilisé).
+ */
+export function sanitizeUserText(text: string, options: { multiline?: boolean } = {}): string {
+  if (typeof text !== 'string') return ''
+  const withoutControls = text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, '')
+  if (options.multiline) {
+    return withoutControls
+      .replace(/\r\n?/g, '\n')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+  }
+  return withoutControls.replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * Détecte la présence d'un lien dans un texte saisi par un visiteur.
+ */
+export function containsLink(text: string): boolean {
+  return /(https?:\/\/|www\.)/i.test(text)
+}
+
+export const hasUnallowedLink = containsLink
+
+const NO_LINK_MESSAGE = 'Les liens ne sont pas autorisés dans les commentaires.'
+
+/**
+ * Schéma Zod de validation stricte pour les commentaires d'annonces
+ */
+export const announcementCommentSchema = z.object({
+  author_name: z
+    .string()
+    .transform((value) => sanitizeUserText(value))
+    .pipe(
+      z
+        .string()
+        .min(2, 'Votre nom doit contenir au moins 2 caractères.')
+        .max(80, 'Votre nom ne peut pas dépasser 80 caractères.')
+        .refine((value) => !containsLink(value), NO_LINK_MESSAGE)
+    ),
+  content: z
+    .string()
+    .transform((value) => sanitizeUserText(value, { multiline: true }))
+    .pipe(
+      z
+        .string()
+        .min(2, 'Le commentaire doit contenir au moins 2 caractères.')
+        .max(1500, 'Le commentaire ne peut pas dépasser 1500 caractères.')
+        .refine((value) => !containsLink(value), NO_LINK_MESSAGE)
+    ),
+})
+
+export type ValidatedAnnouncementComment = z.infer<typeof announcementCommentSchema>

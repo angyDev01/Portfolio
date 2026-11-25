@@ -1,4 +1,4 @@
-import type { DbProfile, DbProject, DbSkill } from '../types/database'
+import type { AnnouncementListItem, DbProfile, DbProject, DbSkill } from '../types/database'
 
 /**
  * Cache mémoire en promesses pour des navigations instantanées et
@@ -8,6 +8,7 @@ export interface PortfolioCacheStore {
   profile: Promise<DbProfile | null> | null
   projects: Promise<DbProject[]> | null
   skills: Promise<DbSkill[]> | null
+  announcements: Promise<AnnouncementListItem[]> | null
 }
 
 export type CacheKey = keyof PortfolioCacheStore
@@ -16,6 +17,7 @@ export const portfolioCache: PortfolioCacheStore = {
   profile: null,
   projects: null,
   skills: null,
+  announcements: null,
 }
 
 export function invalidateCache(key?: CacheKey): void {
@@ -25,5 +27,6 @@ export function invalidateCache(key?: CacheKey): void {
     portfolioCache.profile = null
     portfolioCache.projects = null
     portfolioCache.skills = null
+    portfolioCache.announcements = null
   }
 }

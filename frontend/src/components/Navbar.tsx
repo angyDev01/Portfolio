@@ -1,25 +1,29 @@
 import { useEffect, useState, type ReactElement } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { portfolioService } from '../services/portfolioService'
 import Icon from './Icon'
+import ScrollProgressBar from './ScrollProgressBar'
 import { useTheme } from '../context/ThemeContext'
 
 interface NavItem {
   to: string
   label: string
   end?: boolean
-  prefetch?: 'projects' | 'skills' | 'profile'
+  prefetch?: 'projects' | 'skills' | 'profile' | 'announcements'
 }
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Accueil', end: true },
   { to: '/projets', label: 'Projets', prefetch: 'projects' },
   { to: '/competences', label: 'Compétences', prefetch: 'skills' },
+  { to: '/actualites', label: 'Actualités', prefetch: 'announcements' },
 ]
 
 export default function Navbar(): ReactElement {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const { theme, toggleTheme } = useTheme()
+  const { pathname } = useLocation()
+  const isAdminRoute = pathname.startsWith('/admin')
 
   useEffect(() => {
     const handleResize = (): void => {
@@ -67,10 +71,9 @@ export default function Navbar(): ReactElement {
                 end={item.end}
                 onMouseEnter={item.prefetch ? () => portfolioService.prefetch(item.prefetch!) : undefined}
                 className={({ isActive }) =>
-                  `relative py-5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-indigo'
-                      : 'text-muted hover:text-ink'
+                  `relative py-5 text-sm font-medium transition-colors ${isActive
+                    ? 'text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-indigo'
+                    : 'text-muted hover:text-ink'
                   }`
                 }
               >
@@ -122,6 +125,7 @@ export default function Navbar(): ReactElement {
             </button>
           </div>
         </div>
+        <ScrollProgressBar hidden={isOpen || isAdminRoute} />
       </header>
 
       {/* Menu Mobile Plein Écran (hors du header pour éviter le containing block de backdrop-blur) */}
@@ -135,8 +139,7 @@ export default function Navbar(): ReactElement {
                 end={item.end}
                 onClick={closeMenu}
                 className={({ isActive }) =>
-                  `text-[30px] font-semibold tracking-[-0.025em] leading-tight py-2 transition-colors ${
-                    isActive ? 'text-indigo' : 'text-ink hover:text-indigo'
+                  `text-[30px] font-semibold tracking-[-0.025em] leading-tight py-2 transition-colors ${isActive ? 'text-indigo' : 'text-ink hover:text-indigo'
                   }`
                 }
               >

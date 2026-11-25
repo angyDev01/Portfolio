@@ -11,7 +11,11 @@ import type {
   SkillCategoryType,
   ProjectCategoryType,
   ProjectStatusType,
+  AnnouncementWithComments,
+  PollWithResults,
 } from '../types/database'
+import type { SaveAnnouncementInput } from '../services/announcementService'
+import type { CreatePollInput } from '../services/pollService'
 
 export interface ProjectFormData {
   title: string
@@ -58,6 +62,9 @@ export function useDashboardData() {
 
   const [savingProject, setSavingProject] = useState<boolean>(false)
   const [uploadingAvatar, setUploadingAvatar] = useState<boolean>(false)
+  const [uploadingBanner, setUploadingBanner] = useState<boolean>(false)
+  const [announcements, setAnnouncements] = useState<AnnouncementWithComments[]>([])
+  const [polls, setPolls] = useState<PollWithResults[]>([])
 
   // Toast auto-dismiss
   useEffect(() => {
@@ -74,12 +81,15 @@ export function useDashboardData() {
   const loadAllData = useCallback(async (): Promise<void> => {
     setLoading(true)
     try {
-      const [profData, projsData, sksData, msgsRes] = await Promise.all([
-        portfolioService.getProfile(),
-        portfolioService.getProjects(),
-        portfolioService.getSkills(),
-        portfolioService.getAdminMessages(),
-      ])
+      const [profData, projsData, sksData, msgsRes, annAdminRes, pollsDetailed] =
+        await Promise.all([
+          portfolioService.getProfile(),
+          portfolioService.getProjects(),
+          portfolioService.getSkills(),
+          portfolioService.getAdminMessages(),
+          portfolioService.getAnnouncementsAdmin(),
+          portfolioService.getPollsWithResultsDetailed(),
+        ])
 
       if (profData) {
         setProfile(profData)
@@ -89,6 +99,8 @@ export function useDashboardData() {
       if (msgsRes.ok) {
         setMessages(msgsRes.messages)
       }
+      setAnnouncements(annAdminRes.items)
+      setPolls(pollsDetailed.polls)
     } catch (err) {
       console.error('Error loading admin data:', err)
       showToast('error', 'Erreur lors du chargement des données.')
@@ -230,6 +242,61 @@ export function useDashboardData() {
       return false
     }
   }, [profile?.avatar_url, showToast])
+
+  const uploadBanner = useCallback(
+    async (file: File): Promise<boolean> => {
+      const previousBannerUrl = profile?.banner_url
+      setUploadingBanner(true)
+      try {
+        const res = await portfolioService.uploadMedia(file, 'banners')
+        if (!res.ok || !res.url) {
+          showToast('error', res.error || 'Erreur lors du téléversement de la bannière.')
+          return false
+        }
+
+        const publicUrl = res.url
+        const saveRes = await portfolioService.updateProfile({ banner_url: publicUrl })
+        if (!saveRes.ok) {
+          showToast('error', saveRes.error || 'Erreur lors de la sauvegarde de la bannière.')
+          return false
+        }
+
+        setProfile((prev) =>
+          prev ? { ...prev, banner_url: publicUrl } : ({ banner_url: publicUrl } as DbProfile)
+        )
+
+        if (previousBannerUrl && previousBannerUrl !== publicUrl) {
+          await portfolioService.deleteMedia(previousBannerUrl)
+        }
+
+        showToast('success', 'Bannière de couverture mise à jour !')
+        return true
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Erreur inattendue lors de l’upload.'
+        showToast('error', msg)
+        return false
+      } finally {
+        setUploadingBanner(false)
+      }
+    },
+    [profile?.banner_url, showToast]
+  )
+
+  const removeBanner = useCallback(async (): Promise<boolean> => {
+    const previousBannerUrl = profile?.banner_url
+    const saveRes = await portfolioService.updateProfile({ banner_url: '' })
+    if (saveRes.ok) {
+      setProfile((prev) => (prev ? { ...prev, banner_url: '' } : null))
+      if (previousBannerUrl) {
+        await portfolioService.deleteMedia(previousBannerUrl)
+      }
+      showToast('success', 'Bannière retirée avec succès.')
+      return true
+    } else {
+      showToast('error', saveRes.error || 'Erreur lors du retrait de la bannière.')
+      return false
+    }
+  }, [profile?.banner_url, showToast])
 
   const toggleAcceptMessages = useCallback(async (): Promise<boolean> => {
     const currentStatus = profile?.accept_direct_messages !== false
@@ -461,6 +528,138 @@ export function useDashboardData() {
     [showToast]
   )
 
+  // ==========================================
+  // GESTION DES ANNONCES, COMMENTAIRES & SONDAGES
+  // ==========================================
+
+  const saveAnnouncement = useCallback(
+    async (
+      editingId: string | null,
+      input: SaveAnnouncementInput,
+      coverFile: File | null
+    ): Promise<boolean> => {
+      let finalCoverUrl = input.cover_image_url ?? null
+      if (coverFile) {
+        const uploadRes = await portfolioService.uploadMedia(coverFile, 'announcements')
+        if (!uploadRes.ok || !uploadRes.url) {
+          showToast('error', uploadRes.error || "Erreur téléversement image d'annonce.")
+          return false
+        }
+        finalCoverUrl = uploadRes.url
+      }
+
+      const payload: SaveAnnouncementInput = { ...input, cover_image_url: finalCoverUrl }
+      const res = editingId
+        ? await portfolioService.updateAnnouncement(editingId, payload)
+        : await portfolioService.createAnnouncement(payload)
+
+      if (res.ok) {
+        showToast('success', editingId ? 'Annonce mise à jour.' : 'Annonce publiée.')
+        const adminAnn = await portfolioService.getAnnouncementsAdmin()
+        setAnnouncements(adminAnn.items)
+        return true
+      }
+      showToast('error', res.error || 'Erreur enregistrement annonce.')
+      return false
+    },
+    [showToast]
+  )
+
+  const deleteAnnouncement = useCallback(
+    async (id: string, title: string): Promise<boolean> => {
+      if (!window.confirm(`Supprimer définitivement l'annonce "${title}" ?`)) return false
+      const res = await portfolioService.deleteAnnouncement(id)
+      if (res.ok) {
+        setAnnouncements((prev) => prev.filter((a) => a.id !== id))
+        showToast('success', 'Annonce supprimée.')
+        return true
+      }
+      showToast('error', res.error || 'Erreur suppression annonce.')
+      return false
+    },
+    [showToast]
+  )
+
+  const toggleCommentApproval = useCallback(
+    async (commentId: string, isApproved: boolean): Promise<void> => {
+      const res = await portfolioService.setCommentApproval(commentId, isApproved)
+      if (res.ok) {
+        setAnnouncements((prev) =>
+          prev.map((a) => ({
+            ...a,
+            comments: a.comments.map((c) =>
+              c.id === commentId ? { ...c, is_approved: isApproved } : c
+            ),
+          }))
+        )
+        showToast('success', isApproved ? 'Commentaire approuvé.' : 'Commentaire masqué.')
+      } else {
+        showToast('error', res.error || 'Erreur modération commentaire.')
+      }
+    },
+    [showToast]
+  )
+
+  const deleteAnnouncementComment = useCallback(
+    async (commentId: string): Promise<void> => {
+      const res = await portfolioService.deleteAnnouncementComment(commentId)
+      if (res.ok) {
+        setAnnouncements((prev) =>
+          prev.map((a) => ({
+            ...a,
+            comments: a.comments.filter((c) => c.id !== commentId),
+          }))
+        )
+        showToast('success', 'Commentaire supprimé.')
+      } else {
+        showToast('error', res.error || 'Erreur suppression commentaire.')
+      }
+    },
+    [showToast]
+  )
+
+  const createPoll = useCallback(
+    async (input: CreatePollInput): Promise<boolean> => {
+      const res = await portfolioService.createPoll(input)
+      if (res.ok) {
+        showToast('success', 'Sondage créé et publié.')
+        setPolls(await portfolioService.getPollsWithResults())
+        return true
+      }
+      showToast('error', res.error || 'Erreur création sondage.')
+      return false
+    },
+    [showToast]
+  )
+
+  const togglePollActive = useCallback(
+    async (pollId: string, isActive: boolean): Promise<void> => {
+      const res = await portfolioService.togglePollActive(pollId, isActive)
+      if (res.ok) {
+        setPolls((prev) => prev.map((p) => (p.id === pollId ? { ...p, is_active: isActive } : p)))
+        showToast('success', isActive ? 'Sondage rouvert.' : 'Sondage clôturé.')
+      } else {
+        showToast('error', res.error || 'Erreur mise à jour sondage.')
+      }
+    },
+    [showToast]
+  )
+
+  const deletePoll = useCallback(
+    async (pollId: string, question: string): Promise<boolean> => {
+      if (!window.confirm(`Supprimer le sondage "${question}" et ses votes ?`)) return false
+      const res = await portfolioService.deletePoll(pollId)
+      if (res.ok) {
+        setPolls((prev) => prev.filter((p) => p.id !== pollId))
+        showToast('success', 'Sondage supprimé.')
+        return true
+      }
+      showToast('error', res.error || 'Erreur suppression sondage.')
+      return false
+    },
+    [showToast]
+  )
+
   return {
     loading,
     toast,
@@ -469,16 +668,21 @@ export function useDashboardData() {
     projects,
     skills,
     messages,
+    announcements,
+    polls,
     analytics,
     analyticsRange,
     setAnalyticsRange,
     savingProject,
     uploadingAvatar,
+    uploadingBanner,
     loadAllData,
     updateAvailability,
     updateProfile,
     uploadAvatar,
     removeAvatar,
+    uploadBanner,
+    removeBanner,
     toggleAcceptMessages,
     saveProject,
     deleteProject,
@@ -486,5 +690,12 @@ export function useDashboardData() {
     deleteSkill,
     toggleMessageRead,
     deleteMessage,
+    saveAnnouncement,
+    deleteAnnouncement,
+    toggleCommentApproval,
+    deleteAnnouncementComment,
+    createPoll,
+    togglePollActive,
+    deletePoll,
   }
 }

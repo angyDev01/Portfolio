@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import type { DbProfile } from '../types/database'
 import { portfolioCache, invalidateCache } from './cache'
+import { validateImageFile } from '../utils/mediaValidation'
 
 export const profileService = {
   async getProfile(): Promise<DbProfile | null> {
@@ -90,16 +91,23 @@ export const profileService = {
    */
   async uploadMedia(
     file: File,
-    folder: 'avatars' | 'projects' = 'avatars'
+    folder: 'avatars' | 'projects' | 'banners' | 'announcements' = 'avatars'
   ): Promise<{ ok: boolean; url?: string; error?: string }> {
     try {
-      const fileExt = file.name.split('.').pop() || 'png'
+      const validation = validateImageFile(file)
+      if (!validation.ok) {
+        return { ok: false, error: validation.error }
+      }
+      const fileExt = validation.ext
       const timestamp = Date.now()
       const rand = Math.random().toString(36).substring(2, 7)
-      const filePath =
-        folder === 'avatars'
-          ? `avatars/avatar-${timestamp}-${rand}.${fileExt}`
-          : `projects/project-${timestamp}-${rand}.${fileExt}`
+      const prefixMap: Record<'avatars' | 'projects' | 'banners' | 'announcements', string> = {
+        avatars: 'avatar',
+        projects: 'project',
+        banners: 'banner',
+        announcements: 'announcement',
+      }
+      const filePath = `${folder}/${prefixMap[folder]}-${timestamp}-${rand}.${fileExt}`
 
       const { data, error } = await supabase.storage.from('portfolio').upload(filePath, file, {
         cacheControl: '0',
@@ -107,7 +115,23 @@ export const profileService = {
       })
 
       if (error) {
-        return { ok: false, error: error.message }
+        let errorMsg = error.message
+        if (
+          error.message.includes('row-level security') ||
+          error.message.includes('policy') ||
+          error.message.includes('Unauthorized') ||
+          error.message.includes('jwt')
+        ) {
+          errorMsg =
+            'Session expirée ou droits administrateur requis pour téléverser ce fichier. Veuillez vous reconnecter.'
+        } else if (
+          error.message.includes('Entity Too Large') ||
+          error.message.includes('413') ||
+          error.message.includes('too large')
+        ) {
+          errorMsg = 'Le fichier dépasse la taille maximale autorisée par le serveur.'
+        }
+        return { ok: false, error: errorMsg }
       }
 
       const { data: publicData } = supabase.storage

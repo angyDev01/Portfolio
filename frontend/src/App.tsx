@@ -10,6 +10,7 @@ import { trackVisit } from './utils/visitorTracker'
 
 const ProjectsPage = lazy(() => import('./pages/ProjectsPage'))
 const SkillsPage = lazy(() => import('./pages/SkillsPage'))
+const UpdatesPage = lazy(() => import('./pages/UpdatesPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
@@ -52,6 +53,11 @@ const ROUTE_SEO: Record<string, RouteMeta> = {
     title: 'Compétences & Stack Technologique | Yao Jean Angoa (Angy)',
     description: "Stack technique maîtrisée par Yao Jean Angoa : React, TypeScript, Node.js, PostgreSQL, Tailwind CSS, REST APIs et Docker.",
     canonical: 'https://angydev.me/competences',
+  },
+  '/actualites': {
+    title: 'Actualités, Projets en cours & Sondages | Yao Jean Angoa (Angy)',
+    description: "Suivez mes projets en préparation, événements à venir, commentaires et sondages communautaires.",
+    canonical: 'https://angydev.me/actualites',
   },
   '/contact': {
     title: 'Contact & Échange | Yao Jean Angoa (Angy)',
@@ -151,6 +157,7 @@ function MainLayout(): ReactElement {
             <Route path="/a-propos" element={<HomePage />} />
             <Route path="/projets" element={<ProjectsPage />} />
             <Route path="/competences" element={<SkillsPage />} />
+            <Route path="/actualites" element={<UpdatesPage />} />
             <Route path="/contact" element={<ContactPage />} />
 
             {/* Connexion Admin */}
