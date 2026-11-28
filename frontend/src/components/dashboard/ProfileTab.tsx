@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, type FormEvent, type ReactElement } from 'react'
 import Icon from '../Icon'
 import AvatarImage from '../AvatarImage'
+import ShareButton from '../ShareButton'
+import LinkInsertControl from './LinkInsertControl'
 import type { DbProfile, AvailabilityStatusType } from '../../types/database'
 import {
   BANNER_OBJECT_POSITION_CLASS,
@@ -36,6 +38,8 @@ export default function ProfileTab({
 }: ProfileTabProps): ReactElement {
   const avatarInputRef = useRef<HTMLInputElement | null>(null)
   const bannerInputRef = useRef<HTMLInputElement | null>(null)
+  const shortBioRef = useRef<HTMLTextAreaElement | null>(null)
+  const fullBioRef = useRef<HTMLTextAreaElement | null>(null)
   const bannerPosition = getBannerPosition(profile?.banner_url)
 
   const [form, setForm] = useState({
@@ -156,8 +160,8 @@ export default function ProfileTab({
             type="button"
             onClick={() => onUpdateAvailability('available')}
             className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${form.availability_status === 'available'
-                ? 'bg-emerald-500/15 border-emerald-500/50 shadow-md shadow-emerald-500/10'
-                : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+              ? 'bg-emerald-500/15 border-emerald-500/50 shadow-md shadow-emerald-500/10'
+              : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
               }`}
           >
             <div className="flex items-center gap-2">
@@ -179,8 +183,8 @@ export default function ProfileTab({
             type="button"
             onClick={() => onUpdateAvailability('employed')}
             className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${form.availability_status === 'employed'
-                ? 'bg-indigo-500/15 border-indigo-500/50 shadow-md shadow-indigo-500/10'
-                : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+              ? 'bg-indigo-500/15 border-indigo-500/50 shadow-md shadow-indigo-500/10'
+              : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
               }`}
           >
             <div className="flex items-center gap-2">
@@ -202,8 +206,8 @@ export default function ProfileTab({
             type="button"
             onClick={() => onUpdateAvailability('unavailable')}
             className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${form.availability_status === 'unavailable'
-                ? 'bg-amber-500/15 border-amber-500/50 shadow-md shadow-amber-500/10'
-                : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+              ? 'bg-amber-500/15 border-amber-500/50 shadow-md shadow-amber-500/10'
+              : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
               }`}
           >
             <div className="flex items-center gap-2">
@@ -236,9 +240,25 @@ export default function ProfileTab({
         onSubmit={handleFormSubmit}
         className="glass-card p-6 border-zinc-200 dark:border-zinc-800 space-y-5"
       >
-        <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
-          Informations & Bios
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
+            Informations & Bios
+          </h2>
+          <ShareButton
+            adminOnly={false}
+            label="Partager le profil"
+            item={{
+              kind: 'profile',
+              title: form.name.trim() || profile?.name || 'Portfolio',
+              subtitle: form.role.trim() || profile?.role || undefined,
+              description: form.short_bio.trim() || profile?.short_bio || undefined,
+              badge: form.status_label.trim() || profile?.status_label || undefined,
+              avatarUrl: profile?.avatar_url,
+              bannerUrl: profile?.banner_url,
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-zinc-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 border border-zinc-200 dark:border-zinc-800 text-xs font-medium transition-colors cursor-pointer"
+          />
+        </div>
 
         {/* Avatar & Supabase Storage */}
         <div className="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800">
@@ -349,11 +369,10 @@ export default function ProfileTab({
                         type="button"
                         aria-pressed={active}
                         onClick={() => void onUpdateBannerPosition(opt.value)}
-                        className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer ${
-                          active
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer ${active
                             ? 'bg-indigo-600 text-white font-semibold'
                             : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
-                        }`}
+                          }`}
                       >
                         {opt.label}
                       </button>
@@ -409,10 +428,20 @@ export default function ProfileTab({
 
         {/* Bio Courte */}
         <div>
-          <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-            Bio courte (Section Hero) *
-          </label>
+          <LinkInsertControl
+            label="Bio courte (Section Hero)"
+            htmlFor="profile-short-bio"
+            required
+            labelClassName="text-xs font-mono text-zinc-700 dark:text-zinc-300"
+            fieldRef={shortBioRef}
+            value={form.short_bio}
+            onChange={(nextValue) =>
+              setForm((prev) => ({ ...prev, short_bio: nextValue }))
+            }
+          />
           <textarea
+            ref={shortBioRef}
+            id="profile-short-bio"
             rows={2}
             required
             value={form.short_bio}
@@ -423,10 +452,20 @@ export default function ProfileTab({
 
         {/* Bio Détaillée */}
         <div>
-          <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-            Bio détaillée (Section À propos — séparez les paragraphes par une ligne vide) *
-          </label>
+          <LinkInsertControl
+            label="Bio détaillée (Section À propos — séparez les paragraphes par une ligne vide)"
+            htmlFor="profile-full-bio"
+            required
+            labelClassName="text-xs font-mono text-zinc-700 dark:text-zinc-300"
+            fieldRef={fullBioRef}
+            value={form.full_bio_text}
+            onChange={(nextValue) =>
+              setForm((prev) => ({ ...prev, full_bio_text: nextValue }))
+            }
+          />
           <textarea
+            ref={fullBioRef}
+            id="profile-full-bio"
             rows={5}
             required
             value={form.full_bio_text}

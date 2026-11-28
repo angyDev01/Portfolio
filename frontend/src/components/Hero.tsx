@@ -5,6 +5,7 @@ import { useProfile, useSkills } from '../hooks/usePortfolioData'
 import { portfolioService } from '../services/portfolioService'
 import { BANNER_OBJECT_POSITION_CLASS, getBannerPosition } from '../utils/bannerPosition'
 import AvatarImage from './AvatarImage'
+import RichText from './RichText'
 import ShareButton from './ShareButton'
 import type { ShareItem } from '../utils/shareUtils'
 
@@ -231,8 +232,12 @@ export default function Hero(): ReactElement {
                       </div>
                     ) : (
                       <p className="text-sm sm:text-base text-muted leading-[1.65]">
-                        {profile?.short_bio ||
-                          "J'accompagne les équipes et porteurs de projets de la modélisation des données jusqu'aux finitions d'interface avec React, TypeScript, Node.js et PostgreSQL."}
+                        <RichText
+                          text={
+                            profile?.short_bio ||
+                            "J'accompagne les équipes et porteurs de projets de la modélisation des données jusqu'aux finitions d'interface avec React, TypeScript, Node.js et PostgreSQL."
+                          }
+                        />
                       </p>
                     )}
                   </div>

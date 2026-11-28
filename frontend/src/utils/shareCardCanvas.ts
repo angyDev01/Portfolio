@@ -4,6 +4,7 @@ import {
   stripUrlHash,
   type ShareItem,
 } from './shareUtils'
+import { stripRichLinks } from './richText'
 import { isSafeUrl } from './urlSecurity'
 
 export type ShareCardFormat = 'status' | 'card'
@@ -496,11 +497,12 @@ async function renderStatusCard(params: {
   })
 
   // Sous-titre
-  if (item.subtitle && item.subtitle.trim() !== item.title.trim()) {
+  const cleanSubtitle = stripRichLinks(item.subtitle)
+  if (cleanSubtitle && cleanSubtitle.trim() !== item.title.trim()) {
     cursorY += 12
     ctx.font = `500 32px ${FONT_STACK}`
     ctx.fillStyle = palette.indigo
-    const subLines = wrapTextLines(ctx, item.subtitle, contentW, 2)
+    const subLines = wrapTextLines(ctx, cleanSubtitle, contentW, 2)
     subLines.forEach((line) => {
       ctx.fillText(line, padX, cursorY)
       cursorY += 44
@@ -508,8 +510,8 @@ async function renderStatusCard(params: {
   }
 
   // Résumé / description
-  const bodySource = item.description || ''
-  if (bodySource && bodySource.trim() !== (item.subtitle || '').trim()) {
+  const bodySource = stripRichLinks(item.description)
+  if (bodySource && bodySource.trim() !== cleanSubtitle.trim()) {
     cursorY += 22
     ctx.font = `400 30px ${FONT_STACK}`
     ctx.fillStyle = palette.muted
@@ -617,22 +619,24 @@ async function renderHorizontalCard(params: {
     cursorY += 50
   })
 
-  if (item.subtitle && item.subtitle.trim() !== item.title.trim()) {
+  const cleanCardSubtitle = stripRichLinks(item.subtitle)
+  if (cleanCardSubtitle && cleanCardSubtitle.trim() !== item.title.trim()) {
     cursorY += 8
     ctx.font = `500 22px ${FONT_STACK}`
     ctx.fillStyle = palette.indigo
-    const subLines = wrapTextLines(ctx, item.subtitle, leftW, 2)
+    const subLines = wrapTextLines(ctx, cleanCardSubtitle, leftW, 2)
     subLines.forEach((line) => {
       ctx.fillText(line, padX, cursorY)
       cursorY += 30
     })
   }
 
-  if (item.description && item.description.trim() !== (item.subtitle || '').trim()) {
+  const cleanCardDesc = stripRichLinks(item.description)
+  if (cleanCardDesc && cleanCardDesc.trim() !== cleanCardSubtitle.trim()) {
     cursorY += 14
     ctx.font = `400 21px ${FONT_STACK}`
     ctx.fillStyle = palette.muted
-    const descLines = wrapTextLines(ctx, item.description, leftW, 4)
+    const descLines = wrapTextLines(ctx, cleanCardDesc, leftW, 4)
     descLines.forEach((line) => {
       ctx.fillText(line, padX, cursorY)
       cursorY += 30

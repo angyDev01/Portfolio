@@ -36,6 +36,7 @@ import {
   CheckCircle2,
   Share2,
   Download,
+  Link2,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -77,6 +78,7 @@ export type IconName =
   | 'checkCircle'
   | 'share'
   | 'download'
+  | 'link'
 
 type CustomIcon = (props: SVGProps<SVGSVGElement>) => ReactElement
 
@@ -133,6 +135,7 @@ const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   checkCircle: CheckCircle2,
   share: Share2,
   download: Download,
+  link: Link2,
 }
 
 interface IconProps {

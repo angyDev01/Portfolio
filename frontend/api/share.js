@@ -35,8 +35,24 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;')
 }
 
+const SAFE_MARKDOWN_LINK_RE = /\[([^\]]+)\]\(((?:\([^)\s]*\)|[^)\s])+)\)/g
+
+function isAllowedMarkdownTarget(target) {
+  const clean = String(target ?? '').trim()
+  if (!clean) return false
+  if (clean.startsWith('#')) return true
+  if (clean.startsWith('/') && !clean.startsWith('//')) return true
+  return /^(https?:\/\/|www\.|mailto:|tel:)/i.test(clean)
+}
+
+function stripMarkdownLinks(text) {
+  return String(text ?? '').replace(SAFE_MARKDOWN_LINK_RE, (full, label, target) =>
+    isAllowedMarkdownTarget(target) && String(label).trim() ? String(label).trim() : full
+  )
+}
+
 function truncateText(text, maxLen = 190) {
-  const clean = String(text ?? '').replace(/\s+/g, ' ').trim()
+  const clean = stripMarkdownLinks(text).replace(/\s+/g, ' ').trim()
   if (clean.length <= maxLen) return clean
   return `${clean.slice(0, maxLen - 1).trimEnd()}…`
 }

@@ -1,8 +1,11 @@
 import { useState, useEffect, type ReactElement } from 'react'
+import { Link } from 'react-router-dom'
 import type { DbProject } from '../types/database'
+import { useAdminSession } from '../hooks/useAdminSession'
 import ProjectCoverBadges from './ProjectCoverBadges'
 import ShareButton from './ShareButton'
 import TechLogo from './TechLogo'
+import { resolveInternalPortfolioPath, stripRichLinks } from '../utils/richText'
 import { sanitizeUrl, isSafeUrl } from '../utils/urlSecurity'
 import type { ShareItem } from '../utils/shareUtils'
 
@@ -83,10 +86,15 @@ export default function ProjectCard({
     )
   }
 
+  const { isAdmin } = useAdminSession()
+
   const renderLinks = (compact = false, includeShare = true): ReactElement | null => {
-    const hasDemo = Boolean(demo_url && isSafeUrl(demo_url))
+    const safeDemoUrl = demo_url && isSafeUrl(demo_url) ? sanitizeUrl(demo_url, '') : ''
+    const internalDemoPath = safeDemoUrl ? resolveInternalPortfolioPath(safeDemoUrl) : null
+    const hasDemo = Boolean(safeDemoUrl)
     const hasRepo = Boolean(repo_url && isSafeUrl(repo_url))
-    if (!hasDemo && !hasRepo && !includeShare) return null
+    const showShare = includeShare && isAdmin
+    if (!hasDemo && !hasRepo && !showShare) return null
 
     const linkHitClass =
       'inline-flex items-center justify-center min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 -my-2 sm:my-0 px-1.5 sm:px-0 sm:py-1.5'
@@ -95,29 +103,33 @@ export default function ProjectCard({
       <div
         className={`relative z-10 flex items-center gap-1 sm:gap-4 text-sm font-medium shrink-0 ${compact ? 'text-xs' : ''}`}
       >
-        {hasDemo && (
+        {internalDemoPath ? (
+          <Link
+            to={internalDemoPath}
+            className={`${linkHitClass} text-indigo hover:underline underline-offset-4`}
+            aria-label={`Démo en ligne de ${title}`}
+          >
+            Démo
+          </Link>
+        ) : hasDemo ? (
           <a
-            href={sanitizeUrl(demo_url!)}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={safeDemoUrl}
             className={`${linkHitClass} text-indigo hover:underline underline-offset-4`}
             aria-label={`Démo en ligne de ${title}`}
           >
             Démo
           </a>
-        )}
+        ) : null}
         {hasRepo && (
           <a
             href={sanitizeUrl(repo_url!)}
-            target="_blank"
-            rel="noopener noreferrer"
             className={`${linkHitClass} text-muted hover:text-ink hover:underline underline-offset-4 transition-colors`}
             aria-label={`Code source de ${title}`}
           >
             Code
           </a>
         )}
-        {includeShare && <ShareButton item={projectShareItem} compact={compact} />}
+        {showShare && <ShareButton item={projectShareItem} compact={compact} />}
       </div>
     )
   }
@@ -151,7 +163,7 @@ export default function ProjectCard({
           </div>
 
           <p className="text-base text-muted leading-[1.6] max-w-[55ch]">
-            {summary || description}
+            {stripRichLinks(summary || description)}
           </p>
 
           {skills.length > 0 && (
@@ -192,7 +204,7 @@ export default function ProjectCard({
         </div>
 
         <p className="md:col-span-4 text-sm text-muted line-clamp-1">
-          {tagline || summary || description}
+          {stripRichLinks(tagline || summary || description)}
         </p>
 
         <div className="md:col-span-4 flex items-center justify-between md:justify-end gap-4">
@@ -234,7 +246,7 @@ export default function ProjectCard({
         </div>
 
         <p className="text-sm text-muted leading-[1.6] line-clamp-3 mb-4 max-w-[55ch]">
-          {summary || description}
+          {stripRichLinks(summary || description)}
         </p>
       </div>
 

@@ -3,6 +3,7 @@ import type { PollWithResults } from '../../types/database'
 import { computeOptionPercentage, isPollOpen } from '../../services/pollService'
 import { portfolioService } from '../../services/portfolioService'
 import Icon from '../Icon'
+import RichText from '../RichText'
 import ShareButton from '../ShareButton'
 
 interface PollCardProps {
@@ -79,7 +80,9 @@ export default function PollCard({ poll, headingLevel = 'h3', onVoted }: PollCar
       </div>
 
       {localPoll.description && (
-        <p className="text-sm text-muted leading-[1.55]">{localPoll.description}</p>
+        <p className="text-sm text-muted leading-[1.55] whitespace-pre-line">
+          <RichText text={localPoll.description} />
+        </p>
       )}
 
       <div className="space-y-2.5" role="group" aria-label={localPoll.question}>

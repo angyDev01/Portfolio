@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import type { DbSkill } from '../types/database'
+import RichText from './RichText'
 import TechLogo from './TechLogo'
 
 interface TechCardProps {
@@ -45,7 +46,7 @@ export default function TechCard({
         </div>
         {showDescription && skill.description ? (
           <p className="text-sm text-muted mt-1 leading-relaxed">
-            {skill.description}
+            <RichText text={skill.description} />
           </p>
         ) : (
           <span className="text-xs text-muted capitalize mt-0.5 block">

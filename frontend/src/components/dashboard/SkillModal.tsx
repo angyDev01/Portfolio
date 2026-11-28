@@ -1,4 +1,5 @@
-import { useState, useEffect, type FormEvent, type ReactElement } from 'react'
+import { useState, useEffect, useRef, type FormEvent, type ReactElement } from 'react'
+import LinkInsertControl from './LinkInsertControl'
 import type { DbSkill, SkillCategoryType } from '../../types/database'
 
 interface SkillModalProps {
@@ -39,6 +40,7 @@ export default function SkillModal({
     display_order: 0,
     is_featured: false,
   })
+  const descriptionRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
     if (editingSkill) {
@@ -184,15 +186,24 @@ export default function SkillModal({
           </div>
 
           <div>
-            <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-              Description (optionnelle)
-            </label>
-            <input
-              type="text"
+            <LinkInsertControl
+              label="Description (optionnelle)"
+              htmlFor="skill-description"
+              labelClassName="text-xs font-mono text-zinc-700 dark:text-zinc-300"
+              fieldRef={descriptionRef}
+              value={form.description}
+              onChange={(nextValue) =>
+                setForm((prev) => ({ ...prev, description: nextValue }))
+              }
+            />
+            <textarea
+              ref={descriptionRef}
+              id="skill-description"
+              rows={2}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Brève description..."
-              className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs focus:border-indigo-500 focus:outline-none resize-y"
             />
           </div>
 

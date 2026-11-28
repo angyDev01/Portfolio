@@ -3,6 +3,7 @@ import { DEFAULT_PROFILE_CONTACT } from '../config/defaults'
 import { useProfile, useSkills } from '../hooks/usePortfolioData'
 import SectionHeader from './SectionHeader'
 import AboutVideoPlayer from './AboutVideoPlayer'
+import RichText from './RichText'
 
 export default function About(): ReactElement {
   const { profile } = useProfile()
@@ -52,7 +53,7 @@ export default function About(): ReactElement {
               <div className="lg:col-span-8 space-y-5 text-base sm:text-[18px] leading-[1.65] text-muted max-w-[65ch]">
                 {fullBio.map((paragraph, index) => (
                   <p key={index} className={index === 0 ? 'text-ink' : undefined}>
-                    {paragraph}
+                    <RichText text={paragraph} />
                   </p>
                 ))}
               </div>

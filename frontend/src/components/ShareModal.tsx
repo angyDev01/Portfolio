@@ -232,7 +232,7 @@ export default function ShareModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="share-modal-title"
-      className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md modal-backdrop-animate"
+      className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md modal-backdrop-animate"
       onClick={onClose}
     >
       <div
@@ -393,9 +393,8 @@ export default function ShareModal({
                       type="button"
                       aria-pressed={format === 'status'}
                       onClick={() => setFormat('status')}
-                      className={`px-2.5 py-1 rounded text-[11px] font-medium cursor-pointer ${
-                        format === 'status' ? 'bg-indigo text-indigo-fg' : 'text-muted hover:text-ink'
-                      }`}
+                      className={`px-2.5 py-1 rounded text-[11px] font-medium cursor-pointer ${format === 'status' ? 'bg-indigo text-indigo-fg' : 'text-muted hover:text-ink'
+                        }`}
                     >
                       Statut 9:16
                     </button>
@@ -403,9 +402,8 @@ export default function ShareModal({
                       type="button"
                       aria-pressed={format === 'card'}
                       onClick={() => setFormat('card')}
-                      className={`px-2.5 py-1 rounded text-[11px] font-medium cursor-pointer ${
-                        format === 'card' ? 'bg-indigo text-indigo-fg' : 'text-muted hover:text-ink'
-                      }`}
+                      className={`px-2.5 py-1 rounded text-[11px] font-medium cursor-pointer ${format === 'card' ? 'bg-indigo text-indigo-fg' : 'text-muted hover:text-ink'
+                        }`}
                     >
                       Discussion 16:9
                     </button>
@@ -420,9 +418,8 @@ export default function ShareModal({
                       type="button"
                       aria-pressed={cardTheme === 'dark'}
                       onClick={() => setCardTheme('dark')}
-                      className={`px-2 py-1 rounded text-[11px] font-medium cursor-pointer ${
-                        cardTheme === 'dark' ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
-                      }`}
+                      className={`px-2 py-1 rounded text-[11px] font-medium cursor-pointer ${cardTheme === 'dark' ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
+                        }`}
                     >
                       Sombre
                     </button>
@@ -430,9 +427,8 @@ export default function ShareModal({
                       type="button"
                       aria-pressed={cardTheme === 'light'}
                       onClick={() => setCardTheme('light')}
-                      className={`px-2 py-1 rounded text-[11px] font-medium cursor-pointer ${
-                        cardTheme === 'light' ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
-                      }`}
+                      className={`px-2 py-1 rounded text-[11px] font-medium cursor-pointer ${cardTheme === 'light' ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
+                        }`}
                     >
                       Clair
                     </button>

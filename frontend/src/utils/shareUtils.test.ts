@@ -7,6 +7,7 @@ import {
   buildWhatsAppText,
   buildWhatsAppChatUrl,
   buildShareFilename,
+  truncateShareExcerpt,
   stripUrlHash,
   type ShareItem,
 } from './shareUtils'
@@ -166,5 +167,20 @@ describe('shareUtils', () => {
     expect(
       buildShareFilename({ kind: 'profile', title: 'Yao Jean Angoa' }, 'card')
     ).toBe('yao-jean-angoa-carte.png')
+
+    expect(
+      truncateShareExcerpt('Consultez [Voir la démo](https://example.com) et [les projets](/projets).')
+    ).toBe('Consultez Voir la démo et les projets.')
+
+    const richWhatsApp = buildWhatsAppText(
+      {
+        kind: 'announcement',
+        title: 'Mise à jour',
+        description: 'Accès direct sur [Voir la démo](https://example.com).',
+      },
+      'https://portfolio-vs28.vercel.app/s/actualite/123'
+    )
+    expect(richWhatsApp).toContain('Accès direct sur Voir la démo.')
+    expect(richWhatsApp).not.toContain('[Voir la démo]')
   })
 })

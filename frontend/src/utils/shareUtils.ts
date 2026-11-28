@@ -1,3 +1,4 @@
+import { stripRichLinks } from './richText'
 import { isSafeUrl } from './urlSecurity'
 
 export const PWA_ICON_PATH = '/pwa-512x512.png'
@@ -106,7 +107,7 @@ export function buildShareUrl(item: ShareItem, origin?: string): string {
 
 export function truncateShareExcerpt(text?: string, maxLen = 140): string {
   if (!text) return ''
-  const normalized = text.replace(/\s+/g, ' ').trim()
+  const normalized = stripRichLinks(text).replace(/\s+/g, ' ').trim()
   if (normalized.length <= maxLen) return normalized
   return `${normalized.slice(0, maxLen - 1).trimEnd()}…`
 }

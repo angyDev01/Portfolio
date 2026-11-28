@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useState, type ReactElement } from 'react'
+import { Link } from 'react-router-dom'
 import type {
   AnnouncementKind,
   AnnouncementListItem,
@@ -6,8 +7,10 @@ import type {
   DbAnnouncementComment,
 } from '../../types/database'
 import { portfolioService } from '../../services/portfolioService'
+import { resolveInternalPortfolioPath } from '../../utils/richText'
 import { sanitizeUrl } from '../../utils/urlSecurity'
 import Icon from '../Icon'
+import RichText from '../RichText'
 import ShareButton from '../ShareButton'
 
 const AnnouncementComments = lazy(() => import('./AnnouncementComments'))
@@ -88,6 +91,7 @@ export default function AnnouncementCard({
 
   const kindMeta = KIND_BADGE[announcement.kind] || KIND_BADGE.news
   const safeActionUrl = announcement.action_url ? sanitizeUrl(announcement.action_url, '') : ''
+  const internalActionPath = safeActionUrl ? resolveInternalPortfolioPath(safeActionUrl) : null
 
   const handleCommentAdded = (comment: DbAnnouncementComment): void => {
     setComments((prev) => [...prev, comment])
@@ -147,7 +151,7 @@ export default function AnnouncementCard({
       )}
 
       <p className="text-sm sm:text-base text-muted leading-[1.65] whitespace-pre-line">
-        {announcement.content}
+        <RichText text={announcement.content} />
       </p>
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
@@ -165,17 +169,23 @@ export default function AnnouncementCard({
         </button>
 
         <div className="flex flex-wrap items-center gap-4">
-          {safeActionUrl && (
+          {internalActionPath ? (
+            <Link
+              to={internalActionPath}
+              className="btn-tactile min-h-[44px] sm:min-h-0 -my-2 sm:my-0 inline-flex items-center gap-1.5 text-xs font-medium text-indigo hover:underline underline-offset-4"
+            >
+              <span>{announcement.action_label || 'En savoir plus'}</span>
+              <Icon name="arrowRight" className="size-3.5" />
+            </Link>
+          ) : safeActionUrl ? (
             <a
               href={safeActionUrl}
-              target="_blank"
-              rel="noopener noreferrer"
               className="btn-tactile min-h-[44px] sm:min-h-0 -my-2 sm:my-0 inline-flex items-center gap-1.5 text-xs font-medium text-indigo hover:underline underline-offset-4"
             >
               <span>{announcement.action_label || 'En savoir plus'}</span>
               <Icon name="external" className="size-3.5" />
             </a>
-          )}
+          ) : null}
 
           <ShareButton
             compact
@@ -206,6 +216,7 @@ export default function AnnouncementCard({
           <AnnouncementComments
             announcementId={announcement.id}
             allowComments={announcement.allow_comments}
+            commentsModerated={announcement.comments_moderated}
             comments={comments}
             loading={loadingComments}
             hasMore={hasMoreComments}

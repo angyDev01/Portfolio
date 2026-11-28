@@ -4,6 +4,30 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 
 ---
 
+## [2026-11-28] — Liens Cliquables dans les Annonces, Projets & Contenus Admin
+
+### Texte enrichi sécurisé & assistant d'insertion
+- **Moteur `richText.ts` & tests (`richText.test.ts`)** : détection automatique des URLs (`https://`, `http://`, `www.` normalisé) avec gestion de la ponctuation finale et parenthèses équilibrées, prise en charge des liens nommés `[Libellé](url)` externes et internes (`/page`, `#section`), conversion automatique des URLs du domaine du portfolio (`resolveInternalPortfolioPath`) vers la navigation interne React Router, validation stricte via `isSafeUrl`/`sanitizeUrl` (rejet XSS en texte brut) et utilitaires `stripRichLinks` / `insertMarkdownLink`.
+- **Composant `RichText` & navigation même onglet** : rendu 100 % React sans `dangerouslySetInnerHTML` (`<Link>` React Router pour les routes internes, ouverture dans le même onglet par défaut pour permettre un retour direct via `←`, avec option `openExternalInNewTab` activée uniquement dans `CommunityTab` pour le confort admin) et ajout de l'icône `link`.
+- **Assistant Dashboard `LinkInsertControl`** : bouton *Insérer un lien* et mini panneau inline (sans `<form>` imbriqué) intégrés dans `AnnouncementModal`, `ProjectModal` (*Résumé*, *Description complète*), `PollModal` (*Contexte*), `ProfileTab` (*Bio courte*, *Bio détaillée*) et `SkillModal` (*Description*).
+- **Affichage & aperçus** : liens cliquables activés dans `AnnouncementCard`, `ProjectDetailModal`, `PollCard`, `Hero`, `About`, `TechCard` et `CommunityTab` ; conversion interne et ouverture même onglet appliquées également aux boutons d'action d'`AnnouncementCard`, `ProjectDetailModal` et `ProjectCard` ; nettoyage des balises `[texte](url)` via `stripRichLinks` / `stripMarkdownLinks` dans `ProjectCard`, `ProjectsTab`, `shareUtils.ts`, `shareCardCanvas.ts` et `api/share.js` (OG). Les commentaires visiteurs restent protégés contre les liens.
+
+## [2026-11-28] — Partage Admin Uniquement, Modales Communauté & Commentaires
+
+### Sécurité & Partage Administrateur
+- **Hook partagé `useAdminSession`** (`frontend/src/hooks/useAdminSession.ts`) : abonnement singleton à `portfolioService.getSession()` et `onAuthStateChange` pour connaître l'état de session admin sans dupliquer les listeners sur les grilles.
+- **Visibilité restreinte de `ShareButton`** : propriété `adminOnly` active par défaut (masque le bouton de partage pour les visiteurs sur la page d'accueil, les cartes projets, la modale projet, les annonces et les sondages, et évite le rendu d'un conteneur de liens vide dans `ProjectCard`).
+- **Partage depuis le Dashboard** : ajout de `ShareButton` (`adminOnly={false}`) dans `ProjectsTab`, `ProfileTab` (section *Informations & Bios*) et `CommunityTab` (uniquement sur les annonces publiées et sur les sondages), avec élévation de `ShareModal` à `z-[90]` au-dessus des modales Dashboard (`z-[80]`).
+
+### Modales Communauté (alignées sur `ProjectsTab` → `ProjectModal`)
+- **Création & édition en modale** : ajout de `AnnouncementModal` (`z-[80]`, aperçu image 16:9 avec nettoyage des URLs blob, fermeture Échap/clic extérieur) et `PollModal` (2 à 6 options dynamiques).
+- **Refonte de `CommunityTab`** : suppression des formulaires inline au profit des boutons `Nouvelle annonce` et `Nouveau sondage`, barre de recherche et filtres (dont filtre *À modérer*), et grilles pleine largeur.
+
+### Expérience & Lisibilité des Commentaires
+- **Utilitaires `commentDisplay.ts` & tests** : `getAuthorInitials`, `getAvatarToneIndex` et `formatCommentDate` couverts par `commentDisplay.test.ts`.
+- **Site public (`AnnouncementComments` / `AnnouncementCard`)** : formulaire multi-lignes (`text-base sm:text-sm`) masqué par défaut et révélé au clic sur *Écrire un commentaire*, fil éditorial avec avatars à initiales et indication de modération préalable.
+- **Modération Dashboard (`CommunityTab`)** : panneau dépliable dédié par annonce avec compteur de commentaires en attente, avatars à initiales, dates lisibles et actions *Approuver / Masquer / Supprimer*.
+
 ## [2026-11-28] — Partage WhatsApp (Statut & Discussions), Cadrage Images & Badges Projets
 
 ### 1. Partage WhatsApp Statut & Discussions avec aperçus dynamiques

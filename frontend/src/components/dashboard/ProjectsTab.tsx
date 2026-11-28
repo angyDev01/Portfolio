@@ -1,6 +1,8 @@
 import { useState, useMemo, type ReactElement } from 'react'
 import Icon from '../Icon'
+import ShareButton from '../ShareButton'
 import ProjectModal from './ProjectModal'
+import { stripRichLinks } from '../../utils/richText'
 import type { DbProject, DbSkill } from '../../types/database'
 import type { ProjectFormData } from '../../hooks/useDashboardData'
 
@@ -171,7 +173,7 @@ export default function ProjectsTab({
                   {p.tagline}
                 </p>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed mb-3">
-                  {p.summary}
+                  {stripRichLinks(p.summary)}
                 </p>
 
                 <div className="flex flex-wrap gap-1.5">
@@ -191,6 +193,24 @@ export default function ProjectsTab({
                   {p.category}
                 </span>
                 <div className="flex items-center gap-2">
+                  <ShareButton
+                    adminOnly={false}
+                    compact
+                    label="Partager"
+                    item={{
+                      kind: 'project',
+                      id: p.id,
+                      slug: p.slug,
+                      title: p.title,
+                      subtitle: p.tagline,
+                      description: p.summary || p.description,
+                      badge: p.is_featured ? 'À la une' : p.category,
+                      secondaryBadge: p.status === 'in_progress' ? 'En cours' : undefined,
+                      imageUrl: p.cover_image_url || p.images?.[0],
+                      metaItems: (p.skills ?? []).slice(0, 4),
+                    }}
+                    className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-zinc-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 border border-zinc-200 dark:border-zinc-800 text-xs transition-colors cursor-pointer"
+                  />
                   <button
                     type="button"
                     onClick={() => openEdit(p)}

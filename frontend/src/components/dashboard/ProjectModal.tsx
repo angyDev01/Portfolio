@@ -1,5 +1,6 @@
-import { useState, useEffect, type FormEvent, type ReactElement } from 'react'
+import { useState, useEffect, useRef, type FormEvent, type ReactElement } from 'react'
 import Icon from '../Icon'
+import LinkInsertControl from './LinkInsertControl'
 import type { DbProject, DbSkill, ProjectStatusType, ProjectCategoryType } from '../../types/database'
 import type { ProjectFormData } from '../../hooks/useDashboardData'
 
@@ -42,6 +43,8 @@ export default function ProjectModal({
 
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
+  const summaryRef = useRef<HTMLTextAreaElement | null>(null)
+  const descriptionRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
     if (editingProject) {
@@ -350,10 +353,20 @@ export default function ProjectModal({
 
             {/* Résumé */}
             <div>
-              <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                Résumé de la carte *
-              </label>
+              <LinkInsertControl
+                label="Résumé de la carte"
+                htmlFor="project-summary"
+                required
+                labelClassName="text-xs font-mono text-zinc-700 dark:text-zinc-300"
+                fieldRef={summaryRef}
+                value={form.summary}
+                onChange={(nextValue) =>
+                  setForm((prev) => ({ ...prev, summary: nextValue }))
+                }
+              />
               <textarea
+                ref={summaryRef}
+                id="project-summary"
                 rows={2}
                 required
                 placeholder="Court paragraphe d'aperçu visible sur le catalogue..."
@@ -365,10 +378,19 @@ export default function ProjectModal({
 
             {/* Description complète */}
             <div>
-              <label className="block text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-1">
-                Description complète (Optionnel)
-              </label>
+              <LinkInsertControl
+                label="Description complète (Optionnel)"
+                htmlFor="project-description"
+                labelClassName="text-xs font-mono text-zinc-700 dark:text-zinc-300"
+                fieldRef={descriptionRef}
+                value={form.description}
+                onChange={(nextValue) =>
+                  setForm((prev) => ({ ...prev, description: nextValue }))
+                }
+              />
               <textarea
+                ref={descriptionRef}
+                id="project-description"
                 rows={3}
                 placeholder="Détails techniques, choix d'architecture, défis relevés..."
                 value={form.description}

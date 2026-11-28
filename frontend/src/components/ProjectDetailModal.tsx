@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { createPortal } from 'react-dom'
+import { Link } from 'react-router-dom'
 import type { DbProject } from '../types/database'
 import Icon from './Icon'
 import ProjectCoverBadges from './ProjectCoverBadges'
+import RichText from './RichText'
 import ShareButton from './ShareButton'
 import TechLogo from './TechLogo'
+import { resolveInternalPortfolioPath } from '../utils/richText'
 import { sanitizeUrl, isSafeUrl } from '../utils/urlSecurity'
 import { useFocusTrap, FocusGuard } from '../hooks/useFocusTrap'
 import type { ShareItem } from '../utils/shareUtils'
@@ -69,6 +72,9 @@ export default function ProjectDetailModal({
     imageUrl: cover,
     metaItems: skills.slice(0, 4),
   }
+
+  const safeDemoUrl = demo_url && isSafeUrl(demo_url) ? sanitizeUrl(demo_url, '') : ''
+  const internalDemoPath = safeDemoUrl ? resolveInternalPortfolioPath(safeDemoUrl) : null
 
   return createPortal(
     <div
@@ -150,8 +156,8 @@ export default function ProjectDetailModal({
           )}
 
           {summary && (
-            <p className="text-base text-ink leading-[1.6] mb-6 pb-6 border-b border-line max-w-[65ch]">
-              {summary}
+            <p className="text-base text-ink leading-[1.6] mb-6 pb-6 border-b border-line max-w-[65ch] whitespace-pre-line">
+              <RichText text={summary} />
             </p>
           )}
 
@@ -160,9 +166,13 @@ export default function ProjectDetailModal({
               À propos du projet
             </h3>
             <div className="text-sm sm:text-base text-muted leading-[1.65] space-y-3 whitespace-pre-line max-w-[65ch]">
-              {description ||
-                summary ||
-                "Cette réalisation dispose d'un aperçu condensé ci-dessus. Vous pouvez tester la démo en ligne ou consulter le code source."}
+              <RichText
+                text={
+                  description ||
+                  summary ||
+                  "Cette réalisation dispose d'un aperçu condensé ci-dessus. Vous pouvez tester la démo en ligne ou consulter le code source."
+                }
+              />
             </div>
           </div>
 
@@ -186,23 +196,28 @@ export default function ProjectDetailModal({
           )}
 
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 pt-6 border-t border-line">
-            {demo_url && isSafeUrl(demo_url) && (
+            {internalDemoPath ? (
+              <Link
+                to={internalDemoPath}
+                onClick={onClose}
+                className="btn-tactile w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-indigo hover:bg-indigo-hover text-indigo-fg text-sm font-medium transition-colors"
+              >
+                <span>Voir la démo</span>
+                <Icon name="arrowRight" className="size-3.5" />
+              </Link>
+            ) : safeDemoUrl ? (
               <a
-                href={sanitizeUrl(demo_url)}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={safeDemoUrl}
                 className="btn-tactile w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-indigo hover:bg-indigo-hover text-indigo-fg text-sm font-medium transition-colors"
               >
                 <span>Voir la démo</span>
                 <Icon name="external" className="size-3.5" />
               </a>
-            )}
+            ) : null}
 
             {repo_url && isSafeUrl(repo_url) && (
               <a
                 href={sanitizeUrl(repo_url)}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="btn-tactile w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-paper hover:border-ink/30 text-ink text-sm font-medium transition-colors border border-line"
               >
                 <Icon name="github" className="size-3.5" />
