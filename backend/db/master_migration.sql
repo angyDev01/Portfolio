@@ -773,7 +773,9 @@ ON CONFLICT (id) DO UPDATE SET
   allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 
 DROP POLICY IF EXISTS "Public Access" ON storage.objects;
-CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'portfolio');
+DROP POLICY IF EXISTS "Admin Read" ON storage.objects;
+CREATE POLICY "Admin Read" ON storage.objects FOR SELECT TO authenticated
+USING (bucket_id = 'portfolio' AND public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Upload" ON storage.objects;
 CREATE POLICY "Admin Upload" ON storage.objects FOR INSERT TO authenticated

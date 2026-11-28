@@ -102,6 +102,6 @@ SELECT
   (
     SELECT count(*)::text || ' politiques sur storage.objects'
     FROM pg_policies
-    WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname LIKE '%portfolio%' OR policyname LIKE '%Public Access%'
+    WHERE schemaname = 'storage' AND tablename = 'objects' AND (policyname LIKE '%portfolio%' OR policyname LIKE '%Admin%')
   ) AS details;
 
