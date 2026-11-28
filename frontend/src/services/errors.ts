@@ -3,9 +3,6 @@ interface SupabaseLikeError {
   message?: string | null
 }
 
-export const MIGRATION_HINT =
-  'Migration SQL manquante : exécutez migration_community_and_banner.sql puis migration_community_hardening.sql dans le SQL Editor de Supabase.'
-
 const MISSING_SCHEMA_CODES = new Set([
   'PGRST205', // table absente du cache de schéma
   'PGRST202', // fonction RPC absente

@@ -131,7 +131,7 @@ export default function AnnouncementComments({
               type="button"
               onClick={handleLoadMoreClick}
               disabled={loadingMore}
-              className="text-xs font-medium text-indigo hover:underline underline-offset-4 cursor-pointer disabled:opacity-50"
+              className="min-h-[44px] sm:min-h-0 -my-2 sm:my-0 inline-flex items-center text-xs font-medium text-indigo hover:underline underline-offset-4 cursor-pointer disabled:opacity-50"
             >
               {loadingMore ? 'Chargement...' : 'Afficher les commentaires précédents'}
             </button>
@@ -161,16 +161,19 @@ export default function AnnouncementComments({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
+              name="author_name"
               type="text"
+              autoComplete="name"
               required
               maxLength={80}
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
               placeholder="Votre nom ou pseudo *"
               aria-label="Votre nom ou pseudo"
-              className="sm:col-span-1 w-full px-3.5 py-2.5 rounded-md bg-paper border border-line text-ink text-base sm:text-sm focus:border-indigo focus:outline-none placeholder:text-muted/70"
+              className="sm:col-span-1 w-full px-3.5 py-2.5 rounded-md bg-paper border border-line text-ink text-base sm:text-sm focus:border-indigo focus:ring-2 focus:ring-indigo/20 placeholder:text-muted"
             />
             <input
+              name="content"
               type="text"
               required
               maxLength={1500}
@@ -178,7 +181,7 @@ export default function AnnouncementComments({
               onChange={(e) => setContent(e.target.value)}
               placeholder="Laisser un avis, une question ou un encouragement... *"
               aria-label="Votre commentaire"
-              className="sm:col-span-2 w-full px-3.5 py-2.5 rounded-md bg-paper border border-line text-ink text-base sm:text-sm focus:border-indigo focus:outline-none placeholder:text-muted/70"
+              className="sm:col-span-2 w-full px-3.5 py-2.5 rounded-md bg-paper border border-line text-ink text-base sm:text-sm focus:border-indigo focus:ring-2 focus:ring-indigo/20 placeholder:text-muted"
             />
           </div>
 
@@ -186,7 +189,7 @@ export default function AnnouncementComments({
             <button
               type="submit"
               disabled={submitting}
-              className="btn-tactile min-h-[40px] inline-flex items-center gap-2 px-4 py-2 rounded-md bg-indigo hover:bg-indigo-hover text-indigo-fg text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
+              className="btn-tactile min-h-[44px] sm:min-h-[40px] inline-flex items-center gap-2 px-4 py-2 rounded-md bg-indigo hover:bg-indigo-hover text-indigo-fg text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
             >
               <Icon name="send" className="size-3.5" />
               <span>{submitting ? 'Publication...' : 'Publier le commentaire'}</span>
@@ -195,11 +198,10 @@ export default function AnnouncementComments({
             {feedback && (
               <p
                 role="status"
-                className={`text-xs ${
-                  feedback.type === 'success'
+                className={`text-xs ${feedback.type === 'success'
                     ? 'text-indigo'
                     : 'text-red-600 dark:text-red-400'
-                }`}
+                  }`}
               >
                 {feedback.text}
               </p>

@@ -1,133 +1,109 @@
-import type { ReactElement, ComponentType } from 'react'
-import {
-  SiPython,
-  SiJavascript,
-  SiTypescript,
-  SiDjango,
-  SiReact,
-  SiNodedotjs,
-  SiTailwindcss,
-  SiGit,
-  SiGithub,
-  SiDocker,
-  SiPostgresql,
-  SiSupabase,
-  SiVite,
-  SiNextdotjs,
-  SiHtml5,
-  SiCss,
-  SiExpress,
-  SiMongodb,
-  SiRedis,
-  SiMysql,
-  SiFastapi,
-  SiFlask,
-  SiLinux,
-  SiPostman,
-  SiVercel,
-  SiNetlify,
-  SiFigma,
-  SiGraphql,
-  SiPrisma,
-  SiJest,
-  SiVitest,
-  SiRedux,
-  SiSass,
-  SiBootstrap,
-  SiSqlite,
-  SiCloudflare,
-  SiWebpack,
-  SiNginx,
-  SiPhp,
-  SiLaravel,
-  SiCplusplus,
-  SiGo,
-  SiRust,
-  SiGooglecloud,
-} from 'react-icons/si'
+import { createElement, type ReactElement, type ComponentType } from 'react'
+import { TECH_ICON_PATHS, type TechIconName } from '../data/techIconPaths'
 import Icon from './Icon'
 
+export interface TechSvgProps {
+  className?: string
+  style?: React.CSSProperties
+  size?: number | string
+}
+
 export interface TechDetails {
-  icon: ComponentType<{ className?: string; style?: React.CSSProperties; size?: number | string }>
+  icon: ComponentType<TechSvgProps>
   color: string
   label: string
 }
 
-const TECH_MAP: Record<string, { icon: ComponentType<{ className?: string; style?: React.CSSProperties; size?: number | string }>; color: string; label: string }> = {
-  python: { icon: SiPython, color: '#3776AB', label: 'Python' },
-  javascript: { icon: SiJavascript, color: '#F7DF1E', label: 'JavaScript' },
-  js: { icon: SiJavascript, color: '#F7DF1E', label: 'JavaScript' },
-  typescript: { icon: SiTypescript, color: '#3178C6', label: 'TypeScript' },
-  ts: { icon: SiTypescript, color: '#3178C6', label: 'TypeScript' },
-  django: { icon: SiDjango, color: '#44B78B', label: 'Django' },
-  react: { icon: SiReact, color: '#61DAFB', label: 'React' },
-  reactjs: { icon: SiReact, color: '#61DAFB', label: 'React' },
-  nodejs: { icon: SiNodedotjs, color: '#68A063', label: 'Node.js' },
-  node: { icon: SiNodedotjs, color: '#68A063', label: 'Node.js' },
-  tailwindcss: { icon: SiTailwindcss, color: '#06B6D4', label: 'Tailwind CSS' },
-  tailwind: { icon: SiTailwindcss, color: '#06B6D4', label: 'Tailwind CSS' },
-  git: { icon: SiGit, color: '#F05032', label: 'Git' },
-  github: { icon: SiGithub, color: '#A0AEC0', label: 'GitHub' },
-  docker: { icon: SiDocker, color: '#2496ED', label: 'Docker' },
-  postgresql: { icon: SiPostgresql, color: '#4169E1', label: 'PostgreSQL' },
-  postgres: { icon: SiPostgresql, color: '#4169E1', label: 'PostgreSQL' },
-  sql: { icon: SiPostgresql, color: '#4169E1', label: 'SQL' },
-  supabase: { icon: SiSupabase, color: '#3ECF8E', label: 'Supabase' },
-  vite: { icon: SiVite, color: '#646CFF', label: 'Vite' },
-  nextjs: { icon: SiNextdotjs, color: '#E2E8F0', label: 'Next.js' },
-  next: { icon: SiNextdotjs, color: '#E2E8F0', label: 'Next.js' },
-  html: { icon: SiHtml5, color: '#E34F26', label: 'HTML5' },
-  html5: { icon: SiHtml5, color: '#E34F26', label: 'HTML5' },
-  css: { icon: SiCss, color: '#1572B6', label: 'CSS3' },
-  css3: { icon: SiCss, color: '#1572B6', label: 'CSS3' },
-  express: { icon: SiExpress, color: '#CBD5E1', label: 'Express.js' },
-  expressjs: { icon: SiExpress, color: '#CBD5E1', label: 'Express.js' },
-  mongodb: { icon: SiMongodb, color: '#47A248', label: 'MongoDB' },
-  mongo: { icon: SiMongodb, color: '#47A248', label: 'MongoDB' },
-  redis: { icon: SiRedis, color: '#FF4438', label: 'Redis' },
-  mysql: { icon: SiMysql, color: '#4479A1', label: 'MySQL' },
-  sqlite: { icon: SiSqlite, color: '#003B57', label: 'SQLite' },
-  fastapi: { icon: SiFastapi, color: '#009688', label: 'FastAPI' },
-  flask: { icon: SiFlask, color: '#94A3B8', label: 'Flask' },
-  linux: { icon: SiLinux, color: '#FCC624', label: 'Linux' },
-  postman: { icon: SiPostman, color: '#FF6C37', label: 'Postman' },
-  vercel: { icon: SiVercel, color: '#E2E8F0', label: 'Vercel' },
-  netlify: { icon: SiNetlify, color: '#00C7B7', label: 'Netlify' },
-  figma: { icon: SiFigma, color: '#F24E1E', label: 'Figma' },
-  graphql: { icon: SiGraphql, color: '#E10098', label: 'GraphQL' },
-  prisma: { icon: SiPrisma, color: '#5A67D8', label: 'Prisma' },
-  jest: { icon: SiJest, color: '#C21325', label: 'Jest' },
-  vitest: { icon: SiVitest, color: '#FCC72B', label: 'Vitest' },
-  redux: { icon: SiRedux, color: '#764ABC', label: 'Redux' },
-  sass: { icon: SiSass, color: '#CC6699', label: 'Sass' },
-  scss: { icon: SiSass, color: '#CC6699', label: 'SCSS' },
-  bootstrap: { icon: SiBootstrap, color: '#7952B3', label: 'Bootstrap' },
-  cloudflare: { icon: SiCloudflare, color: '#F38020', label: 'Cloudflare' },
-  webpack: { icon: SiWebpack, color: '#8DD6F9', label: 'Webpack' },
-  nginx: { icon: SiNginx, color: '#009639', label: 'Nginx' },
-  php: { icon: SiPhp, color: '#777BB4', label: 'PHP' },
-  laravel: { icon: SiLaravel, color: '#FF2D20', label: 'Laravel' },
-  cplusplus: { icon: SiCplusplus, color: '#00599C', label: 'C++' },
-  cpp: { icon: SiCplusplus, color: '#00599C', label: 'C++' },
-  go: { icon: SiGo, color: '#00ADD8', label: 'Go' },
-  golang: { icon: SiGo, color: '#00ADD8', label: 'Go' },
-  rust: { icon: SiRust, color: '#DEA584', label: 'Rust' },
-  gcp: { icon: SiGooglecloud, color: '#4285F4', label: 'Google Cloud' },
-  googlecloud: { icon: SiGooglecloud, color: '#4285F4', label: 'Google Cloud' },
+function createTechIcon(name: TechIconName): ComponentType<TechSvgProps> {
+  const def = TECH_ICON_PATHS[name]
+  return function TechSvgIcon({ className = '', style, size = '1em' }: TechSvgProps): ReactElement {
+    return (
+      <svg
+        stroke="currentColor"
+        fill="currentColor"
+        strokeWidth="0"
+        viewBox={def.viewBox}
+        height={size}
+        width={size}
+        className={className}
+        style={style}
+        aria-hidden="true"
+        focusable="false"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {def.children.map((node, index) => createElement(node.tag, { ...node.attr, key: index }))}
+      </svg>
+    )
+  }
+}
+
+const TECH_MAP: Record<string, TechDetails> = {
+  python: { icon: createTechIcon('SiPython'), color: '#3776AB', label: 'Python' },
+  javascript: { icon: createTechIcon('SiJavascript'), color: '#F7DF1E', label: 'JavaScript' },
+  js: { icon: createTechIcon('SiJavascript'), color: '#F7DF1E', label: 'JavaScript' },
+  typescript: { icon: createTechIcon('SiTypescript'), color: '#3178C6', label: 'TypeScript' },
+  ts: { icon: createTechIcon('SiTypescript'), color: '#3178C6', label: 'TypeScript' },
+  django: { icon: createTechIcon('SiDjango'), color: '#44B78B', label: 'Django' },
+  react: { icon: createTechIcon('SiReact'), color: '#61DAFB', label: 'React' },
+  reactjs: { icon: createTechIcon('SiReact'), color: '#61DAFB', label: 'React' },
+  nodejs: { icon: createTechIcon('SiNodedotjs'), color: '#68A063', label: 'Node.js' },
+  node: { icon: createTechIcon('SiNodedotjs'), color: '#68A063', label: 'Node.js' },
+  tailwindcss: { icon: createTechIcon('SiTailwindcss'), color: '#06B6D4', label: 'Tailwind CSS' },
+  tailwind: { icon: createTechIcon('SiTailwindcss'), color: '#06B6D4', label: 'Tailwind CSS' },
+  git: { icon: createTechIcon('SiGit'), color: '#F05032', label: 'Git' },
+  github: { icon: createTechIcon('SiGithub'), color: '#A0AEC0', label: 'GitHub' },
+  docker: { icon: createTechIcon('SiDocker'), color: '#2496ED', label: 'Docker' },
+  postgresql: { icon: createTechIcon('SiPostgresql'), color: '#4169E1', label: 'PostgreSQL' },
+  postgres: { icon: createTechIcon('SiPostgresql'), color: '#4169E1', label: 'PostgreSQL' },
+  sql: { icon: createTechIcon('SiPostgresql'), color: '#4169E1', label: 'SQL' },
+  supabase: { icon: createTechIcon('SiSupabase'), color: '#3ECF8E', label: 'Supabase' },
+  vite: { icon: createTechIcon('SiVite'), color: '#646CFF', label: 'Vite' },
+  nextjs: { icon: createTechIcon('SiNextdotjs'), color: '#E2E8F0', label: 'Next.js' },
+  next: { icon: createTechIcon('SiNextdotjs'), color: '#E2E8F0', label: 'Next.js' },
+  html: { icon: createTechIcon('SiHtml5'), color: '#E34F26', label: 'HTML5' },
+  html5: { icon: createTechIcon('SiHtml5'), color: '#E34F26', label: 'HTML5' },
+  css: { icon: createTechIcon('SiCss'), color: '#1572B6', label: 'CSS3' },
+  css3: { icon: createTechIcon('SiCss'), color: '#1572B6', label: 'CSS3' },
+  express: { icon: createTechIcon('SiExpress'), color: '#CBD5E1', label: 'Express.js' },
+  expressjs: { icon: createTechIcon('SiExpress'), color: '#CBD5E1', label: 'Express.js' },
+  mongodb: { icon: createTechIcon('SiMongodb'), color: '#47A248', label: 'MongoDB' },
+  mongo: { icon: createTechIcon('SiMongodb'), color: '#47A248', label: 'MongoDB' },
+  redis: { icon: createTechIcon('SiRedis'), color: '#FF4438', label: 'Redis' },
+  mysql: { icon: createTechIcon('SiMysql'), color: '#4479A1', label: 'MySQL' },
+  sqlite: { icon: createTechIcon('SiSqlite'), color: '#003B57', label: 'SQLite' },
+  fastapi: { icon: createTechIcon('SiFastapi'), color: '#009688', label: 'FastAPI' },
+  flask: { icon: createTechIcon('SiFlask'), color: '#94A3B8', label: 'Flask' },
+  linux: { icon: createTechIcon('SiLinux'), color: '#FCC624', label: 'Linux' },
+  postman: { icon: createTechIcon('SiPostman'), color: '#FF6C37', label: 'Postman' },
+  vercel: { icon: createTechIcon('SiVercel'), color: '#E2E8F0', label: 'Vercel' },
+  netlify: { icon: createTechIcon('SiNetlify'), color: '#00C7B7', label: 'Netlify' },
+  figma: { icon: createTechIcon('SiFigma'), color: '#F24E1E', label: 'Figma' },
+  graphql: { icon: createTechIcon('SiGraphql'), color: '#E10098', label: 'GraphQL' },
+  prisma: { icon: createTechIcon('SiPrisma'), color: '#5A67D8', label: 'Prisma' },
+  jest: { icon: createTechIcon('SiJest'), color: '#C21325', label: 'Jest' },
+  vitest: { icon: createTechIcon('SiVitest'), color: '#FCC72B', label: 'Vitest' },
+  redux: { icon: createTechIcon('SiRedux'), color: '#764ABC', label: 'Redux' },
+  sass: { icon: createTechIcon('SiSass'), color: '#CC6699', label: 'Sass' },
+  scss: { icon: createTechIcon('SiSass'), color: '#CC6699', label: 'SCSS' },
+  bootstrap: { icon: createTechIcon('SiBootstrap'), color: '#7952B3', label: 'Bootstrap' },
+  cloudflare: { icon: createTechIcon('SiCloudflare'), color: '#F38020', label: 'Cloudflare' },
+  webpack: { icon: createTechIcon('SiWebpack'), color: '#8DD6F9', label: 'Webpack' },
+  nginx: { icon: createTechIcon('SiNginx'), color: '#009639', label: 'Nginx' },
+  php: { icon: createTechIcon('SiPhp'), color: '#777BB4', label: 'PHP' },
+  laravel: { icon: createTechIcon('SiLaravel'), color: '#FF2D20', label: 'Laravel' },
+  cplusplus: { icon: createTechIcon('SiCplusplus'), color: '#00599C', label: 'C++' },
+  cpp: { icon: createTechIcon('SiCplusplus'), color: '#00599C', label: 'C++' },
+  go: { icon: createTechIcon('SiGo'), color: '#00ADD8', label: 'Go' },
+  golang: { icon: createTechIcon('SiGo'), color: '#00ADD8', label: 'Go' },
+  rust: { icon: createTechIcon('SiRust'), color: '#DEA584', label: 'Rust' },
+  gcp: { icon: createTechIcon('SiGooglecloud'), color: '#4285F4', label: 'Google Cloud' },
+  googlecloud: { icon: createTechIcon('SiGooglecloud'), color: '#4285F4', label: 'Google Cloud' },
 }
 
 /**
  * Fallback élégant si techno inconnue
  */
-function DefaultCodeIcon({
-  className,
-  style,
-  size,
-}: {
-  className?: string
-  style?: React.CSSProperties
-  size?: number | string
-}): ReactElement {
+function DefaultCodeIcon({ className, style, size }: TechSvgProps): ReactElement {
   return (
     <span
       className={className}
@@ -155,12 +131,10 @@ export function getTechDetails(rawName: string): TechDetails {
 
   const clean = rawName.toLowerCase().replace(/[\s\-_.]/g, '')
 
-  // Recherche directe
   if (TECH_MAP[clean]) {
     return TECH_MAP[clean]
   }
 
-  // Recherche par inclusion
   for (const [key, details] of Object.entries(TECH_MAP)) {
     if (clean.includes(key) || key.includes(clean)) {
       return details

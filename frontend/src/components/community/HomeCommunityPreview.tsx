@@ -49,7 +49,7 @@ export default function HomeCommunityPreview(): ReactElement | null {
             <div className="pt-2">
               <Link
                 to="/actualites"
-                className="btn-tactile inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-surface hover:bg-surface-elevated border border-line text-ink text-sm font-medium transition-all shadow-xs cursor-pointer"
+                className="btn-tactile min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-surface hover:bg-surface-elevated hover:border-indigo/40 border border-line text-ink text-sm font-medium transition-colors cursor-pointer"
               >
                 <span>Accéder à toutes les actualités</span>
                 <Icon name="arrowRight" className="size-4 text-indigo" />

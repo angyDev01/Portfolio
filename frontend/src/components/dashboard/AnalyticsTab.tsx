@@ -99,8 +99,8 @@ export default function AnalyticsTab({
             </span>
             <span
               className={`text-xs font-mono font-medium flex items-center gap-0.5 ${analytics.viewsTrendPercent >= 0
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-rose-600 dark:text-rose-400'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-rose-600 dark:text-rose-400'
                 }`}
             >
               <Icon name="trending" className="size-3" />
@@ -117,9 +117,10 @@ export default function AnalyticsTab({
         </div>
 
         {/* Carte 2 : Messages reçus */}
-        <div
+        <button
+          type="button"
           onClick={onOpenMessages}
-          className="glass-card p-5 border-zinc-200 dark:border-zinc-800 cursor-pointer hover:border-indigo-400/50 transition-colors group"
+          className="glass-card p-5 border-zinc-200 dark:border-zinc-800 cursor-pointer hover:border-indigo-400/50 transition-colors group w-full text-left"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
@@ -145,7 +146,7 @@ export default function AnalyticsTab({
           <p className="text-[11px] text-zinc-500 font-mono mt-1">
             cliquez pour ouvrir le panneau
           </p>
-        </div>
+        </button>
 
         {/* Carte 3 : Taux de Conversion */}
         <div className="glass-card p-5 border-zinc-200 dark:border-zinc-800">
@@ -161,7 +162,7 @@ export default function AnalyticsTab({
             <span className="text-3xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">
               {analytics.conversionRate}%
             </span>
-            <span className="text-xs text-zinc-500 font-mono">visiteurs $\rightarrow$ contacts</span>
+            <span className="text-xs text-zinc-500 font-mono">visiteurs → contacts</span>
           </div>
           <p className="text-[11px] text-zinc-500 font-mono mt-1">
             taux de contact direct calculé
@@ -230,8 +231,8 @@ export default function AnalyticsTab({
                   type="button"
                   onClick={() => setAnalyticsRange(range)}
                   className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${analyticsRange === range
-                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
-                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                     }`}
                 >
                   {range}j

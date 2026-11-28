@@ -5,6 +5,7 @@
 :root {
   --paper: #F4F6F3;
   --surface: #FFFFFF;
+  --surface-elevated: #ECEFEC;
   --ink: #16211F;
   --muted: #5B6B67;
   --line: #D9E0DC;
@@ -12,12 +13,14 @@
   --indigo-hover: #242E7D;
   --indigo-fg: #FFFFFF;
   --mango: #E9B323;
+  --mango-text: #8A6400;
   --mango-fg: #16211F;
 }
 
 html.dark {
   --paper: #0E1615;
   --surface: #16201F;
+  --surface-elevated: #1D2A28;
   --ink: #E3E9E6;
   --muted: #93A39F;
   --line: #24302E;
@@ -25,6 +28,7 @@ html.dark {
   --indigo-hover: #A6B0FF;
   --indigo-fg: #0E1615;
   --mango: #F2C445;
+  --mango-text: var(--mango);
   --mango-fg: #16211F;
 }
 
@@ -34,6 +38,7 @@ html.dark {
 
   --color-paper: var(--paper);
   --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);
@@ -41,6 +46,7 @@ html.dark {
   --color-indigo-hover: var(--indigo-hover);
   --color-indigo-fg: var(--indigo-fg);
   --color-mango: var(--mango);
+  --color-mango-text: var(--mango-text);
   --color-mango-fg: var(--mango-fg);
 }
 
@@ -170,6 +176,13 @@ html.dark {
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Cartes du tableau de bord alignées sur le design system */
+  .glass-card {
+    background-color: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
   }
 
   /* Marge basse respectant les zones sûres iOS/PWA */

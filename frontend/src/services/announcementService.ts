@@ -6,7 +6,7 @@ import type {
   DbAnnouncement,
   DbAnnouncementComment,
 } from '../types/database'
-import { announcementCommentSchema, getZodErrorMessage, sanitizeUrl } from '../utils/security'
+import { sanitizeUrl } from '../utils/urlSecurity'
 import { getOrCreateVisitorId } from '../utils/visitorTracker'
 import { formatSupabaseError, isMissingSchemaError } from './errors'
 import { invalidateCache, portfolioCache } from './cache'
@@ -298,6 +298,7 @@ export const announcementService = {
     comment: DbAnnouncementComment | null
     message: string
   }> {
+    const { announcementCommentSchema, getZodErrorMessage } = await import('../utils/security')
     const validation = announcementCommentSchema.safeParse({
       author_name: payload.author_name,
       content: payload.content,

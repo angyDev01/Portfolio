@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactElement } from 'react'
 import { DEFAULT_PROFILE_CONTACT } from '../config/defaults'
 import { useProfile } from '../hooks/usePortfolioData'
+import { copyTextToClipboard } from '../utils/clipboard'
 import Icon from '../components/Icon'
-import ContactInfoSidebar from '../components/contact/ContactInfoSidebar'
+import ContactInfoSidebar, { type CopyEmailState } from '../components/contact/ContactInfoSidebar'
 import DirectMessageForm from '../components/contact/DirectMessageForm'
 import EmailClientForm from '../components/contact/EmailClientForm'
 
@@ -11,13 +12,13 @@ type ContactChannel = 'direct' | 'email'
 export default function ContactPage(): ReactElement {
   const { profile } = useProfile()
   const [activeChannel, setActiveChannel] = useState<ContactChannel>('direct')
-  const [copied, setCopied] = useState(false)
+  const [copyState, setCopyState] = useState<CopyEmailState>('idle')
 
   useEffect(() => {
-    if (!copied) return
-    const timer = window.setTimeout(() => setCopied(false), 2500)
+    if (copyState === 'idle') return
+    const timer = window.setTimeout(() => setCopyState('idle'), 2500)
     return () => window.clearTimeout(timer)
-  }, [copied])
+  }, [copyState])
 
   const recipientEmail = profile?.email || DEFAULT_PROFILE_CONTACT.email
   const primaryPhone = profile?.phone || DEFAULT_PROFILE_CONTACT.phone
@@ -30,17 +31,31 @@ export default function ContactPage(): ReactElement {
   const facebook = profile?.facebook_url || DEFAULT_PROFILE_CONTACT.facebookUrl
 
   const handleCopyEmail = async (): Promise<void> => {
-    try {
-      await navigator.clipboard.writeText(recipientEmail)
-      setCopied(true)
-    } catch {
-      /* ignore clipboard refusal */
-    }
+    const ok = await copyTextToClipboard(recipientEmail)
+    setCopyState(ok ? 'copied' : 'error')
   }
+
+  const mobileCopyLabel =
+    copyState === 'copied'
+      ? 'Email copié'
+      : copyState === 'error'
+        ? 'Copie impossible'
+        : 'Copier l’email'
+
+  const liveMessage =
+    copyState === 'copied'
+      ? 'Adresse email copiée dans le presse-papiers.'
+      : copyState === 'error'
+        ? 'Copie impossible. Sélectionnez l’adresse manuellement.'
+        : ''
 
   return (
     <div className="pt-24 pb-16 md:pt-36 md:pb-28 transition-colors">
       <div className="container-custom">
+        <span className="sr-only" role="status" aria-live="polite">
+          {liveMessage}
+        </span>
+
         <header className="max-w-[60ch] mb-8 md:mb-12">
           <h1
             style={{ fontVariationSettings: "'opsz' 72" }}
@@ -66,11 +81,15 @@ export default function ContactPage(): ReactElement {
           </a>
           <button
             type="button"
+            data-copy-email="mobile"
             onClick={handleCopyEmail}
             className="btn-tactile min-h-[44px] inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md bg-surface border border-line text-ink text-xs font-medium cursor-pointer"
           >
-            <Icon name={copied ? 'check' : 'copy'} className="size-3.5 text-indigo" />
-            <span>{copied ? 'Email copié' : 'Copier l’email'}</span>
+            <Icon
+              name={copyState === 'copied' ? 'check' : copyState === 'error' ? 'alert' : 'copy'}
+              className="size-3.5 text-indigo"
+            />
+            <span>{mobileCopyLabel}</span>
           </button>
         </div>
 
@@ -85,7 +104,7 @@ export default function ContactPage(): ReactElement {
             linkedin={linkedin}
             twitter={twitter}
             facebook={facebook}
-            copied={copied}
+            copyState={copyState}
             onCopyEmail={handleCopyEmail}
           />
 

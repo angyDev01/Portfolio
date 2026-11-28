@@ -34,6 +34,8 @@ import {
   Megaphone,
   Image as ImageIcon,
   CheckCircle2,
+  Share2,
+  Download,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -73,6 +75,8 @@ export type IconName =
   | 'megaphone'
   | 'image'
   | 'checkCircle'
+  | 'share'
+  | 'download'
 
 type CustomIcon = (props: SVGProps<SVGSVGElement>) => ReactElement
 
@@ -127,6 +131,8 @@ const ICON_MAP: Record<IconName, LucideIcon | CustomIcon> = {
   megaphone: Megaphone,
   image: ImageIcon,
   checkCircle: CheckCircle2,
+  share: Share2,
+  download: Download,
 }
 
 interface IconProps {

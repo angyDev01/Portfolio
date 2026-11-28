@@ -44,6 +44,7 @@ export default function HomeProjectsMarquee(): ReactElement {
               <ProjectFeatureSkeleton />
             ) : !leadProject ? (
               <EmptyState
+                headingLevel="h3"
                 title="Aucun projet publié pour le moment"
                 description="Les réalisations apparaîtront ici dès leur mise en ligne."
               />

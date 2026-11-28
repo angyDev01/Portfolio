@@ -32,15 +32,15 @@ async function runMigrationAndSeed() {
 
   try {
     console.log('\n🚀 [1/3] Connexion établie avec la base distante...')
-    console.log('📦 [2/3] Exécution des migrations (création des tables)...')
+    console.log('📦 [2/3] Exécution des migrations (master_migration.sql)...')
 
-    const schemaPath = path.join(__dirname, 'schema.sql')
+    const schemaPath = path.join(__dirname, 'master_migration.sql')
     const schemaSql = fs.readFileSync(schemaPath, 'utf-8')
 
-    await client.query('BEGIN')
     await client.query(schemaSql)
 
     console.log('🌱 [3/3] Peuplement des données initiales (Seeding)...')
+    await client.query('BEGIN')
 
     // 1. Insertion du profil
     await client.query(`

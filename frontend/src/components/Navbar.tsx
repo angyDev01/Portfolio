@@ -1,5 +1,7 @@
-import { useEffect, useState, type ReactElement } from 'react'
+import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
+import { DEFAULT_PROFILE_CONTACT } from '../config/defaults'
+import { useProfile } from '../hooks/usePortfolioData'
 import { portfolioService } from '../services/portfolioService'
 import Icon from './Icon'
 import ScrollProgressBar from './ScrollProgressBar'
@@ -22,31 +24,78 @@ const NAV_ITEMS: NavItem[] = [
 export default function Navbar(): ReactElement {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const { theme, toggleTheme } = useTheme()
+  const { profile } = useProfile()
   const { pathname } = useLocation()
   const isAdminRoute = pathname.startsWith('/admin')
 
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null)
+  const firstMobileLinkRef = useRef<HTMLAnchorElement | null>(null)
+  const restoreFocusOnCloseRef = useRef<boolean>(false)
+  const wasOpenRef = useRef<boolean>(false)
+
+  const closeMenu = (restoreFocus = false): void => {
+    restoreFocusOnCloseRef.current = restoreFocus
+    setIsOpen(false)
+  }
+
+  // Fermer automatiquement sur changement de route (y compris Retour/Avancer navigateur)
+  useEffect(() => {
+    restoreFocusOnCloseRef.current = false
+    setIsOpen(false)
+  }, [pathname])
+
   useEffect(() => {
     const handleResize = (): void => {
-      if (window.innerWidth >= 768) setIsOpen(false)
+      if (window.innerWidth >= 768) {
+        restoreFocusOnCloseRef.current = false
+        setIsOpen(false)
+      }
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   useEffect(() => {
-    if (!isOpen) return
+    const mainEl = document.getElementById('main')
+    const footerEl = document.querySelector('footer')
+
+    if (!isOpen) {
+      if (wasOpenRef.current && restoreFocusOnCloseRef.current) {
+        menuButtonRef.current?.focus({ preventScroll: true })
+      }
+      wasOpenRef.current = false
+      restoreFocusOnCloseRef.current = false
+      return
+    }
+
+    wasOpenRef.current = true
+    const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    mainEl?.setAttribute('inert', '')
+    footerEl?.setAttribute('inert', '')
+
+    const rafId = window.requestAnimationFrame(() => {
+      firstMobileLinkRef.current?.focus({ preventScroll: true })
+    })
+
     const handleKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') setIsOpen(false)
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        closeMenu(true)
+      }
     }
     window.addEventListener('keydown', handleKey)
+
     return () => {
-      document.body.style.overflow = ''
+      window.cancelAnimationFrame(rafId)
+      document.body.style.overflow = prevOverflow
+      mainEl?.removeAttribute('inert')
+      footerEl?.removeAttribute('inert')
       window.removeEventListener('keydown', handleKey)
     }
   }, [isOpen])
 
-  const closeMenu = (): void => setIsOpen(false)
+  const locationLabel = profile?.location || DEFAULT_PROFILE_CONTACT.location
 
   return (
     <>
@@ -55,7 +104,7 @@ export default function Navbar(): ReactElement {
           {/* Identité typographique */}
           <Link
             to="/"
-            onClick={closeMenu}
+            onClick={() => closeMenu(false)}
             className="text-[20px] font-bold tracking-[-0.03em] text-ink hover:text-indigo transition-colors py-2"
             aria-label="Angy — accueil"
           >
@@ -115,11 +164,13 @@ export default function Navbar(): ReactElement {
             </button>
 
             <button
+              ref={menuButtonRef}
               type="button"
-              onClick={() => setIsOpen((prev) => !prev)}
+              onClick={() => (isOpen ? closeMenu(true) : setIsOpen(true))}
               className="btn-tactile flex size-11 items-center justify-center rounded-md border border-line text-ink"
               aria-label={isOpen ? 'Fermer le menu de navigation' : 'Ouvrir le menu de navigation'}
               aria-expanded={isOpen}
+              aria-controls="mobile-navigation-drawer"
             >
               <Icon name={isOpen ? 'close' : 'menu'} className="size-5" />
             </button>
@@ -130,14 +181,18 @@ export default function Navbar(): ReactElement {
 
       {/* Menu Mobile Plein Écran (hors du header pour éviter le containing block de backdrop-blur) */}
       {isOpen && (
-        <div className="md:hidden fixed inset-x-0 top-16 bottom-0 h-[calc(100dvh-4rem)] z-40 bg-paper border-t border-line px-6 pt-8 pb-safe flex flex-col justify-between overflow-y-auto hero-view-enter">
+        <div
+          id="mobile-navigation-drawer"
+          className="md:hidden fixed inset-x-0 top-16 bottom-0 h-[calc(100dvh-4rem)] z-40 bg-paper border-t border-line px-6 pt-8 pb-safe flex flex-col justify-between overflow-y-auto hero-view-enter"
+        >
           <nav aria-label="Navigation mobile" className="flex flex-col gap-3">
-            {[...NAV_ITEMS, { to: '/contact', label: 'Contact', prefetch: 'profile' as const }].map((item) => (
+            {NAV_ITEMS.map((item, idx) => (
               <NavLink
                 key={item.to}
+                ref={idx === 0 ? firstMobileLinkRef : undefined}
                 to={item.to}
                 end={item.end}
-                onClick={closeMenu}
+                onClick={() => closeMenu(false)}
                 className={({ isActive }) =>
                   `text-[30px] font-semibold tracking-[-0.025em] leading-tight py-2 transition-colors ${isActive ? 'text-indigo' : 'text-ink hover:text-indigo'
                   }`
@@ -151,13 +206,13 @@ export default function Navbar(): ReactElement {
           <div className="border-t border-line pt-6 space-y-4">
             <Link
               to="/contact"
-              onClick={closeMenu}
+              onClick={() => closeMenu(false)}
               className="btn-tactile w-full min-h-[48px] inline-flex items-center justify-center px-5 py-3 rounded-md bg-indigo hover:bg-indigo-hover text-indigo-fg text-sm font-medium transition-colors"
             >
               Écrire un message
             </Link>
             <p className="text-sm text-muted">
-              Abidjan, Côte d&apos;Ivoire — remote
+              {locationLabel}
             </p>
           </div>
         </div>

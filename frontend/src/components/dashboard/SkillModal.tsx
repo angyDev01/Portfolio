@@ -133,6 +133,7 @@ export default function SkillModal({
                 <option value="tools">Outils & Méthodes</option>
                 <option value="database">Base de données</option>
                 <option value="devops">DevOps / Cloud</option>
+                <option value="mobile">Mobile</option>
                 <option value="other">Autre</option>
               </select>
             </div>

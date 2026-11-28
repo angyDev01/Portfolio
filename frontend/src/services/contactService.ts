@@ -1,5 +1,4 @@
 import { supabase } from '../lib/supabase'
-import { directMessageSchema, getZodErrorMessage } from '../utils/security'
 import type { ContactMessage, DirectMessagePayload } from '../types/database'
 import { profileService } from './profileService'
 
@@ -7,6 +6,7 @@ export const contactService = {
   async submitDirectMessage(
     payload: DirectMessagePayload
   ): Promise<{ ok: boolean; message: string }> {
+    const { directMessageSchema, getZodErrorMessage } = await import('../utils/security')
     const validation = directMessageSchema.safeParse(payload)
     if (!validation.success) {
       return {

@@ -4,6 +4,19 @@ Ce document consigne l'historique exhaustif des évolutions, correctifs, optimis
 
 ---
 
+## [2026-11-28] — Partage WhatsApp (Statut & Discussions), Cadrage Images & Badges Projets
+
+### 1. Partage WhatsApp Statut & Discussions avec aperçus dynamiques
+- **Aperçus Open Graph dynamiques** (`frontend/api/share.js`, `frontend/vercel.json`) : Fonction serverless Vercel résolvant `/s/projet/:slug`, `/s/actualite/:id`, `/s/sondage/:id` et `/s/profil` avec les balises `og:image` / `og:title` / `og:description` issues de Supabase (couverture dédiée pour projets/actualités, photo de profil, sinon icône PWA `/pwa-512x512.png`).
+- **Cartes visuelles Canvas & Web Share API** (`shareUtils.ts`, `shareCardCanvas.ts`, `ShareModal.tsx`, `ShareButton.tsx`) : Génération à la demande de cartes PNG haute netteté en format **Statut 9:16** (`1080×1920`) et **Discussion 16:9** (`1200×630`), thèmes sombre/clair, partage natif mobile (`navigator.share({ files })`), lien direct discussion WhatsApp, téléchargement PNG et copie de lien.
+- **Intégration & Deep-linking** (`ProjectCard.tsx`, `ProjectDetailModal.tsx`, `AnnouncementCard.tsx`, `PollCard.tsx`, `Hero.tsx`, `ProjectsPage.tsx`, `UpdatesPage.tsx`, `App.tsx`) : Bouton `Partager` sur tous les contenus publics et ouverture/défilement automatique depuis les URLs partagées (`?projet=`, `?annonce=`, `?sondage=`).
+
+### 2. Bannière, Cadrage 16:9 des Projets & Badges
+- **Photo de couverture responsive** (`Hero.tsx`, `bannerPosition.ts`, `ProfileTab.tsx`, `useDashboardData.ts`) : Bannière pleine largeur (`16:5`) sur tablette/desktop avec cadrage vertical réglable (`Haut` / `Centre` / `Bas`), et carte profil encadrée avec avatar superposé sur mobile.
+- **Projets YouTube 16:9 & mentions sur couverture** (`ProjectCard.tsx`, `ProjectDetailModal.tsx`, `ProjectModal.tsx`, `ProjectCoverBadges.tsx`) : Cadres unifiés `aspect-video` avec `object-contain` et badges `À la une` / `En cours` directement sur la couverture.
+
+---
+
 ## [2026-11-19] — Refonte Visuelle « Indigo & Lagune »
 
 ### 1. Identité Visuelle, Palette & Typographie

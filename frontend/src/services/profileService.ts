@@ -151,7 +151,7 @@ export const profileService = {
   async deleteMedia(url?: string | null): Promise<void> {
     if (!url) return
     try {
-      const cleanUrl = url.split('?')[0] || ''
+      const cleanUrl = (url.split('#')[0] || '').split('?')[0] || ''
       const marker = '/storage/v1/object/public/portfolio/'
       const idx = cleanUrl.indexOf(marker)
       if (idx !== -1) {

@@ -1,4 +1,5 @@
-import { useState, useMemo, type ReactElement } from 'react'
+import { useState, useMemo, useEffect, type ReactElement } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import type { DbProject, ProjectCategoryType } from '../types/database'
 import { useProjects } from '../hooks/usePortfolioData'
 import ProjectCard from '../components/ProjectCard'
@@ -10,8 +11,28 @@ const CATEGORIES: Array<'Tous' | ProjectCategoryType> = ['Tous', 'Full-Stack', '
 
 export default function ProjectsPage(): ReactElement {
   const { projects, loading } = useProjects()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [activeCategory, setActiveCategory] = useState<'Tous' | ProjectCategoryType>('Tous')
   const [selectedProject, setSelectedProject] = useState<DbProject | null>(null)
+
+  const targetSlug = searchParams.get('projet')
+
+  useEffect(() => {
+    if (!targetSlug || loading || projects.length === 0) return
+    const match = projects.find((p) => p.slug === targetSlug || p.id === targetSlug)
+    if (match) {
+      setSelectedProject(match)
+    }
+  }, [targetSlug, loading, projects])
+
+  const handleCloseModal = (): void => {
+    setSelectedProject(null)
+    if (searchParams.has('projet')) {
+      const next = new URLSearchParams(searchParams)
+      next.delete('projet')
+      setSearchParams(next, { replace: true })
+    }
+  }
 
   const filteredProjects = useMemo(() => {
     if (activeCategory === 'Tous') return projects
@@ -50,9 +71,9 @@ export default function ProjectsPage(): ReactElement {
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActiveCategory(cat)}
-                className={`relative shrink-0 min-h-[44px] pb-3.5 pt-2 text-sm font-medium transition-colors cursor-pointer ${isActive
-                    ? 'text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-indigo'
-                    : 'text-muted hover:text-ink'
+                className={`relative shrink-0 inline-block text-center min-w-[44px] min-h-[44px] px-1 pb-3.5 pt-2 text-sm font-medium transition-colors cursor-pointer ${isActive
+                  ? 'text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-indigo'
+                  : 'text-muted hover:text-ink'
                   }`}
               >
                 <span>{cat}</span>
@@ -78,6 +99,7 @@ export default function ProjectsPage(): ReactElement {
                 key={project.id}
                 project={project}
                 variant="tile"
+                headingLevel="h2"
                 onClick={(p) => setSelectedProject(p)}
               />
             ))}
@@ -92,7 +114,7 @@ export default function ProjectsPage(): ReactElement {
         <ProjectDetailModal
           project={selectedProject}
           isOpen={Boolean(selectedProject)}
-          onClose={() => setSelectedProject(null)}
+          onClose={handleCloseModal}
         />
       </div>
     </div>

@@ -1,0 +1,28 @@
+{
+  "rewrites": [
+    {
+      "source": "/s/projet/:slug",
+      "destination": "/api/share?type=project&id=:slug"
+    },
+    {
+      "source": "/s/actualite/:id",
+      "destination": "/api/share?type=announcement&id=:id"
+    },
+    {
+      "source": "/s/sondage/:id",
+      "destination": "/api/share?type=poll&id=:id"
+    },
+    {
+      "source": "/s/profil",
+      "destination": "/api/share?type=profile"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -186,21 +186,24 @@ export default function ProjectModal({
           <div className="flex-1 overflow-y-auto p-6 space-y-4 overscroll-contain">
             {/* Capture / Image */}
             <div>
-              <label className="block text-xs font-mono font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+              <label className="block text-xs font-mono font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
                 Capture d'écran / Photo du projet *
               </label>
+              <p className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 mb-2">
+                Format YouTube 16:9 recommandé : 1280 × 720 px ou 1920 × 1080 px (identique sur mobile et desktop).
+              </p>
 
               {coverPreview ? (
                 <div className="space-y-2">
-                  <div className="relative w-full h-44 sm:h-52 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-950">
+                  <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-950">
                     <img
                       src={coverPreview}
                       alt="Aperçu du projet"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain object-center"
                     />
                     <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md text-white text-[11px] font-mono flex items-center gap-1.5 shadow-sm">
                       <span className="size-2 rounded-full bg-emerald-400" />
-                      <span>Aperçu de la capture</span>
+                      <span>Aperçu 16:9</span>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -232,7 +235,7 @@ export default function ProjectModal({
                     Importer une capture ou photo du projet
                   </span>
                   <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">
-                    Photothèque smartphone ou explorateur PC (PNG, JPG, WebP)
+                    Format YouTube 16:9 (1280 × 720 ou 1920 × 1080 px) • PNG, JPG, WebP, AVIF (max 5 Mo)
                   </span>
                   <input
                     type="file"

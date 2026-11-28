@@ -1,8 +1,13 @@
-import { useEffect, type ReactElement } from 'react'
+import { useEffect, useRef, useState, type ReactElement } from 'react'
+import { createPortal } from 'react-dom'
 import type { DbProject } from '../types/database'
 import Icon from './Icon'
+import ProjectCoverBadges from './ProjectCoverBadges'
+import ShareButton from './ShareButton'
 import TechLogo from './TechLogo'
-import { sanitizeUrl, isSafeUrl } from '../utils/security'
+import { sanitizeUrl, isSafeUrl } from '../utils/urlSecurity'
+import { useFocusTrap, FocusGuard } from '../hooks/useFocusTrap'
+import type { ShareItem } from '../utils/shareUtils'
 
 interface ProjectDetailModalProps {
   project: DbProject | null
@@ -15,29 +20,31 @@ export default function ProjectDetailModal({
   isOpen,
   onClose,
 }: ProjectDetailModalProps): ReactElement | null {
-  useEffect(() => {
-    if (!isOpen) return
-    const handleKeyDown = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
+  const dialogRef = useRef<HTMLDivElement | null>(null)
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null)
+  const [coverFailed, setCoverFailed] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+
+  const cover = project ? project.cover_image_url || project.images?.[0] : null
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+    setCoverFailed(false)
+  }, [cover])
+
+  const { focusFirst, focusLast } = useFocusTrap(
+    dialogRef,
+    isOpen && Boolean(project),
+    () => {
+      if (!shareOpen) onClose()
+    },
+    { initialFocusRef: closeBtnRef }
+  )
 
   if (!isOpen || !project) return null
 
   const {
+    id,
+    slug,
     title,
     tagline,
     summary,
@@ -45,27 +52,40 @@ export default function ProjectDetailModal({
     category,
     status,
     is_featured,
-    cover_image_url,
-    images = [],
     skills = [],
     demo_url,
     repo_url,
   } = project
 
-  const cover = cover_image_url || images[0]
+  const shareItem: ShareItem = {
+    kind: 'project',
+    id,
+    slug,
+    title,
+    subtitle: tagline,
+    description: summary || description,
+    badge: is_featured ? 'À la une' : category,
+    secondaryBadge: status === 'in_progress' ? 'En cours' : undefined,
+    imageUrl: cover,
+    metaItems: skills.slice(0, 4),
+  }
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-project-title"
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md modal-backdrop-animate"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md modal-backdrop-animate"
       onClick={onClose}
     >
       <div
-        className="bg-surface border-t sm:border border-line rounded-t-2xl sm:rounded-xl max-h-[92dvh] sm:max-h-[90vh] w-full sm:max-w-[780px] flex flex-col overflow-hidden text-muted shadow-2xl sheet-dialog-animate"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="bg-surface border-t sm:border border-line rounded-t-2xl sm:rounded-xl max-h-[92dvh] sm:max-h-[90vh] w-full sm:max-w-[780px] flex flex-col overflow-hidden text-muted shadow-2xl sheet-dialog-animate focus:outline-none"
         onClick={(e) => e.stopPropagation()}
       >
+        <FocusGuard onFocus={focusLast} />
+
         {/* Poignée discrète sur mobile */}
         <div className="sm:hidden flex justify-center pt-2.5 pb-1 shrink-0" aria-hidden="true">
           <span className="h-1 w-10 rounded-full bg-line" />
@@ -76,8 +96,7 @@ export default function ProjectDetailModal({
           <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium text-muted min-w-0">
             <span className="inline-flex items-center gap-1.5 text-ink">
               <span
-                className={`size-2 rounded-full ${status === 'completed' ? 'bg-mango' : 'bg-indigo'
-                  }`}
+                className={`size-2 rounded-full ${status === 'completed' ? 'bg-mango' : 'bg-indigo'}`}
                 aria-hidden="true"
               />
               {status === 'completed' ? 'Terminé' : 'En cours'}
@@ -90,14 +109,15 @@ export default function ProjectDetailModal({
             )}
 
             {is_featured && (
-              <span className="text-indigo">Sélection</span>
+              <span className="text-indigo">À la une</span>
             )}
           </div>
 
           <button
+            ref={closeBtnRef}
             type="button"
             onClick={onClose}
-            className="btn-tactile shrink-0 size-10 sm:size-9 rounded-md border border-line bg-paper text-muted hover:text-ink hover:border-ink/30 flex items-center justify-center transition-colors cursor-pointer"
+            className="btn-tactile shrink-0 size-11 sm:size-9 rounded-md border border-line bg-paper text-muted hover:text-ink hover:border-ink/30 flex items-center justify-center transition-colors cursor-pointer"
             aria-label="Fermer la boîte de dialogue"
           >
             <Icon name="close" className="size-4" />
@@ -106,13 +126,15 @@ export default function ProjectDetailModal({
 
         {/* Corps scrollable */}
         <div className="overflow-y-auto px-5 sm:px-8 pt-5 sm:pt-6 pb-safe">
-          {cover && (
-            <div className="relative aspect-[16/10] w-full rounded-lg border border-line bg-paper overflow-hidden mb-6">
+          {cover && !coverFailed && (
+            <div className="relative aspect-video w-full rounded-lg border border-line bg-paper overflow-hidden mb-6">
               <img
                 src={cover}
                 alt={title}
-                className="w-full h-full object-cover"
+                onError={() => setCoverFailed(true)}
+                className="w-full h-full object-contain object-center"
               />
+              <ProjectCoverBadges isFeatured={is_featured} status={status} />
             </div>
           )}
 
@@ -188,6 +210,13 @@ export default function ProjectDetailModal({
               </a>
             )}
 
+            <ShareButton
+              item={shareItem}
+              label="Partager"
+              onOpenChange={setShareOpen}
+              className="btn-tactile w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-paper hover:border-indigo/50 hover:text-indigo text-ink text-sm font-medium transition-colors border border-line cursor-pointer"
+            />
+
             <button
               type="button"
               onClick={onClose}
@@ -197,7 +226,10 @@ export default function ProjectDetailModal({
             </button>
           </div>
         </div>
+
+        <FocusGuard onFocus={focusFirst} />
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

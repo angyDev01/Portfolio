@@ -3,13 +3,16 @@ import type { PollWithResults } from '../../types/database'
 import { computeOptionPercentage, isPollOpen } from '../../services/pollService'
 import { portfolioService } from '../../services/portfolioService'
 import Icon from '../Icon'
+import ShareButton from '../ShareButton'
 
 interface PollCardProps {
   poll: PollWithResults
+  headingLevel?: 'h2' | 'h3'
   onVoted?: () => void
 }
 
-export default function PollCard({ poll, onVoted }: PollCardProps): ReactElement {
+export default function PollCard({ poll, headingLevel = 'h3', onVoted }: PollCardProps): ReactElement {
+  const HeadingTag = headingLevel
   const [localPoll, setLocalPoll] = useState<PollWithResults>(poll)
   const [votingOptionId, setVotingOptionId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ type: 'info' | 'error'; text: string } | null>(null)
@@ -69,9 +72,9 @@ export default function PollCard({ poll, onVoted }: PollCardProps): ReactElement
             />
             {open ? 'Sondage ouvert' : 'Sondage clôturé'}
           </span>
-          <h3 className="text-lg font-semibold text-ink tracking-[-0.015em]">
+          <HeadingTag className="text-lg font-semibold text-ink tracking-[-0.015em]">
             {localPoll.question}
-          </h3>
+          </HeadingTag>
         </div>
       </div>
 
@@ -91,20 +94,18 @@ export default function PollCard({ poll, onVoted }: PollCardProps): ReactElement
               type="button"
               disabled={!open || hasVoted || Boolean(votingOptionId)}
               onClick={() => handleVote(option.id)}
-              className={`relative w-full text-left rounded-lg border px-4 py-3 overflow-hidden transition-colors ${
-                isUserChoice
+              className={`relative w-full min-h-[44px] text-left rounded-lg border px-4 py-3 overflow-hidden transition-colors ${isUserChoice
                   ? 'border-indigo bg-paper'
                   : open && !hasVoted
                     ? 'border-line bg-paper hover:border-indigo cursor-pointer'
                     : 'border-line bg-paper'
-              }`}
+                }`}
             >
               {showResults && (
                 <span
                   aria-hidden="true"
-                  className={`absolute inset-y-0 left-0 transition-all duration-300 ${
-                    isUserChoice ? 'bg-indigo/15' : 'bg-line/50'
-                  }`}
+                  className={`absolute inset-y-0 left-0 transition-all duration-300 ${isUserChoice ? 'bg-indigo/15' : 'bg-line/50'
+                    }`}
                   style={{ width: `${pct}%` }}
                 />
               )}
@@ -131,30 +132,43 @@ export default function PollCard({ poll, onVoted }: PollCardProps): ReactElement
       {feedback && (
         <p
           role="status"
-          className={`text-xs ${
-            feedback.type === 'error'
+          className={`text-xs ${feedback.type === 'error'
               ? 'text-red-600 dark:text-red-400'
               : 'text-indigo'
-          }`}
+            }`}
         >
           {feedback.text}
         </p>
       )}
 
-      <div className="flex items-center justify-between text-xs text-muted pt-1">
-        <span>
-          {localPoll.total_votes} participation{localPoll.total_votes > 1 ? 's' : ''}
-        </span>
-        {localPoll.closes_at && (
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted pt-1">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <span>
-            Clôture :{' '}
-            {new Intl.DateTimeFormat('fr-FR', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            }).format(new Date(localPoll.closes_at))}
+            {localPoll.total_votes} participation{localPoll.total_votes > 1 ? 's' : ''}
           </span>
-        )}
+          {localPoll.closes_at && (
+            <span>
+              Clôture :{' '}
+              {new Intl.DateTimeFormat('fr-FR', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              }).format(new Date(localPoll.closes_at))}
+            </span>
+          )}
+        </div>
+
+        <ShareButton
+          compact
+          item={{
+            kind: 'poll',
+            id: localPoll.id,
+            title: localPoll.question,
+            description: localPoll.description || undefined,
+            badge: open ? 'Sondage ouvert' : 'Sondage clôturé',
+            metaItems: localPoll.options.map((o) => o.label),
+          }}
+        />
       </div>
     </article>
   )

@@ -11,8 +11,9 @@ export default function Footer(): ReactElement {
   const clickTimestampsRef = useRef<number[]>([])
   const longPressTimerRef = useRef<number | null>(null)
 
-  const name = profile?.name || 'Angoa Yao Jean'
+  const name = profile?.name || 'Yao Jean Angoa'
   const alias = profile?.alias || "Angy's"
+  const location = profile?.location || DEFAULT_PROFILE_CONTACT.location
   const github = profile?.github_url || DEFAULT_PROFILE_CONTACT.githubUrl
   const linkedin = profile?.linkedin_url || DEFAULT_PROFILE_CONTACT.linkedinUrl
   const twitter = profile?.twitter_url || DEFAULT_PROFILE_CONTACT.twitterUrl
@@ -70,20 +71,20 @@ export default function Footer(): ReactElement {
               {name} ({alias})
             </p>
             <p className="text-sm text-muted">
-              Abidjan, Côte d'Ivoire — remote
+              {location}
             </p>
           </div>
 
           {/* Réseaux sociaux en liens texte */}
           <nav aria-label="Réseaux sociaux">
-            <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium">
+            <ul className="flex flex-wrap items-center gap-x-2 sm:gap-x-6 gap-y-1 -ml-1.5 -my-2 sm:ml-0 sm:my-0 text-sm font-medium">
               {socialLinks.map((social) => (
                 <li key={social.label}>
                   <a
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block py-1.5 text-muted hover:text-indigo transition-colors underline-offset-4 hover:underline"
+                    className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-1.5 sm:min-h-0 sm:min-w-0 sm:px-0 sm:py-1.5 text-muted hover:text-indigo transition-colors underline-offset-4 hover:underline"
                   >
                     {social.label}
                   </a>
@@ -96,17 +97,35 @@ export default function Footer(): ReactElement {
         <div className="pt-6 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-muted">
           <p>© {new Date().getFullYear()} {name}. Tous droits réservés.</p>
 
-          <nav aria-label="Navigation pied de page" className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <Link to="/" className="py-1 hover:text-ink transition-colors">
+          <nav aria-label="Navigation pied de page" className="flex flex-wrap items-center gap-x-2 sm:gap-x-6 gap-y-1 -ml-1 -my-2 sm:ml-0 sm:my-0">
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-1 sm:min-h-0 sm:min-w-0 sm:px-0 sm:py-1 hover:text-ink transition-colors"
+            >
               Accueil
             </Link>
-            <Link to="/projets" className="py-1 hover:text-ink transition-colors">
+            <Link
+              to="/projets"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-1 sm:min-h-0 sm:min-w-0 sm:px-0 sm:py-1 hover:text-ink transition-colors"
+            >
               Projets
             </Link>
-            <Link to="/competences" className="py-1 hover:text-ink transition-colors">
+            <Link
+              to="/competences"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-1 sm:min-h-0 sm:min-w-0 sm:px-0 sm:py-1 hover:text-ink transition-colors"
+            >
               Compétences
             </Link>
-            <Link to="/contact" className="py-1 hover:text-ink transition-colors">
+            <Link
+              to="/actualites"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-1 sm:min-h-0 sm:min-w-0 sm:px-0 sm:py-1 hover:text-ink transition-colors"
+            >
+              Actualités
+            </Link>
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-1 sm:min-h-0 sm:min-w-0 sm:px-0 sm:py-1 hover:text-ink transition-colors"
+            >
               Contact
             </Link>
           </nav>

@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
 import Icon from '../Icon'
 
+export type CopyEmailState = 'idle' | 'copied' | 'error'
+
 interface ContactInfoSidebarProps {
   recipientEmail: string
   primaryPhone: string
@@ -11,7 +13,7 @@ interface ContactInfoSidebarProps {
   linkedin: string
   twitter: string
   facebook: string
-  copied: boolean
+  copyState: CopyEmailState
   onCopyEmail: () => void
 }
 
@@ -25,9 +27,21 @@ export default function ContactInfoSidebar({
   linkedin,
   twitter,
   facebook,
-  copied,
+  copyState,
   onCopyEmail,
 }: ContactInfoSidebarProps): ReactElement {
+  const copyLabel =
+    copyState === 'copied'
+      ? 'Adresse copiée'
+      : copyState === 'error'
+        ? 'Copie impossible'
+        : 'Copier l’adresse'
+
+  const touchLinkClass =
+    'inline-flex items-center min-h-[44px] sm:min-h-0 -my-2.5 sm:my-0 sm:py-1'
+  const socialLinkClass =
+    'inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-1.5 sm:min-h-0 sm:min-w-0 sm:px-0 sm:py-1 text-muted hover:text-indigo transition-colors'
+
   return (
     <aside className="rail-title order-2 lg:order-1 space-y-6">
       <dl className="divide-y divide-line border-t border-b border-line text-sm">
@@ -39,15 +53,20 @@ export default function ContactInfoSidebar({
             </span>
             <button
               type="button"
+              data-copy-email="sidebar"
               onClick={onCopyEmail}
-              className={`btn-tactile py-1 inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer transition-colors ${
-                copied
-                  ? 'text-indigo'
+              className={`btn-tactile ${touchLinkClass} gap-1.5 text-xs font-medium cursor-pointer transition-colors ${copyState === 'copied'
+                ? 'text-indigo'
+                : copyState === 'error'
+                  ? 'text-red-600 dark:text-red-400'
                   : 'text-muted hover:text-ink underline underline-offset-4'
-              }`}
+                }`}
             >
-              <Icon name={copied ? 'check' : 'copy'} className="size-3.5" />
-              <span>{copied ? 'Adresse copiée' : 'Copier l’adresse'}</span>
+              <Icon
+                name={copyState === 'copied' ? 'check' : copyState === 'error' ? 'alert' : 'copy'}
+                className="size-3.5"
+              />
+              <span>{copyLabel}</span>
             </button>
           </dd>
         </div>
@@ -62,13 +81,13 @@ export default function ContactInfoSidebar({
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="py-1 text-indigo hover:underline underline-offset-4"
+                className={`${touchLinkClass} text-indigo hover:underline underline-offset-4`}
               >
                 WhatsApp
               </a>
               <a
                 href={`tel:${primaryPhone.replace(/\s+/g, '')}`}
-                className="py-1 text-muted hover:text-ink hover:underline underline-offset-4"
+                className={`${touchLinkClass} text-muted hover:text-ink hover:underline underline-offset-4`}
               >
                 Appeler
               </a>
@@ -83,12 +102,12 @@ export default function ContactInfoSidebar({
 
         <div className="py-4 space-y-2">
           <dt className="text-xs font-medium text-muted">Réseaux</dt>
-          <dd className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium">
+          <dd className="flex flex-wrap gap-x-2 sm:gap-x-4 gap-y-1 -ml-1.5 -my-2 sm:ml-0 sm:my-0 text-xs font-medium">
             <a
               href={github}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-1 text-muted hover:text-indigo transition-colors"
+              className={socialLinkClass}
             >
               GitHub
             </a>
@@ -96,7 +115,7 @@ export default function ContactInfoSidebar({
               href={linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-1 text-muted hover:text-indigo transition-colors"
+              className={socialLinkClass}
             >
               LinkedIn
             </a>
@@ -104,7 +123,7 @@ export default function ContactInfoSidebar({
               href={twitter}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-1 text-muted hover:text-indigo transition-colors"
+              className={socialLinkClass}
             >
               X
             </a>
@@ -112,7 +131,7 @@ export default function ContactInfoSidebar({
               href={facebook}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-1 text-muted hover:text-indigo transition-colors"
+              className={socialLinkClass}
             >
               Facebook
             </a>

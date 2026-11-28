@@ -4,7 +4,7 @@ import { emailContactSchema, getZodErrorMessage } from '../../utils/security'
 import Icon from '../Icon'
 
 const INPUT_CLASS =
-  'w-full px-3.5 py-2.5 rounded-md bg-paper border border-line text-ink text-base sm:text-sm focus:border-indigo focus:outline-none placeholder:text-muted/70 transition-colors'
+  'w-full px-3.5 py-2.5 rounded-md bg-paper border border-line text-ink text-base sm:text-sm focus:border-indigo focus:ring-2 focus:ring-indigo/20 placeholder:text-muted transition-colors'
 
 interface EmailClientFormProps {
   recipientEmail: string
@@ -67,7 +67,9 @@ export default function EmailClientForm({ recipientEmail }: EmailClientFormProps
           </label>
           <input
             id="email-name"
+            name="name"
             type="text"
+            autoComplete="name"
             required
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -82,7 +84,9 @@ export default function EmailClientForm({ recipientEmail }: EmailClientFormProps
           </label>
           <input
             id="email-address"
+            name="email"
             type="email"
+            autoComplete="email"
             required
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -97,6 +101,7 @@ export default function EmailClientForm({ recipientEmail }: EmailClientFormProps
           </label>
           <input
             id="email-subject"
+            name="subject"
             type="text"
             required
             value={form.subject}
@@ -112,6 +117,7 @@ export default function EmailClientForm({ recipientEmail }: EmailClientFormProps
           </label>
           <textarea
             id="email-body"
+            name="message"
             rows={4}
             required
             value={form.message}
@@ -133,11 +139,10 @@ export default function EmailClientForm({ recipientEmail }: EmailClientFormProps
         {feedback && (
           <div
             role="status"
-            className={`text-sm p-3.5 rounded-md border ${
-              feedback.type === 'success'
+            className={`text-sm p-3.5 rounded-md border ${feedback.type === 'success'
                 ? 'text-indigo bg-paper border-indigo/40'
                 : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800'
-            }`}
+              }`}
           >
             {feedback.text}
           </div>

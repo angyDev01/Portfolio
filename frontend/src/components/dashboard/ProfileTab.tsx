@@ -2,6 +2,12 @@ import { useState, useEffect, useRef, type FormEvent, type ReactElement } from '
 import Icon from '../Icon'
 import AvatarImage from '../AvatarImage'
 import type { DbProfile, AvailabilityStatusType } from '../../types/database'
+import {
+  BANNER_OBJECT_POSITION_CLASS,
+  BANNER_POSITION_OPTIONS,
+  getBannerPosition,
+  type BannerPosition,
+} from '../../utils/bannerPosition'
 
 interface ProfileTabProps {
   profile: DbProfile | null
@@ -13,6 +19,7 @@ interface ProfileTabProps {
   onRemoveAvatar: () => Promise<boolean>
   onUploadBanner: (file: File) => Promise<boolean>
   onRemoveBanner: () => Promise<boolean>
+  onUpdateBannerPosition: (position: BannerPosition) => Promise<boolean>
 }
 
 export default function ProfileTab({
@@ -25,12 +32,14 @@ export default function ProfileTab({
   onRemoveAvatar,
   onUploadBanner,
   onRemoveBanner,
+  onUpdateBannerPosition,
 }: ProfileTabProps): ReactElement {
   const avatarInputRef = useRef<HTMLInputElement | null>(null)
   const bannerInputRef = useRef<HTMLInputElement | null>(null)
+  const bannerPosition = getBannerPosition(profile?.banner_url)
 
   const [form, setForm] = useState({
-    name: 'Angoa Yao Jean',
+    name: 'Yao Jean Angoa',
     alias: "Angy's",
     role: 'Développeur Full-Stack Junior',
     short_bio:
@@ -60,8 +69,8 @@ export default function ProfileTab({
         full_bio_text: Array.isArray(profile.full_bio)
           ? profile.full_bio.join('\n\n')
           : typeof profile.full_bio === 'string'
-          ? profile.full_bio
-          : '',
+            ? profile.full_bio
+            : '',
         github_url: profile.github_url || '',
         linkedin_url: profile.linkedin_url || '',
         twitter_url: profile.twitter_url || '',
@@ -146,11 +155,10 @@ export default function ProfileTab({
           <button
             type="button"
             onClick={() => onUpdateAvailability('available')}
-            className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-              form.availability_status === 'available'
+            className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${form.availability_status === 'available'
                 ? 'bg-emerald-500/15 border-emerald-500/50 shadow-md shadow-emerald-500/10'
                 : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               <span className="relative flex size-2.5">
@@ -170,11 +178,10 @@ export default function ProfileTab({
           <button
             type="button"
             onClick={() => onUpdateAvailability('employed')}
-            className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-              form.availability_status === 'employed'
+            className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${form.availability_status === 'employed'
                 ? 'bg-indigo-500/15 border-indigo-500/50 shadow-md shadow-indigo-500/10'
                 : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               <span className="relative flex size-2.5">
@@ -194,11 +201,10 @@ export default function ProfileTab({
           <button
             type="button"
             onClick={() => onUpdateAvailability('unavailable')}
-            className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-              form.availability_status === 'unavailable'
+            className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${form.availability_status === 'unavailable'
                 ? 'bg-amber-500/15 border-amber-500/50 shadow-md shadow-amber-500/10'
                 : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               <span className="size-2.5 rounded-full bg-amber-500" />
@@ -282,7 +288,7 @@ export default function ProfileTab({
                 Bannière / Photo de couverture (Accueil)
               </h3>
               <p className="text-[11px] text-zinc-500 font-mono">
-                Format panoramique recommandé (ex. 1600×500 px). Affichée en tête du Hero.
+                Format panoramique 16:5 recommandé : 1600 × 500 px ou 1920 × 600 px (identique sur mobile et desktop).
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -317,13 +323,44 @@ export default function ProfileTab({
           </div>
 
           {profile?.banner_url ? (
-            <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
-              <img
-                key={profile.banner_url}
-                src={profile.banner_url}
-                alt="Aperçu bannière"
-                className="w-full h-32 sm:h-40 object-cover block"
-              />
+            <div className="space-y-2.5">
+              <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900">
+                <img
+                  key={profile.banner_url}
+                  src={profile.banner_url}
+                  alt="Aperçu bannière"
+                  className={`w-full aspect-[16/5] object-cover ${BANNER_OBJECT_POSITION_CLASS[bannerPosition]} block`}
+                />
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
+                  Cadrage vertical :
+                </span>
+                <div
+                  role="group"
+                  aria-label="Cadrage vertical de la photo de couverture"
+                  className="inline-flex rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-0.5 gap-0.5"
+                >
+                  {BANNER_POSITION_OPTIONS.map((opt) => {
+                    const active = bannerPosition === opt.value
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => void onUpdateBannerPosition(opt.value)}
+                        className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer ${
+                          active
+                            ? 'bg-indigo-600 text-white font-semibold'
+                            : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="h-20 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-800 flex items-center justify-center text-xs font-mono text-zinc-400">

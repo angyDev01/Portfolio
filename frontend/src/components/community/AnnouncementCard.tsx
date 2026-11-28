@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactElement } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState, type ReactElement } from 'react'
 import type {
   AnnouncementKind,
   AnnouncementListItem,
@@ -6,9 +6,11 @@ import type {
   DbAnnouncementComment,
 } from '../../types/database'
 import { portfolioService } from '../../services/portfolioService'
-import { sanitizeUrl } from '../../utils/security'
+import { sanitizeUrl } from '../../utils/urlSecurity'
 import Icon from '../Icon'
-import AnnouncementComments from './AnnouncementComments'
+import ShareButton from '../ShareButton'
+
+const AnnouncementComments = lazy(() => import('./AnnouncementComments'))
 
 const KIND_BADGE: Record<AnnouncementKind, { label: string; tone: string }> = {
   project_wip: {
@@ -40,12 +42,15 @@ function formatDate(iso: string): string {
 interface AnnouncementCardProps {
   announcement: AnnouncementListItem | AnnouncementWithComments
   defaultExpanded?: boolean
+  headingLevel?: 'h2' | 'h3'
 }
 
 export default function AnnouncementCard({
   announcement,
   defaultExpanded = false,
+  headingLevel = 'h3',
 }: AnnouncementCardProps): ReactElement {
+  const HeadingTag = headingLevel
   const [commentsOpen, setCommentsOpen] = useState(defaultExpanded)
   const initialComments =
     'comments' in announcement && Array.isArray(announcement.comments)
@@ -130,9 +135,9 @@ export default function AnnouncementCard({
         </div>
       )}
 
-      <h3 className="text-xl sm:text-2xl font-semibold tracking-[-0.02em] text-ink mb-2.5">
+      <HeadingTag className="text-xl sm:text-2xl font-semibold tracking-[-0.02em] text-ink mb-2.5">
         {announcement.title}
-      </h3>
+      </HeadingTag>
 
       {announcement.event_date && (
         <p className="inline-flex items-center gap-2 text-xs font-medium text-indigo mb-3">
@@ -150,7 +155,7 @@ export default function AnnouncementCard({
           type="button"
           onClick={() => setCommentsOpen((prev) => !prev)}
           aria-expanded={commentsOpen}
-          className="btn-tactile min-h-[40px] inline-flex items-center gap-2 text-xs font-medium text-ink hover:text-indigo transition-colors cursor-pointer"
+          className="btn-tactile min-h-[44px] sm:min-h-[40px] -my-1 sm:my-0 inline-flex items-center gap-2 text-xs font-medium text-ink hover:text-indigo transition-colors cursor-pointer"
         >
           <Icon name="messageSquare" className="size-4 text-indigo" />
           <span>
@@ -159,29 +164,55 @@ export default function AnnouncementCard({
           <span className="text-muted">({commentsOpen ? 'masquer' : 'voir / commenter'})</span>
         </button>
 
-        {safeActionUrl && (
-          <a
-            href={safeActionUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-tactile inline-flex items-center gap-1.5 text-xs font-medium text-indigo hover:underline underline-offset-4"
-          >
-            <span>{announcement.action_label || 'En savoir plus'}</span>
-            <Icon name="external" className="size-3.5" />
-          </a>
-        )}
+        <div className="flex flex-wrap items-center gap-4">
+          {safeActionUrl && (
+            <a
+              href={safeActionUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-tactile min-h-[44px] sm:min-h-0 -my-2 sm:my-0 inline-flex items-center gap-1.5 text-xs font-medium text-indigo hover:underline underline-offset-4"
+            >
+              <span>{announcement.action_label || 'En savoir plus'}</span>
+              <Icon name="external" className="size-3.5" />
+            </a>
+          )}
+
+          <ShareButton
+            compact
+            item={{
+              kind: 'announcement',
+              id: announcement.id,
+              title: announcement.title,
+              badge: kindMeta.label,
+              secondaryBadge: announcement.is_pinned ? 'Épinglé' : undefined,
+              subtitle: announcement.event_date
+                ? `Date prévue : ${formatDate(announcement.event_date)}`
+                : undefined,
+              description: announcement.content,
+              imageUrl: announcement.cover_image_url,
+            }}
+          />
+        </div>
       </div>
 
       {commentsOpen && (
-        <AnnouncementComments
-          announcementId={announcement.id}
-          allowComments={announcement.allow_comments}
-          comments={comments}
-          loading={loadingComments}
-          hasMore={hasMoreComments}
-          onLoadMore={handleLoadMore}
-          onCommentAdded={handleCommentAdded}
-        />
+        <Suspense
+          fallback={
+            <div className="mt-5 pt-5 border-t border-line space-y-2 py-2">
+              <div className="h-12 rounded-lg bg-paper/60 animate-pulse" />
+            </div>
+          }
+        >
+          <AnnouncementComments
+            announcementId={announcement.id}
+            allowComments={announcement.allow_comments}
+            comments={comments}
+            loading={loadingComments}
+            hasMore={hasMoreComments}
+            onLoadMore={handleLoadMore}
+            onCommentAdded={handleCommentAdded}
+          />
+        </Suspense>
       )}
     </article>
   )

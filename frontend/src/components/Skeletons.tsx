@@ -3,7 +3,7 @@ import type { ReactElement } from 'react'
 export function ProjectCardSkeleton(): ReactElement {
   return (
     <div className="flex flex-col gap-4 animate-pulse">
-      <div className="aspect-[16/10] w-full rounded-lg bg-line/60" />
+      <div className="aspect-video w-full rounded-lg bg-line/60" />
       <div className="space-y-2.5">
         <div className="h-5 bg-line/70 rounded w-2/3" />
         <div className="h-3.5 bg-line/50 rounded w-full" />
@@ -21,7 +21,7 @@ export function ProjectFeatureSkeleton(): ReactElement {
   return (
     <div className="space-y-8 animate-pulse">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-7 aspect-[16/10] rounded-lg bg-line/60" />
+        <div className="lg:col-span-7 aspect-video rounded-lg bg-line/60" />
         <div className="lg:col-span-5 space-y-4">
           <div className="h-7 bg-line/70 rounded w-3/4" />
           <div className="h-4 bg-line/50 rounded w-full" />

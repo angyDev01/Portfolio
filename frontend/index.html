@@ -10,15 +10,32 @@
   <meta name="author" content="Yao Jean Angoa (Angy)" />
   <meta name="keywords"
     content="Yao Jean Angoa, Angy, Développeur Full-Stack, React, TypeScript, Node.js, PostgreSQL, Tailwind CSS, Abidjan, Côte d'Ivoire, Remote, Portfolio" />
-  <meta name="theme-color" content="#0E1615" />
+  <meta name="theme-color" content="#F4F6F3" />
+  <script>
+    (function () {
+      try {
+        var s = localStorage.getItem('theme');
+        var d = s === 'dark' || (s !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var r = document.documentElement;
+        r.classList.toggle('dark', d);
+        r.classList.toggle('light', !d);
+        r.style.colorScheme = d ? 'dark' : 'light';
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', d ? '#0E1615' : '#F4F6F3');
+      } catch (e) { }
+    })();
+  </script>
   <meta name="robots" content="index, follow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    rel="stylesheet"
+  <link rel="preload" as="style"
     href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=JetBrains+Mono:wght@400;500&display=swap"
-  />
-  <link rel="canonical" href="https://angydev.me/" />
+    onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=JetBrains+Mono:wght@400;500&display=swap" />
+  </noscript>
+  <link rel="canonical" href="https://portfolio-vs28.vercel.app/" />
 
   <!-- Données géographiques -->
   <meta name="geo.region" content="CI" />
@@ -26,13 +43,13 @@
 
   <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://angydev.me/" />
+  <meta property="og:url" content="https://portfolio-vs28.vercel.app/" />
   <meta property="og:site_name" content="Portfolio de Yao Jean Angoa (Angy)" />
   <meta property="og:locale" content="fr_FR" />
   <meta property="og:title" content="Yao Jean Angoa (Angy) | Développeur Full-Stack Web" />
   <meta property="og:description"
     content="Développeur Full-Stack Web. Découvrez mes réalisations concrètes, ma stack technologique et mes méthodes de conception." />
-  <meta property="og:image" content="https://angydev.me/pwa-512x512.png" />
+  <meta property="og:image" content="https://portfolio-vs28.vercel.app/pwa-512x512.png" />
   <meta property="og:image:width" content="512" />
   <meta property="og:image:height" content="512" />
   <meta property="og:image:alt" content="Yao Jean Angoa (Angy) - Développeur Full-Stack Web" />
@@ -44,7 +61,7 @@
   <meta name="twitter:title" content="Yao Jean Angoa (Angy) | Développeur Full-Stack Web" />
   <meta name="twitter:description"
     content="Développeur Full-Stack Web — React, TypeScript, Node.js et PostgreSQL. Découvrez mes réalisations et mon univers technique." />
-  <meta name="twitter:image" content="https://angydev.me/pwa-512x512.png" />
+  <meta name="twitter:image" content="https://portfolio-vs28.vercel.app/pwa-512x512.png" />
 
   <!-- Favicons & Manifest -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -59,16 +76,16 @@
     "@graph": [
       {
         "@type": "Person",
-        "@id": "https://angydev.me/#person",
-        "name": "Angoa Yao Jean",
+        "@id": "https://portfolio-vs28.vercel.app/#person",
+        "name": "Yao Jean Angoa",
         "alternateName": "Angy",
         "givenName": "Yao Jean",
         "familyName": "Angoa",
         "gender": "Male",
         "jobTitle": "Développeur Full-Stack Web",
         "description": "Développeur Full-Stack Web concevant des applications réactives, robustes et centrées sur l'expérience utilisateur.",
-        "url": "https://angydev.me",
-        "image": "https://angydev.me/pwa-512x512.png",
+        "url": "https://portfolio-vs28.vercel.app",
+        "image": "https://portfolio-vs28.vercel.app/pwa-512x512.png",
         "email": "mailto:angynewdev@gmail.com",
         "telephone": "+2250720646526",
         "address": {
@@ -96,12 +113,12 @@
       },
       {
         "@type": "WebSite",
-        "@id": "https://angydev.me/#website",
-        "url": "https://angydev.me",
+        "@id": "https://portfolio-vs28.vercel.app/#website",
+        "url": "https://portfolio-vs28.vercel.app",
         "name": "Yao Jean Angoa (Angy) | Portfolio",
         "description": "Portfolio officiel et réalisations de Yao Jean Angoa (Angy), développeur Full-Stack Web.",
         "publisher": {
-          "@id": "https://angydev.me/#person"
+          "@id": "https://portfolio-vs28.vercel.app/#person"
         },
         "inLanguage": "fr-FR"
       }

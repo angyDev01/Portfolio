@@ -1,7 +1,21 @@
 import type { ReactElement } from 'react'
 import { Link } from 'react-router-dom'
+import { useProfile } from '../hooks/usePortfolioData'
 
 export default function HomeContactBanner(): ReactElement {
+  const { profile } = useProfile()
+
+  const status = profile
+    ? profile.availability_status || (profile.is_available ? 'available' : 'employed')
+    : 'available'
+
+  const statusCopy =
+    status === 'unavailable'
+      ? 'Actuellement mobilisé sur mes engagements en cours, mais toujours ouvert aux échanges techniques et prises de contact. Réponse sous 24h.'
+      : status === 'employed'
+        ? 'Actuellement en poste, mais ouvert aux échanges techniques, collaborations ponctuelles ou opportunités futures. Réponse sous 24h.'
+        : 'Disponible pour une mission full-stack, un poste ou un échange technique. Réponse sous 24h.'
+
   return (
     <section
       id="contact-invitation"
@@ -17,7 +31,7 @@ export default function HomeContactBanner(): ReactElement {
             Un projet en tête ? Parlons-en.
           </h2>
           <p className="text-sm sm:text-base text-indigo-fg/80 leading-relaxed">
-            Disponible pour une mission full-stack, un poste ou un échange technique. Réponse sous 24h.
+            {statusCopy}
           </p>
         </div>
 

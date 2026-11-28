@@ -41,6 +41,7 @@ export default function DashboardPage(): ReactElement {
     removeAvatar,
     uploadBanner,
     removeBanner,
+    updateBannerPosition,
     toggleAcceptMessages,
     saveProject,
     deleteProject,
@@ -168,6 +169,7 @@ export default function DashboardPage(): ReactElement {
             onRemoveAvatar={removeAvatar}
             onUploadBanner={uploadBanner}
             onRemoveBanner={removeBanner}
+            onUpdateBannerPosition={updateBannerPosition}
           />
         )}
       </div>

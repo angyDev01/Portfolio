@@ -1,4 +1,5 @@
-import { useMemo, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAnnouncements, usePolls } from '../hooks/usePortfolioData'
 import AnnouncementCard from '../components/community/AnnouncementCard'
 import PollCard from '../components/community/PollCard'
@@ -16,7 +17,18 @@ const TABS: Array<{ id: UpdatesTab; label: string }> = [
 export default function UpdatesPage(): ReactElement {
   const { announcements, loading: loadingAnn } = useAnnouncements()
   const { polls, loading: loadingPolls } = usePolls()
+  const [searchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState<UpdatesTab>('all')
+  const scrolledTargetRef = useRef<string | null>(null)
+
+  const targetAnnonceId = searchParams.get('annonce')
+  const targetPollId = searchParams.get('sondage')
+
+  useEffect(() => {
+    if (targetAnnonceId || targetPollId) {
+      setActiveTab('all')
+    }
+  }, [targetAnnonceId, targetPollId])
 
   const filteredAnnouncements = useMemo(() => {
     if (activeTab === 'polls') return []
@@ -28,6 +40,26 @@ export default function UpdatesPage(): ReactElement {
   const loading = loadingAnn || loadingPolls
   const hasPolls = polls.length > 0
   const hasAnnouncements = filteredAnnouncements.length > 0
+
+  useEffect(() => {
+    if (loading) return
+    const key = targetAnnonceId
+      ? `annonce-${targetAnnonceId}`
+      : targetPollId
+        ? `sondage-${targetPollId}`
+        : null
+    if (!key || scrolledTargetRef.current === key) return
+
+    const timer = window.setTimeout(() => {
+      const el = document.getElementById(key)
+      if (el) {
+        scrolledTargetRef.current = key
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 80)
+
+    return () => window.clearTimeout(timer)
+  }, [loading, targetAnnonceId, targetPollId, activeTab, announcements.length, polls.length])
 
   return (
     <div className="pt-24 pb-16 md:pt-36 md:pb-28">
@@ -65,17 +97,15 @@ export default function UpdatesPage(): ReactElement {
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative shrink-0 min-h-[44px] pb-3.5 pt-2 text-sm font-medium transition-colors cursor-pointer ${
-                  isActive
+                className={`relative shrink-0 inline-block text-center min-w-[44px] min-h-[44px] px-1 pb-3.5 pt-2 text-sm font-medium transition-colors cursor-pointer ${isActive
                     ? 'text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-indigo'
                     : 'text-muted hover:text-ink'
-                }`}
+                  }`}
               >
                 <span>{tab.label}</span>
                 <sup
-                  className={`ml-1 text-[11px] font-normal ${
-                    isActive ? 'text-indigo' : 'text-muted'
-                  }`}
+                  className={`ml-1 text-[11px] font-normal ${isActive ? 'text-indigo' : 'text-muted'
+                    }`}
                 >
                   {count}
                 </sup>
@@ -98,7 +128,17 @@ export default function UpdatesPage(): ReactElement {
           /* Onglet dédié aux sondages */
           <div className="max-w-3xl space-y-6">
             {hasPolls ? (
-              polls.map((poll) => <PollCard key={poll.id} poll={poll} />)
+              polls.map((poll) => (
+                <div
+                  key={poll.id}
+                  id={`sondage-${poll.id}`}
+                  className={
+                    targetPollId === poll.id ? 'rounded-xl ring-2 ring-indigo/50' : undefined
+                  }
+                >
+                  <PollCard poll={poll} headingLevel="h2" />
+                </div>
+              ))
             ) : (
               <EmptyState
                 title="Aucun sondage actif"
@@ -112,11 +152,19 @@ export default function UpdatesPage(): ReactElement {
             <div className="lg:col-span-7 xl:col-span-8 space-y-6 min-w-0">
               {hasAnnouncements ? (
                 filteredAnnouncements.map((ann, index) => (
-                  <AnnouncementCard
+                  <div
                     key={ann.id}
-                    announcement={ann}
-                    defaultExpanded={index === 0}
-                  />
+                    id={`annonce-${ann.id}`}
+                    className={
+                      targetAnnonceId === ann.id ? 'rounded-xl ring-2 ring-indigo/50' : undefined
+                    }
+                  >
+                    <AnnouncementCard
+                      announcement={ann}
+                      headingLevel="h2"
+                      defaultExpanded={index === 0 || ann.id === targetAnnonceId}
+                    />
+                  </div>
                 ))
               ) : (
                 <EmptyState
@@ -132,7 +180,15 @@ export default function UpdatesPage(): ReactElement {
               </h2>
               <div className="space-y-5">
                 {polls.map((poll) => (
-                  <PollCard key={poll.id} poll={poll} />
+                  <div
+                    key={poll.id}
+                    id={`sondage-${poll.id}`}
+                    className={
+                      targetPollId === poll.id ? 'rounded-xl ring-2 ring-indigo/50' : undefined
+                    }
+                  >
+                    <PollCard poll={poll} headingLevel="h3" />
+                  </div>
                 ))}
               </div>
             </aside>
@@ -142,11 +198,19 @@ export default function UpdatesPage(): ReactElement {
           <div className="max-w-3xl space-y-6">
             {hasAnnouncements ? (
               filteredAnnouncements.map((ann, index) => (
-                <AnnouncementCard
+                <div
                   key={ann.id}
-                  announcement={ann}
-                  defaultExpanded={index === 0}
-                />
+                  id={`annonce-${ann.id}`}
+                  className={
+                    targetAnnonceId === ann.id ? 'rounded-xl ring-2 ring-indigo/50' : undefined
+                  }
+                >
+                  <AnnouncementCard
+                    announcement={ann}
+                    headingLevel="h2"
+                    defaultExpanded={index === 0 || ann.id === targetAnnonceId}
+                  />
+                </div>
               ))
             ) : (
               <EmptyState

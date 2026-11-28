@@ -1,10 +1,12 @@
 import type { ReactElement } from 'react'
-import { useProfile } from '../hooks/usePortfolioData'
+import { DEFAULT_PROFILE_CONTACT } from '../config/defaults'
+import { useProfile, useSkills } from '../hooks/usePortfolioData'
 import SectionHeader from './SectionHeader'
 import AboutVideoPlayer from './AboutVideoPlayer'
 
 export default function About(): ReactElement {
   const { profile } = useProfile()
+  const { skills } = useSkills()
 
   const fullBio =
     profile?.full_bio && Array.isArray(profile.full_bio) && profile.full_bio.length > 0
@@ -21,6 +23,14 @@ export default function About(): ReactElement {
       : profile?.availability_status === 'unavailable'
         ? 'Non disponible'
         : 'Disponible'
+
+  const topSkills = [...skills]
+    .sort((a, b) => Number(b.is_featured) - Number(a.is_featured))
+    .map((s) => s.name)
+    .slice(0, 4)
+  const stackSummary = topSkills.length > 0 ? topSkills.join(', ') : 'React, TS, Node, Postgres'
+  const locationSummary = profile?.location || DEFAULT_PROFILE_CONTACT.locationShort
+  const profileName = profile?.name || 'Yao Jean Angoa'
 
   return (
     <section
@@ -59,13 +69,13 @@ export default function About(): ReactElement {
                   <div className="py-3.5 flex justify-between gap-4">
                     <dt className="text-muted">Stack</dt>
                     <dd className="text-right font-medium text-ink">
-                      React, TS, Node, Postgres
+                      {stackSummary}
                     </dd>
                   </div>
                   <div className="py-3.5 flex justify-between gap-4">
                     <dt className="text-muted">Lieu</dt>
                     <dd className="text-right font-medium text-ink">
-                      Abidjan (Remote)
+                      {locationSummary}
                     </dd>
                   </div>
                   <div className="py-3.5 flex justify-between gap-4">
@@ -79,7 +89,10 @@ export default function About(): ReactElement {
             </div>
 
             {/* Présentation Vidéo */}
-            <AboutVideoPlayer posterUrl={profile?.avatar_url || '/videos/poster.jpg'} />
+            <AboutVideoPlayer
+              posterUrl="/videos/poster.jpg"
+              profileName={profileName}
+            />
           </div>
         </div>
       </div>

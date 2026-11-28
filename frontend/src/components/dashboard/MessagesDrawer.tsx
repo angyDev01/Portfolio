@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect, type ReactElement } from 'react'
+import { useState, useMemo, useEffect, useRef, type ReactElement } from 'react'
 import Icon from '../Icon'
-import { sanitizeUrl } from '../../utils/security'
+import { sanitizeUrl } from '../../utils/urlSecurity'
 import type { ContactMessage, DbProfile } from '../../types/database'
 
 interface MessagesDrawerProps {
@@ -26,6 +26,17 @@ export default function MessagesDrawer({
 }: MessagesDrawerProps): ReactElement {
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all')
   const [search, setSearch] = useState<string>('')
+  const drawerRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    const el = drawerRef.current
+    if (!el) return
+    if (isOpen) {
+      el.removeAttribute('inert')
+    } else {
+      el.setAttribute('inert', '')
+    }
+  }, [isOpen])
 
   // Fermeture du slide-over au clavier (ESC)
   useEffect(() => {
@@ -66,12 +77,13 @@ export default function MessagesDrawer({
 
       {/* Drawer */}
       <aside
-        role="dialog"
+        ref={drawerRef}
+        role={isOpen ? 'dialog' : undefined}
         aria-label="Messagerie Directe"
-        aria-modal="true"
-        className={`fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white dark:bg-zinc-900 shadow-2xl border-l border-zinc-200 dark:border-zinc-800 flex flex-col transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        aria-modal={isOpen ? true : undefined}
+        aria-hidden={!isOpen}
+        className={`fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white dark:bg-zinc-900 shadow-2xl border-l border-zinc-200 dark:border-zinc-800 flex flex-col transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-zinc-200 dark:border-zinc-800">
@@ -114,16 +126,14 @@ export default function MessagesDrawer({
             <button
               type="button"
               onClick={onToggleAcceptMessages}
-              className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer ${
-                profile?.accept_direct_messages !== false
+              className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer ${profile?.accept_direct_messages !== false
                   ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40'
                   : 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/40'
-              }`}
+                }`}
             >
               <span
-                className={`size-2 rounded-full ${
-                  profile?.accept_direct_messages !== false ? 'bg-emerald-500' : 'bg-rose-500'
-                }`}
+                className={`size-2 rounded-full ${profile?.accept_direct_messages !== false ? 'bg-emerald-500' : 'bg-rose-500'
+                  }`}
               />
               <span>{profile?.accept_direct_messages !== false ? 'Actif' : 'Suspendu'}</span>
             </button>
@@ -135,22 +145,20 @@ export default function MessagesDrawer({
               <button
                 type="button"
                 onClick={() => setFilter('all')}
-                className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${
-                  filter === 'all'
+                className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${filter === 'all'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
                     : 'text-zinc-600 dark:text-zinc-400'
-                }`}
+                  }`}
               >
                 Tous ({messages.length})
               </button>
               <button
                 type="button"
                 onClick={() => setFilter('unread')}
-                className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${
-                  filter === 'unread'
+                className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${filter === 'unread'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-medium'
                     : 'text-zinc-600 dark:text-zinc-400'
-                }`}
+                  }`}
               >
                 Non lus ({unreadMessagesCount})
               </button>
@@ -188,8 +196,8 @@ export default function MessagesDrawer({
                 {search
                   ? 'Aucun résultat pour cette recherche'
                   : filter === 'unread'
-                  ? 'Aucun message non lu. Tout est à jour !'
-                  : 'Aucun message reçu pour le moment.'}
+                    ? 'Aucun message non lu. Tout est à jour !'
+                    : 'Aucun message reçu pour le moment.'}
               </p>
             </div>
           ) : (
@@ -207,11 +215,10 @@ export default function MessagesDrawer({
               return (
                 <article
                   key={msg.id}
-                  className={`p-4 rounded-xl border transition-all duration-200 ${
-                    !msg.is_read
+                  className={`p-4 rounded-xl border transition-all duration-200 ${!msg.is_read
                       ? 'border-indigo-500/40 bg-indigo-500/5 dark:bg-zinc-800/80 shadow-xs'
                       : 'border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/40'
-                  }`}
+                    }`}
                 >
                   {/* Top Row : Nom, Badge lu/non-lu, Date */}
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -278,11 +285,10 @@ export default function MessagesDrawer({
                       onClick={(e) => {
                         if (!msg.phone) e.preventDefault()
                       }}
-                      className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${
-                        msg.phone
+                      className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${msg.phone
                           ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
                           : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-60 cursor-not-allowed border border-transparent'
-                      }`}
+                        }`}
                       title={msg.phone ? 'Ouvrir WhatsApp' : 'Téléphone non fourni'}
                     >
                       <Icon name="messageSquare" className="size-3" />
@@ -295,11 +301,10 @@ export default function MessagesDrawer({
                       onClick={(e) => {
                         if (!msg.phone) e.preventDefault()
                       }}
-                      className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${
-                        msg.phone
+                      className={`flex items-center justify-center gap-1 py-1.5 px-2 rounded-md text-[11px] font-mono transition-all ${msg.phone
                           ? 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30'
                           : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 opacity-60 cursor-not-allowed border border-transparent'
-                      }`}
+                        }`}
                       title={msg.phone ? 'Composer le numéro' : 'Téléphone non fourni'}
                     >
                       <Icon name="phone" className="size-3" />

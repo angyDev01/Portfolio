@@ -16,6 +16,11 @@ import type {
 } from '../types/database'
 import type { SaveAnnouncementInput } from '../services/announcementService'
 import type { CreatePollInput } from '../services/pollService'
+import {
+  type BannerPosition,
+  stripBannerPosition,
+  withBannerPosition,
+} from '../utils/bannerPosition'
 
 export interface ProjectFormData {
   title: string
@@ -265,7 +270,7 @@ export function useDashboardData() {
           prev ? { ...prev, banner_url: publicUrl } : ({ banner_url: publicUrl } as DbProfile)
         )
 
-        if (previousBannerUrl && previousBannerUrl !== publicUrl) {
+        if (previousBannerUrl && stripBannerPosition(previousBannerUrl) !== stripBannerPosition(publicUrl)) {
           await portfolioService.deleteMedia(previousBannerUrl)
         }
 
@@ -297,6 +302,28 @@ export function useDashboardData() {
       return false
     }
   }, [profile?.banner_url, showToast])
+
+  const updateBannerPosition = useCallback(
+    async (position: BannerPosition): Promise<boolean> => {
+      if (!profile?.banner_url) return false
+      const updatedUrl = withBannerPosition(profile.banner_url, position)
+      if (updatedUrl === profile.banner_url) return true
+
+      const previousUrl = profile.banner_url
+      setProfile((prev) => (prev ? { ...prev, banner_url: updatedUrl } : prev))
+
+      const saveRes = await portfolioService.updateProfile({ banner_url: updatedUrl })
+      if (!saveRes.ok) {
+        setProfile((prev) => (prev ? { ...prev, banner_url: previousUrl } : prev))
+        showToast('error', saveRes.error || 'Erreur lors de la mise à jour du cadrage.')
+        return false
+      }
+
+      showToast('success', 'Cadrage de la bannière enregistré !')
+      return true
+    },
+    [profile?.banner_url, showToast]
+  )
 
   const toggleAcceptMessages = useCallback(async (): Promise<boolean> => {
     const currentStatus = profile?.accept_direct_messages !== false
@@ -683,6 +710,7 @@ export function useDashboardData() {
     removeAvatar,
     uploadBanner,
     removeBanner,
+    updateBannerPosition,
     toggleAcceptMessages,
     saveProject,
     deleteProject,

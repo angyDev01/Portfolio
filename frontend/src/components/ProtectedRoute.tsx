@@ -36,10 +36,10 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps): React
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-paper flex flex-col items-center justify-center transition-colors">
         <div className="flex flex-col items-center gap-3">
-          <div className="size-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs font-mono text-zinc-500">Vérification des autorisations...</p>
+          <div className="size-8 border-2 border-indigo border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-mono text-muted">Vérification des autorisations...</p>
         </div>
       </div>
     )

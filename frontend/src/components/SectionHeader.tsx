@@ -37,7 +37,7 @@ export default function SectionHeader({
         <Link
           to={link.to}
           onMouseEnter={link.onMouseEnter}
-          className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-indigo hover:underline underline-offset-4 decoration-2 transition-colors"
+          className="min-h-[44px] sm:min-h-0 -mt-2 -mb-3 sm:mt-1 sm:mb-0 inline-flex items-center gap-1.5 text-sm font-medium text-indigo hover:underline underline-offset-4 decoration-2 transition-colors"
         >
           <span>{link.label}</span>
         </Link>

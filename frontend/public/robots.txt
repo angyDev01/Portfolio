@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /dashboard/
 
-Sitemap: https://angydev.me/sitemap.xml
+Sitemap: https://portfolio-vs28.vercel.app/sitemap.xml

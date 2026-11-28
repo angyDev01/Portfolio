@@ -61,6 +61,7 @@ export default function HomeSkillsPreview(): ReactElement {
               </div>
             ) : groupedCategories.length === 0 ? (
               <EmptyState
+                headingLevel="h3"
                 title="Aucune compétence renseignée"
                 description="Les technologies et compétences seront affichées ici prochainement."
               />
